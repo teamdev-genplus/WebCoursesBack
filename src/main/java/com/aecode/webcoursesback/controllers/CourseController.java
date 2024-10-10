@@ -94,52 +94,10 @@ public class CourseController  {
         CourseDTO dto=m.map(cS.listId(id),CourseDTO.class);
         return dto;
     }
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> update(@RequestPart(value="file", required = false) MultipartFile imagen,
-                                         @RequestPart(value = "data", required = false) String dtoJson) {
-        String originalFilename = null;
-        try {
-            // Convertir el JSON a CourseDTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            CourseDTO dto = objectMapper.readValue(dtoJson, CourseDTO.class);
-
-            // Obtener el curso existente de la base de datos
-            Course existingCourse = cS.listId(dto.getCourseId());
-            if (existingCourse == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
-            }
-
-            String userUploadDir = uploadDir + File.separator + "course";
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
-
-            // Manejo del archivo de imagen
-            if (imagen != null && !imagen.isEmpty()) {
-                // Si se sube una nueva imagen, reemplazar la imagen actual
-                originalFilename = imagen.getOriginalFilename();
-                byte[] bytes = imagen.getBytes();
-                Path path = userUploadPath.resolve(originalFilename);
-                Files.write(path, bytes);
-
-                // Actualizar la ruta de la imagen en el curso
-                existingCourse.setImage("course/" + originalFilename);
-            }
-
-            // Actualizar otros datos del curso
-            ModelMapper modelMapper = new ModelMapper();
-            modelMapper.map(dto, existingCourse);  // Mapear solo los cambios del DTO al curso existente
-
-            // Guardar los cambios en la base de datos
-            cS.insert(existingCourse);
-
-            return ResponseEntity.ok("Curso actualizado correctamente");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el curso: " + e.getMessage());
-        }
+    @PutMapping
+    public void update(@RequestBody CourseDTO dto) {
+        ModelMapper m = new ModelMapper();
+        Course c = m.map(dto, Course.class);
+        cS.insert(c);
     }
-
 }
