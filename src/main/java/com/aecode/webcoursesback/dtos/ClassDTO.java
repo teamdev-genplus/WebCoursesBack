@@ -9,7 +9,6 @@ public class ClassDTO {
     private String videoUrl;
     private String description;
     private String document;
-    private int durationMinutes;
     private int orderNumber;
     private Set<ClassQuestionDTO> classquestions;
 
@@ -60,14 +59,6 @@ public class ClassDTO {
 
     public void setDocument(String document) {
         this.document = document;
-    }
-
-    public int getDurationMinutes() {
-        return durationMinutes;
-    }
-
-    public void setDurationMinutes(int durationMinutes) {
-        this.durationMinutes = durationMinutes;
     }
 
     public int getOrderNumber() {

@@ -84,28 +84,9 @@ public class ClassController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to classes.");
         }
 
-        // Si tiene acceso, devolver las clases
+        ModelMapper modelMapper = new ModelMapper();
         List<ClassDTO> datos = cS.list().stream()
-                .map(classes -> {
-                    ClassDTO dto = new ClassDTO();
-                    dto.setClassId(classes.getClassId());
-                    dto.setModuleId(classes.getModule().getModuleId());
-                    dto.setTitle(classes.getTitle());
-                    dto.setVideoUrl(classes.getVideoUrl());
-                    dto.setDescription(classes.getDescription());
-                    dto.setDurationMinutes(classes.getDurationMinutes());
-                    dto.setOrderNumber(classes.getOrderNumber());
-                    dto.setDocument("/uploads/" + classes.getDocument());
-
-                    dto.setClassquestions(classes.getClassquestions().stream()
-                            .map(classQuestion -> {
-                                ClassQuestionDTO questionDTO = new ClassQuestionDTO();
-                                questionDTO.setQuestionId(classQuestion.getQuestionId());
-                                return questionDTO;
-                            })
-                            .collect(Collectors.toSet()));
-                    return dto;
-                })
+                .map(classes -> modelMapper.map(classes, ClassDTO.class))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(datos);

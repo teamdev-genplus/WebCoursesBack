@@ -29,9 +29,6 @@ public class Class {
     private String document;
 
     @Column(nullable = false)
-    private int durationMinutes;
-
-    @Column(nullable = false)
     private int orderNumber;
 
     @OneToMany(mappedBy = "aclass", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -40,14 +37,13 @@ public class Class {
     public Class() {
     }
 
-    public Class(int classId, Module module, String title, String videoUrl, String description, String document, int durationMinutes, int orderNumber,Set<ClassQuestion> classquestions) {
+    public Class(int classId, Module module, String title, String videoUrl, String description, String document, int orderNumber,Set<ClassQuestion> classquestions) {
         this.classId = classId;
         this.module = module;
         this.title = title;
         this.videoUrl = videoUrl;
         this.description = description;
         this.document = document;
-        this.durationMinutes = durationMinutes;
         this.orderNumber = orderNumber;
         this.classquestions = classquestions;
     }
@@ -98,14 +94,6 @@ public class Class {
 
     public void setDocument(String document) {
         this.document = document;
-    }
-
-    public int getDurationMinutes() {
-        return durationMinutes;
-    }
-
-    public void setDurationMinutes(int durationMinutes) {
-        this.durationMinutes = durationMinutes;
     }
 
     public int getOrderNumber() {
