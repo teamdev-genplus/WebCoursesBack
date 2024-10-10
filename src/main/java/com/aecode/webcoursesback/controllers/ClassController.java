@@ -102,12 +102,54 @@ public class ClassController {
         ClassDTO dto=m.map(cS.listId(id),ClassDTO.class);
         return dto;
     }
-    @PutMapping
-    public void update(@RequestBody ClassDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Class c = m.map(dto, Class.class);
-        cS.insert(c);
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> update(@RequestPart(value="file", required = false) MultipartFile document,
+                                         @RequestPart(value = "data", required = false) String dtoJson) {
+        String originalFilename = null;
+        try {
+            // Convertir el JSON a ClassDTO
+            ObjectMapper objectMapper = new ObjectMapper();
+            ClassDTO dto = objectMapper.readValue(dtoJson, ClassDTO.class);
+
+            // Obtener la clase existente desde la base de datos
+            Class existingClass = cS.listId(dto.getClassId());
+            if (existingClass == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clase no encontrada");
+            }
+
+            String userUploadDir = uploadDir + File.separator + "class";
+            Path userUploadPath = Paths.get(userUploadDir);
+            if (!Files.exists(userUploadPath)) {
+                Files.createDirectories(userUploadPath);
+            }
+
+            // Manejo del archivo de documento
+            if (document != null && !document.isEmpty()) {
+                // Si se sube un nuevo documento, reemplazar el documento actual
+                originalFilename = document.getOriginalFilename();
+                byte[] bytes = document.getBytes();
+                Path path = userUploadPath.resolve(originalFilename);
+                Files.write(path, bytes);
+
+                // Actualizar la ruta del documento en la entidad
+                existingClass.setDocument("class/" + originalFilename);
+            }
+
+            // Actualizar otros datos de la clase
+            ModelMapper modelMapper = new ModelMapper();
+            modelMapper.map(dto, existingClass);  // Mapear solo los cambios del DTO a la clase existente
+
+            // Guardar los cambios en la base de datos
+            cS.insert(existingClass);
+
+            return ResponseEntity.ok("Clase actualizada correctamente");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de documento: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la clase: " + e.getMessage());
+        }
     }
+
 
 
 }
