@@ -90,9 +90,18 @@ public class CourseController  {
                 .map(course -> {
                     CourseDTO dto = m.map(course, CourseDTO.class);
                     dto.setModules(course.getModules().stream()
-                            .sorted(Comparator.comparing(Module::getModuleId))
-                            .map(module -> m.map(module, ModuleDTO.class))
-                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+                            .sorted(Comparator.comparing(Module::getModuleId))  // Ordenar por 'moduleId'
+                            .map(module -> {
+                                ModuleDTO moduleDTO = m.map(module, ModuleDTO.class);
+                                // Ordenar las clases por 'classId' dentro de cada módulo
+                                moduleDTO.setClasses(module.getClasses().stream()
+                                        .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
+                                        .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
+                                        .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden
+
+                                return moduleDTO;
+                            })
+                            .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden en módulos
 
                     return dto;
                 })
@@ -117,11 +126,11 @@ public class CourseController  {
                     moduleDTO.setClasses(module.getClasses().stream()
                             .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
                             .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
-                            .collect(Collectors.toCollection(LinkedHashSet::new)));  // Mantener el orden en LinkedHashSet
+                            .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden
 
                     return moduleDTO;
                 })
-                .collect(Collectors.toCollection(LinkedHashSet::new)));  // Usar LinkedHashSet para mantener el orden en módulos
+                .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden en módulos
 
         return dto;
     }

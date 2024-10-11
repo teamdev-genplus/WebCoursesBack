@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.dtos;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 public class ModuleDTO {
@@ -8,7 +9,7 @@ public class ModuleDTO {
     private int courseId;
     private String title;
     private int orderNumber;
-    private Set<ClassDTO> classes;
+    private List<ClassDTO> classes;
     private TestDTO test;
 
     public int getModuleId() {
@@ -43,11 +44,11 @@ public class ModuleDTO {
         this.orderNumber = orderNumber;
     }
 
-    public Set<ClassDTO> getClasses() {
+    public List<ClassDTO> getClasses() {
         return classes;
     }
 
-    public void setClasses(Set<ClassDTO> classes) {
+    public void setClasses(List<ClassDTO> classes) {
         this.classes = classes;
     }
 

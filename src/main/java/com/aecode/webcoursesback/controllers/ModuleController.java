@@ -52,13 +52,14 @@ public class ModuleController {
                     dto.setClasses(module.getClasses().stream()
                             .sorted(Comparator.comparing(Class::getClassId))
                             .map(classEntity -> m.map(classEntity, ClassDTO.class))
-                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+                            .collect(Collectors.toList())); // Usar List para mantener el orden
 
                     return dto;
                 })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(moduleDTOs);
+
     }
 
     @DeleteMapping("/{id}")
@@ -70,11 +71,11 @@ public class ModuleController {
         Module module = mS.listId(id);
         ModuleDTO dto = m.map(module, ModuleDTO.class);
         dto.setClasses(module.getClasses().stream()
-                .sorted(Comparator.comparing(Class::getClassId))
-                .map(classEntity -> m.map(classEntity, ClassDTO.class))
-                .collect(Collectors.toCollection(LinkedHashSet::new)));
+                .sorted(Comparator.comparing(Class::getClassId)) // Ordenar clases por 'classId'
+                .map(classEntity -> m.map(classEntity, ClassDTO.class)) // Mapear las clases a DTO
+                .collect(Collectors.toList())); // Usar List para garantizar el orden
 
-        return dto;
+        return dto; // Devuelve el módulo DTO
     }
     @PutMapping
     public void update(@RequestBody ModuleDTO dto) {
