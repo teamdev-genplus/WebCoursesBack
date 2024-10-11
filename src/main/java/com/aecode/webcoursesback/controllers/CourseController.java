@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
 import com.aecode.webcoursesback.entities.Course;
+import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.ICourseService;
 import com.aecode.webcoursesback.services.IUserProfileService;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,11 +82,21 @@ public class CourseController  {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Access Denied: No access to courses.");
         }
-        ModelMapper modelMapper = new ModelMapper();
-        List<CourseDTO> datos = cS.list().stream()
-                .map(course -> modelMapper.map(course, CourseDTO.class))  // Mapeo directo con ModelMapper
+
+        ModelMapper m = new ModelMapper();
+        List<CourseDTO> courseDTOs = cS.list().stream()
+                .map(course -> {
+                    CourseDTO dto = m.map(course, CourseDTO.class);
+                    dto.setModules(course.getModules().stream()
+                            .sorted(Comparator.comparing(Module::getModuleId))
+                            .map(module -> m.map(module, ModuleDTO.class))
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(datos);
+
+        return ResponseEntity.ok(courseDTOs);
     }
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Integer id){cS.delete(id);}
@@ -91,7 +104,13 @@ public class CourseController  {
     @GetMapping("/{id}")
     public CourseDTO listId(@PathVariable("id")Integer id){
         ModelMapper m=new ModelMapper();
-        CourseDTO dto=m.map(cS.listId(id),CourseDTO.class);
+        Course course = cS.listId(id);
+        CourseDTO dto = m.map(course, CourseDTO.class);
+        dto.setModules(course.getModules().stream()
+                .sorted(Comparator.comparing(Module::getModuleId))
+                .map(module -> m.map(module, ModuleDTO.class))
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+
         return dto;
     }
     @PutMapping

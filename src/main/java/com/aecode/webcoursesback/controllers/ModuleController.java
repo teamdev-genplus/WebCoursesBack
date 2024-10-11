@@ -1,6 +1,9 @@
 package com.aecode.webcoursesback.controllers;
 
+import com.aecode.webcoursesback.dtos.ClassDTO;
+import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
+import com.aecode.webcoursesback.entities.Class;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IModuleService;
@@ -11,7 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,11 +45,17 @@ public class ModuleController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to modules.");
         }
 
-        // Si tiene acceso, devolver los módulos
         ModelMapper m = new ModelMapper();
-        List<Module> modules = mS.list();
-        List<ModuleDTO> moduleDTOs = modules.stream()
-                .map(module -> m.map(module, ModuleDTO.class))
+        List<ModuleDTO> moduleDTOs = mS.list().stream()
+                .map(module -> {
+                    ModuleDTO dto = m.map(module, ModuleDTO.class);
+                    dto.setClasses(module.getClasses().stream()
+                            .sorted(Comparator.comparing(Class::getClassId))
+                            .map(classEntity -> m.map(classEntity, ClassDTO.class))
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(moduleDTOs);
@@ -54,8 +66,14 @@ public class ModuleController {
 
     @GetMapping("/{id}")
     public ModuleDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        ModuleDTO dto=m.map(mS.listId(id),ModuleDTO.class);
+        ModelMapper m = new ModelMapper();
+        Module module = mS.listId(id);
+        ModuleDTO dto = m.map(module, ModuleDTO.class);
+        dto.setClasses(module.getClasses().stream()
+                .sorted(Comparator.comparing(Class::getClassId))
+                .map(classEntity -> m.map(classEntity, ClassDTO.class))
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+
         return dto;
     }
     @PutMapping
