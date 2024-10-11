@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.controllers;
+import com.aecode.webcoursesback.dtos.ClassDTO;
 import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
+import com.aecode.webcoursesback.entities.Class;
 import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -107,9 +109,19 @@ public class CourseController  {
         Course course = cS.listId(id);
         CourseDTO dto = m.map(course, CourseDTO.class);
         dto.setModules(course.getModules().stream()
-                .sorted(Comparator.comparing(Module::getModuleId))
-                .map(module -> m.map(module, ModuleDTO.class))
-                .collect(Collectors.toCollection(LinkedHashSet::new)));
+                .sorted(Comparator.comparing(Module::getModuleId))  // Ordenar por 'moduleId'
+                .map(module -> {
+                    ModuleDTO moduleDTO = m.map(module, ModuleDTO.class);
+
+                    // Ordenar las clases por 'classId' dentro de cada módulo
+                    moduleDTO.setClasses(module.getClasses().stream()
+                            .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
+                            .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
+                            .collect(Collectors.toCollection(LinkedHashSet::new)));  // Mantener el orden en LinkedHashSet
+
+                    return moduleDTO;
+                })
+                .collect(Collectors.toCollection(LinkedHashSet::new)));  // Usar LinkedHashSet para mantener el orden en módulos
 
         return dto;
     }
