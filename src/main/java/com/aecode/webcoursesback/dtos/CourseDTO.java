@@ -1,12 +1,12 @@
 package com.aecode.webcoursesback.dtos;
 
-import java.util.Set;
+import java.util.List;
 
 public class CourseDTO {
     private int courseId;
     private String title;
     private String image;
-    private Set<ModuleDTO> modules;
+    private List<ModuleDTO> modules;
 
     public int getCourseId() {
         return courseId;
@@ -32,11 +32,11 @@ public class CourseDTO {
         this.image = image;
     }
 
-    public Set<ModuleDTO> getModules() {
+    public List<ModuleDTO> getModules() {
         return modules;
     }
 
-    public void setModules(Set<ModuleDTO> modules) {
+    public void setModules(List<ModuleDTO> modules) {
         this.modules = modules;
     }
 }
