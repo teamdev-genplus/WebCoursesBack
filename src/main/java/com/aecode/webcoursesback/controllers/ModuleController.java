@@ -3,6 +3,7 @@ package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ClassDTO;
 import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
+import com.aecode.webcoursesback.dtos.TestDTO;
 import com.aecode.webcoursesback.entities.Class;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -70,6 +71,12 @@ public class ModuleController {
         ModelMapper m = new ModelMapper();
         Module module = mS.listId(id);
         ModuleDTO dto = m.map(module, ModuleDTO.class);
+
+        // Mapear el test si existe
+        if (module.getTest() != null) {
+            dto.setTest(m.map(module.getTest(), TestDTO.class));
+        }
+
         dto.setClasses(module.getClasses().stream()
                 .sorted(Comparator.comparing(Class::getClassId)) // Ordenar clases por 'classId'
                 .map(classEntity -> m.map(classEntity, ClassDTO.class)) // Mapear las clases a DTO

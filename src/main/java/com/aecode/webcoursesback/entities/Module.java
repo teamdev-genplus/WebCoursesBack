@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.entities;
-
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,15 +24,19 @@ public class Module {
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Class> classes = new HashSet<>();
 
+    @OneToOne(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Test test;
+
     public Module() {
     }
 
-    public Module(int moduleId, Course course, String title, int orderNumber, Set<Class> classes) {
+    public Module(int moduleId, Course course, String title, int orderNumber, Set<Class> classes, Test test) {
         this.moduleId = moduleId;
         this.course = course;
         this.title = title;
         this.orderNumber = orderNumber;
         this.classes = classes;
+        this.test = test;
     }
 
     public int getModuleId() {
@@ -62,7 +63,6 @@ public class Module {
         this.title = title;
     }
 
-
     public int getOrderNumber() {
         return orderNumber;
     }
@@ -77,5 +77,13 @@ public class Module {
 
     public void setClasses(Set<Class> classes) {
         this.classes = classes;
+    }
+
+    public Test getTest() {
+        return test;
+    }
+
+    public void setTest(Test test) {
+        this.test = test;
     }
 }
