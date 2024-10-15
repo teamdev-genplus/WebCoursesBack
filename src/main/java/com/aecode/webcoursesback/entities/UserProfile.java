@@ -2,6 +2,9 @@ package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "userprofile")
 public class UserProfile {
@@ -21,15 +24,19 @@ public class UserProfile {
     @Column(nullable = false)
     private boolean hasAccess = false;
 
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgress> progress = new ArrayList<>();
+
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, boolean hasAccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, boolean hasAccess, List<UserProgress> progress) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
         this.hasAccess = hasAccess;
+        this.progress = progress;
     }
 
     public int getUserId() {
@@ -70,5 +77,13 @@ public class UserProfile {
 
     public void setHasAccess(boolean hasAccess) {
         this.hasAccess = hasAccess;
+    }
+
+    public List<UserProgress> getProgress() {
+        return progress;
+    }
+
+    public void setProgress(List<UserProgress> progress) {
+        this.progress = progress;
     }
 }

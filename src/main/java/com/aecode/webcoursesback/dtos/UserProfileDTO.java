@@ -1,11 +1,14 @@
 package com.aecode.webcoursesback.dtos;
 
+import java.util.List;
+
 public class UserProfileDTO {
     private int userId;
     private String fullname;
     private String email;
     private String passwordHash;
     private boolean hasAccess;
+    private List<UserProgressDTO> userProgress;
 
     public int getUserId() {
         return userId;
@@ -45,5 +48,13 @@ public class UserProfileDTO {
 
     public void setHasAccess(boolean hasAccess) {
         this.hasAccess = hasAccess;
+    }
+
+    public List<UserProgressDTO> getUserProgress() {
+        return userProgress;
+    }
+
+    public void setUserProgress(List<UserProgressDTO> userProgress) {
+        this.userProgress = userProgress;
     }
 }
