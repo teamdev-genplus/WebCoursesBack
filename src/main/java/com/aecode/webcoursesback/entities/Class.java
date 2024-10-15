@@ -1,7 +1,10 @@
 package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -33,6 +36,9 @@ public class Class {
 
     @OneToMany(mappedBy = "aclass", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ClassQuestion> classquestions = new HashSet<>();
+
+    @OneToMany(mappedBy = "classes", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgress> progress = new ArrayList<>();
 
     public Class() {
     }

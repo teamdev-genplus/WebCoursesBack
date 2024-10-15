@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.dtos;
+import java.util.List;
 import java.util.Set;
 
 public class ClassDTO {
@@ -11,6 +12,7 @@ public class ClassDTO {
     private String document;
     private int orderNumber;
     private Set<ClassQuestionDTO> classquestions;
+    private List<UserProgressDTO> userProgress;
 
 
     public int getClassId() {
@@ -75,5 +77,13 @@ public class ClassDTO {
 
     public void setClassquestions(Set<ClassQuestionDTO> classquestions) {
         this.classquestions = classquestions;
+    }
+
+    public List<UserProgressDTO> getUserProgress() {
+        return userProgress;
+    }
+
+    public void setUserProgress(List<UserProgressDTO> userProgress) {
+        this.userProgress = userProgress;
     }
 }
