@@ -8,6 +8,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\QuestionController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\TestController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProfileController.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\AnswerDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\ClassAnswerDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\ClassDTO.java
@@ -18,6 +19,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\QuestionDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\TestDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProfileDTO.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Answer.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Class.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\ClassAnswer.java
@@ -27,6 +29,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Question.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Test.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserProfile.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserProgress.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IAnswerRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IClassAnswerRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IClassQuestionRepo.java
@@ -36,6 +39,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IQuestionRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\ITestRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProfileRepository.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IAnswerService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IClassAnswerService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IClassQuestionService.java
@@ -45,6 +49,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IQuestionService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ITestService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProfileService.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\AnswerServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ClassAnswerImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ClassQuestionImp.java
@@ -54,5 +59,6 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\QuestionServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\TestServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProfileServiceImplement.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProgressServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\ServletInitializer.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\WebCoursesBackApplication.java

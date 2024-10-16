@@ -1,12 +1,16 @@
 com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.class
 com\aecode\webcoursesback\entities\ClassQuestion.class
 com\aecode\webcoursesback\dtos\ClassAnswerDTO.class
+com\aecode\webcoursesback\services\IUserProgressService.class
+com\aecode\webcoursesback\controllers\UserProgressController.class
+com\aecode\webcoursesback\entities\UserProgress.class
 com\aecode\webcoursesback\controllers\ClassController.class
 com\aecode\webcoursesback\repositories\IModuleRepo.class
 com\aecode\webcoursesback\dtos\LoginDTO.class
 com\aecode\webcoursesback\entities\Answer.class
 com\aecode\webcoursesback\repositories\IClassQuestionRepo.class
 com\aecode\webcoursesback\dtos\AnswerDTO.class
+com\aecode\webcoursesback\servicesimplement\UserProgressServiceImp.class
 com\aecode\webcoursesback\services\ITestService.class
 com\aecode\webcoursesback\entities\Class.class
 com\aecode\webcoursesback\dtos\ClassDTO.class
@@ -22,7 +26,9 @@ com\aecode\webcoursesback\dtos\ClassQuestionDTO.class
 com\aecode\webcoursesback\repositories\IUserProfileRepository.class
 com\aecode\webcoursesback\services\ICourseService.class
 com\aecode\webcoursesback\dtos\QuestionDTO.class
+com\aecode\webcoursesback\repositories\IUserProgressRepo.class
 com\aecode\webcoursesback\dtos\CourseDTO.class
+com\aecode\webcoursesback\dtos\UserProgressDTO.class
 com\aecode\webcoursesback\controllers\TestController.class
 com\aecode\webcoursesback\servicesimplement\AnswerServiceImp.class
 com\aecode\webcoursesback\services\IUserProfileService.class
