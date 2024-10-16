@@ -43,7 +43,7 @@ public class Class {
     public Class() {
     }
 
-    public Class(int classId, Module module, String title, String videoUrl, String description, String document, int orderNumber,Set<ClassQuestion> classquestions) {
+    public Class(int classId, Module module, String title, String videoUrl, String description, String document, int orderNumber, Set<ClassQuestion> classquestions, List<UserProgress> progress) {
         this.classId = classId;
         this.module = module;
         this.title = title;
@@ -52,6 +52,7 @@ public class Class {
         this.document = document;
         this.orderNumber = orderNumber;
         this.classquestions = classquestions;
+        this.progress = progress;
     }
 
     public int getClassId() {
@@ -116,5 +117,13 @@ public class Class {
 
     public void setClassquestions(Set<ClassQuestion> classquestions) {
         this.classquestions = classquestions;
+    }
+
+    public List<UserProgress> getProgress() {
+        return progress;
+    }
+
+    public void setProgress(List<UserProgress> progress) {
+        this.progress = progress;
     }
 }
