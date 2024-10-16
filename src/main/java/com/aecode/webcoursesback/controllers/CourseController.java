@@ -5,9 +5,7 @@ import com.aecode.webcoursesback.dtos.ModuleDTO;
 import com.aecode.webcoursesback.entities.Class;
 import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.ICourseService;
-import com.aecode.webcoursesback.services.IUserProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,8 +32,6 @@ public class CourseController  {
     private String uploadDir;
     @Autowired
     private ICourseService cS;
-    @Autowired
-    private IUserProfileService upS;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value="file", required = false) MultipartFile imagen,
@@ -76,39 +71,13 @@ public class CourseController  {
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Buscar al usuario por su email
-        UserProfile user = upS.findByEmail(email);
-        // Verificar si el usuario tiene acceso
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Access Denied: No access to courses.");
-        }
-
-        ModelMapper m = new ModelMapper();
-        List<CourseDTO> courseDTOs = cS.list().stream()
-                .map(course -> {
-                    CourseDTO dto = m.map(course, CourseDTO.class);
-                    dto.setModules(course.getModules().stream()
-                            .sorted(Comparator.comparing(Module::getModuleId))  // Ordenar por 'moduleId'
-                            .map(module -> {
-                                ModuleDTO moduleDTO = m.map(module, ModuleDTO.class);
-                                // Ordenar las clases por 'classId' dentro de cada módulo
-                                moduleDTO.setClasses(module.getClasses().stream()
-                                        .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
-                                        .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
-                                        .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden
-
-                                return moduleDTO;
-                            })
-                            .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden en módulos
-
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(courseDTOs);
+    public List<CourseDTO> list() {
+        return cS.list().stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, CourseDTO.class);
+        }).collect(Collectors.toList());
     }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Integer id){cS.delete(id);}
 

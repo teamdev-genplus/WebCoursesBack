@@ -77,19 +77,11 @@ public class ClassController {
 
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Verificar si el usuario tiene acceso
-        UserProfile user = upS.findByEmail(email);
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to classes.");
-        }
-
-        ModelMapper modelMapper = new ModelMapper();
-        List<ClassDTO> datos = cS.list().stream()
-                .map(classes -> modelMapper.map(classes, ClassDTO.class))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(datos);
+    public List<ClassDTO> list() {
+        return cS.list().stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, ClassDTO.class);
+        }).collect(Collectors.toList());
     }
 
 
