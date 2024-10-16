@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.dtos;
 
-import com.aecode.webcoursesback.entities.Class;
-
-
 public class UserProgressDTO {
     private int progressId;
     private int userId;
