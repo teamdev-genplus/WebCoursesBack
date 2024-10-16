@@ -34,16 +34,22 @@ public class UserProgressController {
         UserProfile user = pS.listId(dto.getUserId());
         Class aClass = cS.listId(dto.getClassId());
 
-        if (user == null || aClass == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario o clase no encontrados");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no encontrado");
+        }
+        if (aClass == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Clase no encontrada");
         }
 
         // Mapear el DTO a la entidad
-        UserProgress userProgress = m.map(dto, UserProgress.class);
+        UserProgress userProgress = new UserProgress();
         userProgress.setUserProfile(user); // Asignar el UserProfile
-        userProgress.setClasses(aClass); // Asignar la Class
+        userProgress.setClasses(aClass);   // Asignar la Class
+        userProgress.setCompleted(dto.isCompleted()); // Asignar si está completado
 
+        // Guardar en la base de datos
         upS.insert(userProgress);
+
         return ResponseEntity.ok("Progreso guardado correctamente");
     }
 
