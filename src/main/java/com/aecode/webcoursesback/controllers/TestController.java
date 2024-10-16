@@ -2,12 +2,10 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.TestDTO;
 import com.aecode.webcoursesback.entities.Test;
-import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.ITestService;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +18,6 @@ public class TestController {
     @Autowired
     private ITestService tS;
 
-    @Autowired
-    private IUserProfileService upS;
-
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody TestDTO dto) {
         ModelMapper m = new ModelMapper();
@@ -32,21 +27,11 @@ public class TestController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Verificar si el usuario tiene acceso
-        UserProfile user = upS.findByEmail(email);
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to tests.");
-        }
-
-        // Si tiene acceso, devolver los exámenes
-        ModelMapper m = new ModelMapper();
-        List<Test> t = tS.list();
-        List<TestDTO> testDTOs = t.stream()
-                .map(test -> m.map(test, TestDTO.class))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(testDTOs);
+    public List<TestDTO> list() {
+        return tS.list().stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, TestDTO.class);
+        }).collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")

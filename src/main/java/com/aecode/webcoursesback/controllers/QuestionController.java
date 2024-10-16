@@ -2,12 +2,9 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.QuestionDTO;
 import com.aecode.webcoursesback.entities.Question;
-import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IQuestionService;
-import com.aecode.webcoursesback.services.IUserProfileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +18,6 @@ public class QuestionController {
     @Autowired
     private IQuestionService qS;
 
-    @Autowired
-    private IUserProfileService upS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody QuestionDTO dto) {
@@ -33,21 +28,11 @@ public class QuestionController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Verificar si el usuario tiene acceso
-        UserProfile user = upS.findByEmail(email);
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to questions.");
-        }
-
-        // Si tiene acceso, devolver las preguntas
-        ModelMapper m = new ModelMapper();
-        List<Question> q = qS.list();
-        List<QuestionDTO> questionDTOs = q.stream()
-                .map(question -> m.map(question, QuestionDTO.class))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(questionDTOs);
+    public List<QuestionDTO> list() {
+        return qS.list().stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, QuestionDTO.class);
+        }).collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")
