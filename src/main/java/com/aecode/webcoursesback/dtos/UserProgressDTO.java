@@ -1,13 +1,12 @@
 package com.aecode.webcoursesback.dtos;
 
 import com.aecode.webcoursesback.entities.Class;
-import com.aecode.webcoursesback.entities.UserProfile;
 
 
 public class UserProgressDTO {
     private int progressId;
-    private UserProfile userProfile;
-    private Class classes;
+    private int userId;
+    private int classId;
     private boolean isCompleted;
 
     public int getProgressId() {
@@ -18,20 +17,20 @@ public class UserProgressDTO {
         this.progressId = progressId;
     }
 
-    public UserProfile getUserProfile() {
-        return userProfile;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUserProfile(UserProfile userProfile) {
-        this.userProfile = userProfile;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public Class getClasses() {
-        return classes;
+    public int getClassId() {
+        return classId;
     }
 
-    public void setClasses(Class classes) {
-        this.classes = classes;
+    public void setClassId(int classId) {
+        this.classId = classId;
     }
 
     public boolean isCompleted() {
