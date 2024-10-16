@@ -15,7 +15,7 @@ public class UserProgress {
     private UserProfile userProfile;
 
     @ManyToOne
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "class_id", nullable = false)
     private Class classes;
 
     @Column(nullable = false)
