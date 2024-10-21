@@ -1,32 +1,32 @@
 package com.aecode.webcoursesback.dtos;
 import java.util.List;
-import java.util.Set;
 
 public class ClassDTO {
 
-    private int classId;
-    private int moduleId;
+    private int sessionId;
+    private int unitId;
     private String title;
     private String videoUrl;
     private String description;
-    private String document;
+    private String resourceText;
+    private String resourceDocument;
     private int orderNumber;
-    private Set<ClassQuestionDTO> classquestions;
+    private List<ClassQuestionDTO> classquestions;
 
-    public int getClassId() {
-        return classId;
+    public int getSessionId() {
+        return sessionId;
     }
 
-    public void setClassId(int classId) {
-        this.classId = classId;
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public int getModuleId() {
-        return moduleId;
+    public int getUnitId() {
+        return unitId;
     }
 
-    public void setModuleId(int moduleId) {
-        this.moduleId = moduleId;
+    public void setUnitId(int unitId) {
+        this.unitId = unitId;
     }
 
     public String getTitle() {
@@ -53,12 +53,20 @@ public class ClassDTO {
         this.description = description;
     }
 
-    public String getDocument() {
-        return document;
+    public String getResourceText() {
+        return resourceText;
     }
 
-    public void setDocument(String document) {
-        this.document = document;
+    public void setResourceText(String resourceText) {
+        this.resourceText = resourceText;
+    }
+
+    public String getResourceDocument() {
+        return resourceDocument;
+    }
+
+    public void setResourceDocument(String resourceDocument) {
+        this.resourceDocument = resourceDocument;
     }
 
     public int getOrderNumber() {
@@ -69,11 +77,11 @@ public class ClassDTO {
         this.orderNumber = orderNumber;
     }
 
-    public Set<ClassQuestionDTO> getClassquestions() {
+    public List<ClassQuestionDTO> getClassquestions() {
         return classquestions;
     }
 
-    public void setClassquestions(Set<ClassQuestionDTO> classquestions) {
+    public void setClassquestions(List<ClassQuestionDTO> classquestions) {
         this.classquestions = classquestions;
     }
 }

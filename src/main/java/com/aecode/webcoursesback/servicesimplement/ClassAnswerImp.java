@@ -1,6 +1,6 @@
 package com.aecode.webcoursesback.servicesimplement;
 
-import com.aecode.webcoursesback.entities.ClassAnswer;
+import com.aecode.webcoursesback.entities.SessionAnswer;
 import com.aecode.webcoursesback.repositories.IClassAnswerRepo;
 import com.aecode.webcoursesback.services.IClassAnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +13,12 @@ public class ClassAnswerImp  implements IClassAnswerService {
     @Autowired
     private IClassAnswerRepo aR;
     @Override
-    public void insert(ClassAnswer answer) {
+    public void insert(SessionAnswer answer) {
         aR.save(answer);
     }
 
     @Override
-    public List<ClassAnswer> list() {
+    public List<SessionAnswer> list() {
         return aR.findAll();
     }
 
@@ -28,7 +28,7 @@ public class ClassAnswerImp  implements IClassAnswerService {
     }
 
     @Override
-    public ClassAnswer listId(int answerId) {
-        return aR.findById(answerId).orElse(new ClassAnswer());
+    public SessionAnswer listId(int answerId) {
+        return aR.findById(answerId).orElse(new SessionAnswer());
     }
 }

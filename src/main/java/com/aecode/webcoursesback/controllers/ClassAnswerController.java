@@ -1,8 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ClassAnswerDTO;
-import com.aecode.webcoursesback.entities.Class;
-import com.aecode.webcoursesback.entities.ClassAnswer;
-import com.aecode.webcoursesback.entities.ClassQuestion;
+import com.aecode.webcoursesback.entities.SessionAnswer;
+import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.repositories.IClassQuestionRepo;
 import com.aecode.webcoursesback.services.IClassAnswerService;
 import org.modelmapper.ModelMapper;
@@ -24,14 +23,14 @@ public class ClassAnswerController {
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody ClassAnswerDTO dto) {
         ModelMapper m = new ModelMapper();
-        ClassAnswer a = m.map(dto, ClassAnswer.class);
+        SessionAnswer a = m.map(dto, SessionAnswer.class);
 
-        // Buscar la entidad Class usando el classId del DTO
-        ClassQuestion classquestion = cqR.findById(dto.getQuestionId())
-                .orElseThrow(() -> new RuntimeException("ClassQuestion not found with id: " + dto.getQuestionId()));
+        // Buscar la entidad Session usando el classId del DTO
+        SessionTest s = cqR.findById(dto.getQuestionId())
+                .orElseThrow(() -> new RuntimeException("SessionTest not found with id: " + dto.getQuestionId()));
 
-        // Asignar la entidad Classquestion encontrada a la entidad ClassAnswer
-        a.setClassquestion(classquestion);
+        // Asignar la entidad Classquestion encontrada a la entidad SessionAnswer
+        a.setSessiontest(s);
 
         // Insertar la entidad usando el servicio
         aS.insert(a);
@@ -42,11 +41,11 @@ public class ClassAnswerController {
     @GetMapping
     public List<ClassAnswerDTO> list() {
         ModelMapper m = new ModelMapper();
-        List<ClassAnswer> a = aS.list();
+        List<SessionAnswer> a = aS.list();
         return a.stream().map(answer -> {
             // Convertir la entidad a DTO y asignar el questionId manualmente
             ClassAnswerDTO dto = m.map(answer, ClassAnswerDTO.class);
-            dto.setQuestionId(answer.getClassquestion().getQuestionId());  // Asignar manualmente el questionId
+            dto.setQuestionId(answer.getSessiontest().getTestId());  // Asignar manualmente el questionId
             return dto;
         }).collect(Collectors.toList());
     }
@@ -62,7 +61,7 @@ public class ClassAnswerController {
     @PutMapping
     public void update(@RequestBody ClassAnswerDTO dto) {
         ModelMapper m = new ModelMapper();
-        ClassAnswer a = m.map(dto, ClassAnswer.class);
+        SessionAnswer a = m.map(dto, SessionAnswer.class);
         aS.insert(a);
     }
 

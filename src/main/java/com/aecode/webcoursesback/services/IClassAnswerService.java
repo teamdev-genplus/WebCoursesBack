@@ -1,10 +1,11 @@
 package com.aecode.webcoursesback.services;
-import com.aecode.webcoursesback.entities.ClassAnswer;
+import com.aecode.webcoursesback.entities.SessionAnswer;
+
 import java.util.List;
 
 public interface IClassAnswerService {
-    public void insert(ClassAnswer answer);
-    List<ClassAnswer> list();
+    public void insert(SessionAnswer answer);
+    List<SessionAnswer> list();
     public void delete(int answerId);
-    public ClassAnswer listId(int answerId);
+    public SessionAnswer listId(int answerId);
 }

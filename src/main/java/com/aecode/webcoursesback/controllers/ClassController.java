@@ -1,12 +1,8 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.ClassDTO;
-import com.aecode.webcoursesback.dtos.ClassQuestionDTO;
-import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.entities.Class;
-import com.aecode.webcoursesback.entities.UserProfile;
+import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.services.IClassService;
-import com.aecode.webcoursesback.services.IUserProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +30,6 @@ public class ClassController {
     @Autowired
     private IClassService cS;
 
-    @Autowired
-    private IUserProfileService upS;
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value="file", required = false) MultipartFile imagen,
                                          @RequestPart(value = "data", required = false) String dtoJson) {
@@ -62,9 +55,9 @@ public class ClassController {
 
             // Convertir DTO a entidad
             ModelMapper modelMapper = new ModelMapper();
-            Class classes = modelMapper.map(dto, Class.class);
+            Session classes = modelMapper.map(dto, Session.class);
             // Establecer la ruta del archivo en la entidad
-            classes.setDocument("class/"+originalFilename);
+            classes.setResourceDocument("class/"+originalFilename);
             cS.insert(classes);
 
             return ResponseEntity.ok("Clase guardado correctamente");
@@ -104,8 +97,8 @@ public class ClassController {
             ClassDTO dto = objectMapper.readValue(dtoJson, ClassDTO.class);
 
             // Obtener la clase existente desde la base de datos
-            Class existingClass = cS.listId(dto.getClassId());
-            if (existingClass == null) {
+            Session existingSession = cS.listId(dto.getSessionId());
+            if (existingSession == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clase no encontrada");
             }
 
@@ -124,15 +117,15 @@ public class ClassController {
                 Files.write(path, bytes);
 
                 // Actualizar la ruta del documento en la entidad
-                existingClass.setDocument("class/" + originalFilename);
+                existingSession.setResourceDocument("class/" + originalFilename);
             }
 
             // Actualizar otros datos de la clase
             ModelMapper modelMapper = new ModelMapper();
-            modelMapper.map(dto, existingClass);  // Mapear solo los cambios del DTO a la clase existente
+            modelMapper.map(dto, existingSession);  // Mapear solo los cambios del DTO a la clase existente
 
             // Guardar los cambios en la base de datos
-            cS.insert(existingClass);
+            cS.insert(existingSession);
 
             return ResponseEntity.ok("Clase actualizada correctamente");
         } catch (IOException e) {

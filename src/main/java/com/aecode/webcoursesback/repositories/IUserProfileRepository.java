@@ -20,11 +20,4 @@ public interface IUserProfileRepository extends JpaRepository<UserProfile, Integ
     @Query("SELECT u FROM UserProfile u WHERE u.email LIKE %?1%")
     List<UserProfile> findByEmailContaining(String partialEmail);
 
-    // Buscar usuarios con hasAccess = true
-    @Query("SELECT u FROM UserProfile u WHERE u.hasAccess = true")
-    List<UserProfile> findByHasAccessTrue();
-
-    // Buscar usuarios con hasAccess = false
-    @Query("SELECT u FROM UserProfile u WHERE u.hasAccess = false")
-    List<UserProfile> findByHasAccessFalse();
 }

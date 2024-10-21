@@ -1,6 +1,6 @@
 package com.aecode.webcoursesback.servicesimplement;
 
-import com.aecode.webcoursesback.entities.UserProgress;
+import com.aecode.webcoursesback.entities.UserProgressSession;
 import com.aecode.webcoursesback.repositories.IUserProgressRepo;
 import com.aecode.webcoursesback.services.IUserProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +14,12 @@ public class UserProgressServiceImp implements IUserProgressService {
     @Autowired
     private IUserProgressRepo upR;
     @Override
-    public void insert(UserProgress userprogress) {
+    public void insert(UserProgressSession userprogress) {
         upR.save(userprogress);
     }
 
     @Override
-    public List<UserProgress> list() {
+    public List<UserProgressSession> list() {
         return upR.findAll();
     }
 
@@ -29,7 +29,7 @@ public class UserProgressServiceImp implements IUserProgressService {
     }
 
     @Override
-    public UserProgress listId(int progressId) {
-        return upR.findById(progressId).orElse(new UserProgress());
+    public UserProgressSession listId(int progressId) {
+        return upR.findById(progressId).orElse(new UserProgressSession());
     }
 }

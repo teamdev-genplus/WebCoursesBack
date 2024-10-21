@@ -1,7 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ClassQuestionDTO;
-import com.aecode.webcoursesback.entities.Class;
-import com.aecode.webcoursesback.entities.ClassQuestion;
+import com.aecode.webcoursesback.entities.Session;
+import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.repositories.IClassRepo;
 import com.aecode.webcoursesback.services.IClassQuestionService;
 import org.modelmapper.ModelMapper;
@@ -25,14 +25,14 @@ public class ClassQuestionController {
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody ClassQuestionDTO dto) {
         ModelMapper m = new ModelMapper();
-        ClassQuestion q = m.map(dto, ClassQuestion.class);
+        SessionTest q = m.map(dto, SessionTest.class);
 
-        // Buscar la entidad Class usando el classId del DTO
-        Class aclass = classRepository.findById(dto.getClassId())
-                .orElseThrow(() -> new RuntimeException("Class not found with id: " + dto.getClassId()));
+        // Buscar la entidad Session usando el classId del DTO
+        Session aclass = classRepository.findById(dto.getClassId())
+                .orElseThrow(() -> new RuntimeException("Session not found with id: " + dto.getClassId()));
 
-        // Asignar la entidad Class encontrada a la entidad ClassQuestion
-        q.setAclass(aclass);
+        // Asignar la entidad Session encontrada a la entidad SessionTest
+        q.setSession(aclass);
 
         // Insertar la entidad usando el servicio
         qS.insert(q);
@@ -61,7 +61,7 @@ public class ClassQuestionController {
     @PutMapping
     public void update(@RequestBody ClassQuestionDTO dto) {
         ModelMapper m = new ModelMapper();
-        ClassQuestion q = m.map(dto, ClassQuestion.class);
+        SessionTest q = m.map(dto, SessionTest.class);
         qS.insert(q);
     }
 }

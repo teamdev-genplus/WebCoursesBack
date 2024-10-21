@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "userprofile")
+@Table(name = "userprofiles")
 public class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,22 +21,22 @@ public class UserProfile {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
-    private boolean hasAccess = false;
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgressSession> progressSessions = new ArrayList<>();
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserProgress> progress = new ArrayList<>();
+    private List<UserProgressUnit> progressUnits = new ArrayList<>();
 
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, boolean hasAccess, List<UserProgress> progress) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> progressSessions, List<UserProgressUnit> progressUnits) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.hasAccess = hasAccess;
-        this.progress = progress;
+        this.progressSessions = progressSessions;
+        this.progressUnits = progressUnits;
     }
 
     public int getUserId() {
@@ -71,19 +71,19 @@ public class UserProfile {
         this.passwordHash = passwordHash;
     }
 
-    public boolean isHasAccess() {
-        return hasAccess;
+    public List<UserProgressSession> getProgressSessions() {
+        return progressSessions;
     }
 
-    public void setHasAccess(boolean hasAccess) {
-        this.hasAccess = hasAccess;
+    public void setProgressSessions(List<UserProgressSession> progressSessions) {
+        this.progressSessions = progressSessions;
     }
 
-    public List<UserProgress> getProgress() {
-        return progress;
+    public List<UserProgressUnit> getProgressUnits() {
+        return progressUnits;
     }
 
-    public void setProgress(List<UserProgress> progress) {
-        this.progress = progress;
+    public void setProgressUnits(List<UserProgressUnit> progressUnits) {
+        this.progressUnits = progressUnits;
     }
 }
