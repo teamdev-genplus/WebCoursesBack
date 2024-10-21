@@ -73,44 +73,4 @@ public class UserProfileController {
         upS.update(p);
     }
 
-    @GetMapping("/searchByEmail")
-    public ResponseEntity<List<UserProfileDTO>> searchByEmail(@RequestParam String emailFragment) {
-        // Buscar los usuarios cuyo email contenga el fragmento proporcionado
-        List<UserProfile> users = upS.findByPartialEmail(emailFragment);
-        List<UserProfileDTO> result = users.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/withAccess")
-    public ResponseEntity<List<UserProfileDTO>> listUsersWithAccess() {
-        List<UserProfile> usersWithAccess = upS.findUsersWithAccess();
-        List<UserProfileDTO> result = usersWithAccess.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
-
-    // Endpoint para listar usuarios con hasAccess = false
-    @GetMapping("/withoutAccess")
-    public ResponseEntity<List<UserProfileDTO>> listUsersWithoutAccess() {
-        List<UserProfile> usersWithoutAccess = upS.findUsersWithoutAccess();
-        List<UserProfileDTO> result = usersWithoutAccess.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
 }

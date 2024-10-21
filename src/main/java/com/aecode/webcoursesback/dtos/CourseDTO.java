@@ -5,7 +5,6 @@ import java.util.List;
 public class CourseDTO {
     private int courseId;
     private String title;
-    private String image;
     private List<ModuleDTO> modules;
 
     public int getCourseId() {
@@ -22,14 +21,6 @@ public class CourseDTO {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public List<ModuleDTO> getModules() {

@@ -1,7 +1,6 @@
 package com.aecode.webcoursesback.servicesimplement;
 
-import com.aecode.webcoursesback.entities.Class;
-import com.aecode.webcoursesback.entities.ClassQuestion;
+import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.repositories.IClassQuestionRepo;
 import com.aecode.webcoursesback.repositories.IClassRepo;
 import com.aecode.webcoursesback.services.IClassQuestionService;
@@ -17,12 +16,12 @@ public class ClassQuestionImp implements IClassQuestionService {
     @Autowired
     private IClassRepo cR;
     @Override
-    public void insert(ClassQuestion question) {
+    public void insert(SessionTest question) {
         qR.save(question);
     }
 
     @Override
-    public List<ClassQuestion> list() {
+    public List<SessionTest> list() {
         return qR.findAll();
     }
 
@@ -32,7 +31,7 @@ public class ClassQuestionImp implements IClassQuestionService {
     }
 
     @Override
-    public ClassQuestion listId(int questionId) {
-        return qR.findById(questionId).orElse(new ClassQuestion());
+    public SessionTest listId(int questionId) {
+        return qR.findById(questionId).orElse(new SessionTest());
     }
 }
