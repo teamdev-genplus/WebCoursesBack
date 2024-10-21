@@ -4,12 +4,17 @@ com\aecode\webcoursesback\services\IUserProgressService.class
 com\aecode\webcoursesback\controllers\UserProgressController.class
 com\aecode\webcoursesback\controllers\ClassController.class
 com\aecode\webcoursesback\repositories\IModuleRepo.class
+com\aecode\webcoursesback\services\IUnitService.class
 com\aecode\webcoursesback\dtos\LoginDTO.class
 com\aecode\webcoursesback\repositories\IClassQuestionRepo.class
 com\aecode\webcoursesback\entities\UserCourseAccess.class
+com\aecode\webcoursesback\entities\UserDetail.class
+com\aecode\webcoursesback\repositories\IUnitRepo.class
 com\aecode\webcoursesback\dtos\RelatedWorkDTO.class
 com\aecode\webcoursesback\servicesimplement\UserProgressServiceImp.class
+com\aecode\webcoursesback\servicesimplement\UnitServiceImp.class
 com\aecode\webcoursesback\dtos\ClassDTO.class
+com\aecode\webcoursesback\dtos\UnitDTO.class
 com\aecode\webcoursesback\servicesimplement\ClassServiceImp.class
 com\aecode\webcoursesback\services\IClassAnswerService.class
 com\aecode\webcoursesback\repositories\IClassRepo.class
@@ -43,6 +48,7 @@ com\aecode\webcoursesback\entities\Course.class
 com\aecode\webcoursesback\controllers\CourseController.class
 com\aecode\webcoursesback\entities\Unit.class
 com\aecode\webcoursesback\ServletInitializer.class
+com\aecode\webcoursesback\controllers\UnitController.class
 com\aecode\webcoursesback\controllers\ClassAnswerController.class
 com\aecode\webcoursesback\services\IClassService.class
 com\aecode\webcoursesback\services\IClassQuestionService.class
