@@ -10,7 +10,7 @@ public class RelatedWork {
     private int workId;
 
     @OneToOne
-    @JoinColumn(name = "module_id", nullable = false)
+    @JoinColumn(name = "module_id", referencedColumnName = "moduleId",nullable = false)
     private Module module;
 
     @Column(nullable = false, length = 255)

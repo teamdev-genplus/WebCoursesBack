@@ -7,7 +7,7 @@ public class UnitDTO {
     private String title;
     private String videoUrl;
     private int orderNumber;
-    private List<ClassDTO> sessions;
+    private List<SessionDTO> sessions;
 
 
     public int getUnitId() {
@@ -50,11 +50,11 @@ public class UnitDTO {
         this.orderNumber = orderNumber;
     }
 
-    public List<ClassDTO> getSessions() {
+    public List<SessionDTO> getSessions() {
         return sessions;
     }
 
-    public void setSessions(List<ClassDTO> sessions) {
+    public void setSessions(List<SessionDTO> sessions) {
         this.sessions = sessions;
     }
 }
