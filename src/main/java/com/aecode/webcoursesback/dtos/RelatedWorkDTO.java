@@ -1,9 +1,7 @@
 package com.aecode.webcoursesback.dtos;
-
-import com.aecode.webcoursesback.entities.Module;
 public class RelatedWorkDTO {
     private int workId;
-    private Module module;
+    private int moduleId;
     private String formUrl;
     private String title;
 
@@ -15,12 +13,12 @@ public class RelatedWorkDTO {
         this.workId = workId;
     }
 
-    public Module getModule() {
-        return module;
+    public int getModuleId() {
+        return moduleId;
     }
 
-    public void setModule(Module module) {
-        this.module = module;
+    public void setModuleId(int moduleId) {
+        this.moduleId = moduleId;
     }
 
     public String getFormUrl() {

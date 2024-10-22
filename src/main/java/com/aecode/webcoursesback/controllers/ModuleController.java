@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
+import com.aecode.webcoursesback.dtos.RelatedWorkDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.services.IModuleService;
 import org.modelmapper.ModelMapper;
@@ -27,7 +28,19 @@ public class ModuleController {
     public List<ModuleDTO> list() {
         return mS.list().stream().map(x -> {
             ModelMapper m = new ModelMapper();
-            return m.map(x, ModuleDTO.class);
+            ModuleDTO moduleDTO = m.map(x, ModuleDTO.class);
+
+            // Mapeo manual del RelatedWork, si existe
+            if (x.getRelatedworks() != null) {
+                RelatedWorkDTO relatedWorkDTO = new RelatedWorkDTO();
+                relatedWorkDTO.setWorkId(x.getRelatedworks().getWorkId());
+                relatedWorkDTO.setModuleId(x.getRelatedworks().getModule().getModuleId());  // Mapear moduleId
+                relatedWorkDTO.setFormUrl(x.getRelatedworks().getFormUrl());
+                relatedWorkDTO.setTitle(x.getRelatedworks().getTitle());
+                moduleDTO.setRelatedWork(relatedWorkDTO);
+            }
+
+            return moduleDTO;
         }).collect(Collectors.toList());
     }
 

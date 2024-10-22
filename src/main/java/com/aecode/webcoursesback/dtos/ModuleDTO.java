@@ -12,7 +12,7 @@ public class ModuleDTO {
     private String title;
     private int orderNumber;
     private List<UnitDTO> units;
-    private RelatedWork relatedWork;
+    private RelatedWorkDTO relatedWork;
 
     public int getModuleId() {
         return moduleId;
@@ -54,11 +54,11 @@ public class ModuleDTO {
         this.units = units;
     }
 
-    public RelatedWork getRelatedWork() {
+    public RelatedWorkDTO getRelatedWork() {
         return relatedWork;
     }
 
-    public void setRelatedWork(RelatedWork relatedWork) {
+    public void setRelatedWork(RelatedWorkDTO relatedWork) {
         this.relatedWork = relatedWork;
     }
 }

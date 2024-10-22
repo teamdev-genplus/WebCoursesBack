@@ -3,7 +3,7 @@ import com.aecode.webcoursesback.dtos.UserProgressDTO;
 import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.entities.UserProgressSession;
-import com.aecode.webcoursesback.services.IClassService;
+import com.aecode.webcoursesback.services.ISessionService;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import com.aecode.webcoursesback.services.IUserProgressService;
 import org.modelmapper.ModelMapper;
@@ -24,7 +24,7 @@ public class UserProgressController {
     @Autowired
     private IUserProfileService pS;
     @Autowired
-    private IClassService cS;
+    private ISessionService cS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody UserProgressDTO dto){
