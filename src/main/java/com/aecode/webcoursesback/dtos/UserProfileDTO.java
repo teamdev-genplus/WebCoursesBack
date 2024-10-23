@@ -7,8 +7,7 @@ public class UserProfileDTO {
     private String fullname;
     private String email;
     private String passwordHash;
-    private boolean hasAccess;
-    private List<UserProgressDTO> userProgress;
+    private List<UserProgressSessionDTO> userprogresssessions;
 
     public int getUserId() {
         return userId;
@@ -42,19 +41,11 @@ public class UserProfileDTO {
         this.passwordHash = passwordHash;
     }
 
-    public boolean isHasAccess() {
-        return hasAccess;
+    public List<UserProgressSessionDTO> getUserprogresssessions() {
+        return userprogresssessions;
     }
 
-    public void setHasAccess(boolean hasAccess) {
-        this.hasAccess = hasAccess;
-    }
-
-    public List<UserProgressDTO> getUserProgress() {
-        return userProgress;
-    }
-
-    public void setUserProgress(List<UserProgressDTO> userProgress) {
-        this.userProgress = userProgress;
+    public void setUserprogresssessions(List<UserProgressSessionDTO> userprogresssessions) {
+        this.userprogresssessions = userprogresssessions;
     }
 }

@@ -1,9 +1,9 @@
 package com.aecode.webcoursesback.dtos;
 
-public class UserProgressDTO {
+public class UserProgressSessionDTO {
     private int progressId;
     private int userId;
-    private int classId;
+    private int sessionId;
     private boolean isCompleted;
 
     public int getProgressId() {
@@ -22,12 +22,12 @@ public class UserProgressDTO {
         this.userId = userId;
     }
 
-    public int getClassId() {
-        return classId;
+    public int getSessionId() {
+        return sessionId;
     }
 
-    public void setClassId(int classId) {
-        this.classId = classId;
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
     }
 
     public boolean isCompleted() {

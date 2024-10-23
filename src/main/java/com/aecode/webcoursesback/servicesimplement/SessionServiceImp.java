@@ -32,4 +32,9 @@ public class SessionServiceImp implements ISessionService {
     public Session listId(int classId) {
         return cR.findById(classId).orElse(new Session());
     }
+
+    @Override
+    public List<Session> findByTitle(String title) {
+        return cR.searchByTitle(title);
+    }
 }
