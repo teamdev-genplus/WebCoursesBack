@@ -7,7 +7,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SessionTestController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UnitController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProfileController.java
-C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressController.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressSessionController.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\CourseDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\LoginDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\ModuleDTO.java
@@ -17,7 +17,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SessionTestDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UnitDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProfileDTO.java
-C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressDTO.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressSessionDTO.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Course.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Module.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\RelatedWork.java
@@ -38,7 +38,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\ISessionTestRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUnitRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProfileRepository.java
-C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressRepo.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressSessionRepo.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ICourseService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IModuleService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IRelatedWorkService.java
@@ -47,7 +47,7 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ISessionTestService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUnitService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProfileService.java
-C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressService.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressSessionService.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\CourseServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.java
@@ -56,6 +56,6 @@ C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\ja
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\SessionTestImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UnitServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProfileServiceImplement.java
-C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProgressServiceImp.java
+C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProgressSessionServiceImp.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\ServletInitializer.java
 C:\Users\MANUEL\OneDrive\Escritorio\manuel\WebCourses\WebCoursesBack\src\main\java\com\aecode\webcoursesback\WebCoursesBackApplication.java
