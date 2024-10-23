@@ -22,7 +22,7 @@ public class UserProfile {
     private String passwordHash;
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserProgressSession> progressSessions = new ArrayList<>();
+    private List<UserProgressSession> userprogresssessions = new ArrayList<>();
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProgressUnit> progressUnits = new ArrayList<>();
@@ -30,12 +30,12 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> progressSessions, List<UserProgressUnit> progressUnits) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> userprogresssessions, List<UserProgressUnit> progressUnits) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.progressSessions = progressSessions;
+        this.userprogresssessions = userprogresssessions;
         this.progressUnits = progressUnits;
     }
 
@@ -71,12 +71,12 @@ public class UserProfile {
         this.passwordHash = passwordHash;
     }
 
-    public List<UserProgressSession> getProgressSessions() {
-        return progressSessions;
+    public List<UserProgressSession> getUserprogresssessions() {
+        return userprogresssessions;
     }
 
-    public void setProgressSessions(List<UserProgressSession> progressSessions) {
-        this.progressSessions = progressSessions;
+    public void setUserprogresssessions(List<UserProgressSession> userprogresssessions) {
+        this.userprogresssessions = userprogresssessions;
     }
 
     public List<UserProgressUnit> getProgressUnits() {

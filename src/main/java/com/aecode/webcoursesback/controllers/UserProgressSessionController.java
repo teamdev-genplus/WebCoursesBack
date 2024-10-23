@@ -1,11 +1,11 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.UserProgressDTO;
+import com.aecode.webcoursesback.dtos.UserProgressSessionDTO;
 import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.entities.UserProgressSession;
 import com.aecode.webcoursesback.services.ISessionService;
 import com.aecode.webcoursesback.services.IUserProfileService;
-import com.aecode.webcoursesback.services.IUserProgressService;
+import com.aecode.webcoursesback.services.IUserProgressSessionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,23 +16,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/userProgress")
-public class UserProgressController {
+@RequestMapping("/progressSession")
+public class UserProgressSessionController {
 
     @Autowired
-    private IUserProgressService upS;
+    private IUserProgressSessionService upS;
     @Autowired
     private IUserProfileService pS;
     @Autowired
     private ISessionService cS;
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody UserProgressDTO dto){
+    public ResponseEntity<String> insert(@RequestBody UserProgressSessionDTO dto){
         ModelMapper m = new ModelMapper();
 
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
-        Session aSession = cS.listId(dto.getClassId());
+        Session aSession = cS.listId(dto.getSessionId());
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no encontrado");
@@ -54,10 +54,10 @@ public class UserProgressController {
     }
 
     @GetMapping
-    public List<UserProgressDTO> list() {
+    public List<UserProgressSessionDTO> list() {
         return upS.list().stream().map(x -> {
             ModelMapper m = new ModelMapper();
-            return m.map(x, UserProgressDTO.class);
+            return m.map(x, UserProgressSessionDTO.class);
         }).collect(Collectors.toList());
     }
 
@@ -65,19 +65,19 @@ public class UserProgressController {
     public void delete(@PathVariable("id")Integer id){upS.delete(id);}
 
     @GetMapping("/{id}")
-    public UserProgressDTO listId(@PathVariable("id")Integer id){
+    public UserProgressSessionDTO listId(@PathVariable("id")Integer id){
         ModelMapper m=new ModelMapper();
-        UserProgressDTO dto=m.map(upS.listId(id),UserProgressDTO.class);
+        UserProgressSessionDTO dto=m.map(upS.listId(id), UserProgressSessionDTO.class);
         return dto;
     }
     @PutMapping
-    public void update(@RequestBody UserProgressDTO dto) {
+    public void update(@RequestBody UserProgressSessionDTO dto) {
         ModelMapper m = new ModelMapper();
         UserProgressSession u = m.map(dto, UserProgressSession.class);
 
         // Asegurarse de cargar los objetos UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
-        Session aSession = cS.listId(dto.getClassId());
+        Session aSession = cS.listId(dto.getSessionId());
 
         u.setUserProfile(user);
         u.setSession(aSession);

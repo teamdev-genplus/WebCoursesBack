@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/class")
+@RequestMapping("/session")
 public class SessionController {
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -68,6 +68,14 @@ public class SessionController {
         }
     }
 
+
+    @GetMapping("/search")
+    public List<SessionDTO> searchByTitle(@RequestParam("title") String title) {
+        return cS.findByTitle(title).stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, SessionDTO.class);
+        }).collect(Collectors.toList());
+    }
 
     @GetMapping
     public List<SessionDTO> list() {

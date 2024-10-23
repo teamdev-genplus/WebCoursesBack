@@ -3,7 +3,7 @@ import com.aecode.webcoursesback.entities.UserProgressSession;
 
 import java.util.List;
 
-public interface IUserProgressService {
+public interface IUserProgressSessionService {
 
     public void insert(UserProgressSession userprogress);
     List<UserProgressSession> list();

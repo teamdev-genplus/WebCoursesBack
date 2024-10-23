@@ -9,4 +9,5 @@ public interface ISessionService {
     List<Session> list();
     public void delete(int classId);
     public Session listId(int classId);
+    List<Session> findByTitle(String title);
 }
