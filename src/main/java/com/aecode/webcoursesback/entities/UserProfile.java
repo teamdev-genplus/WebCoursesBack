@@ -7,9 +7,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "userprofiles")
+@SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
+
 public class UserProfile {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     private int userId;
 
     @Column(length = 50)
@@ -27,16 +29,20 @@ public class UserProfile {
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProgressUnit> progressUnits = new ArrayList<>();
 
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCourseAccess> usercourseaccess = new ArrayList<>();
+
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> userprogresssessions, List<UserProgressUnit> progressUnits) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> userprogresssessions, List<UserProgressUnit> progressUnits, List<UserCourseAccess> usercourseaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
         this.userprogresssessions = userprogresssessions;
         this.progressUnits = progressUnits;
+        this.usercourseaccess = usercourseaccess;
     }
 
     public int getUserId() {
@@ -85,5 +91,13 @@ public class UserProfile {
 
     public void setProgressUnits(List<UserProgressUnit> progressUnits) {
         this.progressUnits = progressUnits;
+    }
+
+    public List<UserCourseAccess> getUsercourseaccess() {
+        return usercourseaccess;
+    }
+
+    public void setUsercourseaccess(List<UserCourseAccess> usercourseaccess) {
+        this.usercourseaccess = usercourseaccess;
     }
 }

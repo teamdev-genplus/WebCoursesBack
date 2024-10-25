@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "relatedworks")
+@SequenceGenerator(name = "work_seq", sequenceName = "work_sequence", allocationSize = 1)
+
 public class RelatedWork {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "work_seq")
     private int workId;
 
     @OneToOne

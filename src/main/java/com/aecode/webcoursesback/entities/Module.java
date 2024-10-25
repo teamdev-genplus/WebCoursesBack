@@ -5,10 +5,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "modules")
+@SequenceGenerator(name = "module_seq", sequenceName = "module_sequence", allocationSize = 1)
 public class Module {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "module_seq")
     private int moduleId;
 
     @ManyToOne
