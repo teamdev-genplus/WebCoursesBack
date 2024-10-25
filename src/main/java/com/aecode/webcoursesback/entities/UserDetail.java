@@ -7,10 +7,12 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "userdetail")
+@SequenceGenerator(name = "userdetail_seq", sequenceName = "userdetail_sequence", allocationSize = 1)
+
 public class UserDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userdetail_seq")
     private int detailsId;
 
     @OneToOne

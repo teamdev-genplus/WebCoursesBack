@@ -5,9 +5,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "sessiontests")
+@SequenceGenerator(name = "sessiontest_seq", sequenceName = "sessiontest_sequence", allocationSize = 1)
 public class SessionTest {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sessiontest_seq")
     private int testId;
 
     @OneToOne

@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "sessionanswers")
+@SequenceGenerator(name = "sessionans_seq", sequenceName = "sessionans_sequence", allocationSize = 1)
+
 public class SessionAnswer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sessionans_seq")
     private int answerId;
 
     @ManyToOne

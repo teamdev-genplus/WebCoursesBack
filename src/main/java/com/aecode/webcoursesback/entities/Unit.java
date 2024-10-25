@@ -6,9 +6,10 @@ import java.util.List;
 
 @Entity
 @Table(name="units")
+@SequenceGenerator(name = "unit_seq", sequenceName = "unit_sequence", allocationSize = 1)
 public class Unit {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "unit_seq")
     private int unitId;
 
     @ManyToOne

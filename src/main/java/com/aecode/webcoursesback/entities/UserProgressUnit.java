@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "userprogressunit")
+@SequenceGenerator(name = "progressunit_seq", sequenceName = "progressunit_sequence", allocationSize = 1)
+
 public class UserProgressUnit {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "progressunit_seq")
+
     private int progressId;
 
     @ManyToOne

@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usercourseaccess")
+@SequenceGenerator(name = "access_seq", sequenceName = "access_sequence", allocationSize = 1)
+
 public class UserCourseAccess {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "access_seq")
     private int accessId;
 
     @ManyToOne
