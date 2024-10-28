@@ -11,7 +11,7 @@ public class SessionDTO {
     private String resourceText;
     private String resourceDocument;
     private int orderNumber;
-    private List<SessionTestDTO> classquestions;
+    private SessionTestDTO sessiontests;
 
     public int getSessionId() {
         return sessionId;
@@ -77,11 +77,11 @@ public class SessionDTO {
         this.orderNumber = orderNumber;
     }
 
-    public List<SessionTestDTO> getClassquestions() {
-        return classquestions;
+    public SessionTestDTO getSessiontests() {
+        return sessiontests;
     }
 
-    public void setClassquestions(List<SessionTestDTO> classquestions) {
-        this.classquestions = classquestions;
+    public void setSessiontests(SessionTestDTO sessiontests) {
+        this.sessiontests = sessiontests;
     }
 }

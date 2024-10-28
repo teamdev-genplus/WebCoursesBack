@@ -46,7 +46,7 @@ public class UserCourseController {
         // Guardar en la base de datos
         ucS.insert(usercourse);
 
-        return ResponseEntity.ok("Progrede del usuario guardado correctamente");
+        return ResponseEntity.ok("Curso del usuario guardado correctamente");
     }
 
     @GetMapping
