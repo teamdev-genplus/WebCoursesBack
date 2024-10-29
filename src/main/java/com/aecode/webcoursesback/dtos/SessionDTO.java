@@ -1,5 +1,4 @@
 package com.aecode.webcoursesback.dtos;
-import java.util.List;
 
 public class SessionDTO {
 
@@ -11,7 +10,10 @@ public class SessionDTO {
     private String resourceText;
     private String resourceDocument;
     private int orderNumber;
+    private String taskName;
+    private String taskUrl;
     private SessionTestDTO sessiontests;
+    private String HtmlContent;
 
     public int getSessionId() {
         return sessionId;
@@ -77,11 +79,35 @@ public class SessionDTO {
         this.orderNumber = orderNumber;
     }
 
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
+
+    public String getTaskUrl() {
+        return taskUrl;
+    }
+
+    public void setTaskUrl(String taskUrl) {
+        this.taskUrl = taskUrl;
+    }
+
     public SessionTestDTO getSessiontests() {
         return sessiontests;
     }
 
     public void setSessiontests(SessionTestDTO sessiontests) {
         this.sessiontests = sessiontests;
+    }
+
+    public String getHtmlContent() {
+        return HtmlContent;
+    }
+
+    public void setHtmlContent(String htmlContent) {
+        HtmlContent = htmlContent;
     }
 }

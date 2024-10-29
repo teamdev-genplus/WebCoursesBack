@@ -10,4 +10,5 @@ public interface ISessionService {
     public void delete(int classId);
     public Session listId(int classId);
     List<Session> findByTitle(String title);
+    public String wrapInHtml(String resourceText);
 }

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,17 +72,21 @@ public class SessionController {
 
     @GetMapping("/search")
     public List<SessionDTO> searchByTitle(@RequestParam("title") String title) {
-        return cS.findByTitle(title).stream().map(x -> {
+        return cS.findByTitle(title).stream().map(session -> {
             ModelMapper m = new ModelMapper();
-            return m.map(x, SessionDTO.class);
+            SessionDTO dto = m.map(session, SessionDTO.class);
+            dto.setHtmlContent(cS.wrapInHtml(session.getResourceText()));
+            return dto;
         }).collect(Collectors.toList());
     }
 
     @GetMapping
     public List<SessionDTO> list() {
-        return cS.list().stream().map(x -> {
+        return cS.list().stream().map(session -> {
             ModelMapper m = new ModelMapper();
-            return m.map(x, SessionDTO.class);
+            SessionDTO dto = m.map(session, SessionDTO.class);
+            dto.setHtmlContent(cS.wrapInHtml(session.getResourceText()));
+            return dto;
         }).collect(Collectors.toList());
     }
 
@@ -92,7 +97,12 @@ public class SessionController {
     @GetMapping("/{id}")
     public SessionDTO listId(@PathVariable("id")Integer id){
         ModelMapper m=new ModelMapper();
-        SessionDTO dto=m.map(cS.listId(id), SessionDTO.class);
+        Session session = cS.listId(id);
+        if (session == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sesión no encontrada");
+        }
+        SessionDTO dto = m.map(session, SessionDTO.class);
+        dto.setHtmlContent(cS.wrapInHtml(session.getResourceText())); // aqui se añade el HTML formateado
         return dto;
     }
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

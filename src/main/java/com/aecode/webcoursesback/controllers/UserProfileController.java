@@ -33,11 +33,12 @@ public class UserProfileController {
 
     // Autenticación de usuario existente
     @PostMapping("/login")
-    public ResponseEntity<UserProfile> login(@RequestBody LoginDTO dto) {
+    public ResponseEntity<UserProfileDTO> login(@RequestBody LoginDTO dto) {
         UserProfile profile = upS.authenticateUser( dto);
         if (profile != null && profile.getPasswordHash().equals(dto.getPasswordHash())) {
-            dto.setUserId(profile.getUserId());
-            return ResponseEntity.ok(profile); // Devuelve el objeto LoginDTO con el ID de perfil actualizado
+            ModelMapper modelMapper = new ModelMapper(); // Crea una instancia de ModelMapper
+            UserProfileDTO userProfileDTO = modelMapper.map(profile, UserProfileDTO.class); // Mapea de UserProfile a UserProfileDTO
+            return ResponseEntity.ok(userProfileDTO); // Devuelve el objeto LoginDTO con el ID de perfil actualizado
         } else {
             return ResponseEntity.badRequest().body(null); // En caso de credenciales inválidas, puedes devolver null o un objeto vacío
         }

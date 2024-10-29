@@ -35,10 +35,16 @@ public class Session {
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionTest sessiontests;
 
+    @Column(nullable = false, length = 255)
+    private String taskName;
+
+    @Column(nullable = false, length = 255)
+    private String taskUrl;
+
     public Session() {
     }
 
-    public Session(int sessionId, Unit unit, String title, String videoUrl, String description, String resourceText, String resourceDocument, int orderNumber, SessionTest sessiontests) {
+    public Session(int sessionId, Unit unit, String title, String videoUrl, String description, String resourceText, String resourceDocument, int orderNumber, SessionTest sessiontests, String taskName, String taskUrl) {
         this.sessionId = sessionId;
         this.unit = unit;
         this.title = title;
@@ -48,6 +54,8 @@ public class Session {
         this.resourceDocument = resourceDocument;
         this.orderNumber = orderNumber;
         this.sessiontests = sessiontests;
+        this.taskName = taskName;
+        this.taskUrl = taskUrl;
     }
 
     public int getSessionId() {
@@ -120,5 +128,21 @@ public class Session {
 
     public void setSessiontests(SessionTest sessiontests) {
         this.sessiontests = sessiontests;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
+
+    public String getTaskUrl() {
+        return taskUrl;
+    }
+
+    public void setTaskUrl(String taskUrl) {
+        this.taskUrl = taskUrl;
     }
 }
