@@ -2,11 +2,16 @@ package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@Table(name = "userprofile")
+@Table(name = "userprofiles")
+@SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
+
 public class UserProfile {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     private int userId;
 
     @Column(length = 50)
@@ -18,18 +23,26 @@ public class UserProfile {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
-    private boolean hasAccess = false;
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgressSession> userprogresssessions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgressUnit> progressUnits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCourseAccess> usercourseaccess = new ArrayList<>();
 
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, boolean hasAccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> userprogresssessions, List<UserProgressUnit> progressUnits, List<UserCourseAccess> usercourseaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.hasAccess = hasAccess;
+        this.userprogresssessions = userprogresssessions;
+        this.progressUnits = progressUnits;
+        this.usercourseaccess = usercourseaccess;
     }
 
     public int getUserId() {
@@ -64,11 +77,27 @@ public class UserProfile {
         this.passwordHash = passwordHash;
     }
 
-    public boolean isHasAccess() {
-        return hasAccess;
+    public List<UserProgressSession> getUserprogresssessions() {
+        return userprogresssessions;
     }
 
-    public void setHasAccess(boolean hasAccess) {
-        this.hasAccess = hasAccess;
+    public void setUserprogresssessions(List<UserProgressSession> userprogresssessions) {
+        this.userprogresssessions = userprogresssessions;
+    }
+
+    public List<UserProgressUnit> getProgressUnits() {
+        return progressUnits;
+    }
+
+    public void setProgressUnits(List<UserProgressUnit> progressUnits) {
+        this.progressUnits = progressUnits;
+    }
+
+    public List<UserCourseAccess> getUsercourseaccess() {
+        return usercourseaccess;
+    }
+
+    public void setUsercourseaccess(List<UserCourseAccess> usercourseaccess) {
+        this.usercourseaccess = usercourseaccess;
     }
 }

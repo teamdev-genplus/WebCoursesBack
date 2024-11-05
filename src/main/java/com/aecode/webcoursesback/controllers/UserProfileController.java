@@ -33,11 +33,12 @@ public class UserProfileController {
 
     // Autenticación de usuario existente
     @PostMapping("/login")
-    public ResponseEntity<UserProfile> login(@RequestBody LoginDTO dto) {
+    public ResponseEntity<UserProfileDTO> login(@RequestBody LoginDTO dto) {
         UserProfile profile = upS.authenticateUser( dto);
         if (profile != null && profile.getPasswordHash().equals(dto.getPasswordHash())) {
-            dto.setUserId(profile.getUserId());
-            return ResponseEntity.ok(profile); // Devuelve el objeto LoginDTO con el ID de perfil actualizado
+            ModelMapper modelMapper = new ModelMapper(); // Crea una instancia de ModelMapper
+            UserProfileDTO userProfileDTO = modelMapper.map(profile, UserProfileDTO.class); // Mapea de UserProfile a UserProfileDTO
+            return ResponseEntity.ok(userProfileDTO); // Devuelve el objeto LoginDTO con el ID de perfil actualizado
         } else {
             return ResponseEntity.badRequest().body(null); // En caso de credenciales inválidas, puedes devolver null o un objeto vacío
         }
@@ -73,44 +74,4 @@ public class UserProfileController {
         upS.update(p);
     }
 
-    @GetMapping("/searchByEmail")
-    public ResponseEntity<List<UserProfileDTO>> searchByEmail(@RequestParam String emailFragment) {
-        // Buscar los usuarios cuyo email contenga el fragmento proporcionado
-        List<UserProfile> users = upS.findByPartialEmail(emailFragment);
-        List<UserProfileDTO> result = users.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/withAccess")
-    public ResponseEntity<List<UserProfileDTO>> listUsersWithAccess() {
-        List<UserProfile> usersWithAccess = upS.findUsersWithAccess();
-        List<UserProfileDTO> result = usersWithAccess.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
-
-    // Endpoint para listar usuarios con hasAccess = false
-    @GetMapping("/withoutAccess")
-    public ResponseEntity<List<UserProfileDTO>> listUsersWithoutAccess() {
-        List<UserProfile> usersWithoutAccess = upS.findUsersWithoutAccess();
-        List<UserProfileDTO> result = usersWithoutAccess.stream()
-                .map(user -> {
-                    ModelMapper mapper = new ModelMapper();
-                    return mapper.map(user, UserProfileDTO.class);
-                })
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(result);
-    }
 }

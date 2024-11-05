@@ -13,12 +13,4 @@ public interface IUserProfileService {
     public UserProfile listId(int userId);
     public void update(UserProfile userprofile);
     public UserProfile authenticateUser(LoginDTO logindto);
-    public UserProfile findByEmail(String email);
-
-    public List<UserProfile> findByPartialEmail(String partialEmail);
-    // Método para buscar usuarios con hasAccess = true
-    List<UserProfile> findUsersWithAccess();
-
-    // Método para buscar usuarios con hasAccess = false
-    List<UserProfile> findUsersWithoutAccess();
 }
