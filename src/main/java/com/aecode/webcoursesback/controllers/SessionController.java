@@ -145,7 +145,7 @@ public class SessionController {
             // Guardar los cambios en la base de datos
             cS.insert(existingSession);
 
-            return ResponseEntity.ok("Clase actualizada correctamente");
+            return ResponseEntity.ok("Sesion actualizada correctamente");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de documento: " + e.getMessage());
         } catch (Exception e) {
