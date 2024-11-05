@@ -40,7 +40,7 @@ public class SessionController {
             ObjectMapper objectMapper = new ObjectMapper();
             SessionDTO dto= objectMapper.readValue(dtoJson, SessionDTO.class);
 
-            String userUploadDir = uploadDir + File.separator + "class";
+            String userUploadDir = uploadDir + File.separator + "session";
             Path userUploadPath = Paths.get(userUploadDir);
             if (!Files.exists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
@@ -58,10 +58,10 @@ public class SessionController {
             ModelMapper modelMapper = new ModelMapper();
             Session classes = modelMapper.map(dto, Session.class);
             // Establecer la ruta del archivo en la entidad
-            classes.setResourceDocument("class/"+originalFilename);
+            classes.setResourceDocument("/uploads/session/" +originalFilename);
             cS.insert(classes);
 
-            return ResponseEntity.ok("Clase guardado correctamente");
+            return ResponseEntity.ok("Sesión guardado correctamente");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class SessionController {
         return cS.findByTitle(title).stream().map(session -> {
             ModelMapper m = new ModelMapper();
             SessionDTO dto = m.map(session, SessionDTO.class);
-            dto.setHtmlContent(cS.wrapInHtml(session.getResourceText()));
+            dto.setHtmlContent(cS.wrapInHtml(session.getDescription()));
             return dto;
         }).collect(Collectors.toList());
     }
@@ -85,7 +85,7 @@ public class SessionController {
         return cS.list().stream().map(session -> {
             ModelMapper m = new ModelMapper();
             SessionDTO dto = m.map(session, SessionDTO.class);
-            dto.setHtmlContent(cS.wrapInHtml(session.getResourceText()));
+            dto.setHtmlContent(cS.wrapInHtml(session.getDescription()));
             return dto;
         }).collect(Collectors.toList());
     }
@@ -102,7 +102,7 @@ public class SessionController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sesión no encontrada");
         }
         SessionDTO dto = m.map(session, SessionDTO.class);
-        dto.setHtmlContent(cS.wrapInHtml(session.getResourceText())); // aqui se añade el HTML formateado
+        dto.setHtmlContent(cS.wrapInHtml(session.getDescription())); // aqui se añade el HTML formateado
         return dto;
     }
     @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -135,7 +135,7 @@ public class SessionController {
                 Files.write(path, bytes);
 
                 // Actualizar la ruta del documento en la entidad
-                existingSession.setResourceDocument("class/" + originalFilename);
+                existingSession.setResourceDocument("/uploads/session/"+ originalFilename);
             }
 
             // Actualizar otros datos de la clase
