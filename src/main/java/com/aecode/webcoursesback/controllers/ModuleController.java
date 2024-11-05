@@ -1,24 +1,19 @@
 package com.aecode.webcoursesback.controllers;
-
-import com.aecode.webcoursesback.dtos.ClassDTO;
-import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.dtos.TestDTO;
-import com.aecode.webcoursesback.entities.Class;
+import com.aecode.webcoursesback.dtos.RelatedWorkDTO;
+import com.aecode.webcoursesback.dtos.SessionDTO;
+import com.aecode.webcoursesback.dtos.UnitDTO;
 import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IModuleService;
-import com.aecode.webcoursesback.services.IUserProfileService;
+import com.aecode.webcoursesback.services.ISessionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,9 +21,8 @@ import java.util.stream.Collectors;
 public class ModuleController {
     @Autowired
     private IModuleService mS;
-
     @Autowired
-    private IUserProfileService upS;
+    private ISessionService cS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody ModuleDTO dto) {
@@ -39,28 +33,28 @@ public class ModuleController {
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Verificar si el usuario tiene acceso
-        UserProfile user = upS.findByEmail(email);
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access Denied: No access to modules.");
-        }
+    public List<ModuleDTO> list() {
+        ModelMapper modelMapper = new ModelMapper();
+        return mS.list().stream().map(module -> {
+            ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
 
-        ModelMapper m = new ModelMapper();
-        List<ModuleDTO> moduleDTOs = mS.list().stream()
-                .map(module -> {
-                    ModuleDTO dto = m.map(module, ModuleDTO.class);
-                    dto.setClasses(module.getClasses().stream()
-                            .sorted(Comparator.comparing(Class::getClassId))
-                            .map(classEntity -> m.map(classEntity, ClassDTO.class))
-                            .collect(Collectors.toList())); // Usar List para mantener el orden
+            // Mapeo de unidades y sus sesiones
+            moduleDTO.setUnits(module.getUnits().stream().map(unit -> {
+                UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
 
-                    return dto;
-                })
-                .collect(Collectors.toList());
+                // Mapeo de sesiones de la unidad
+                unitDTO.setSessions(unit.getSessions().stream().map(session -> {
+                    SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
+                    // Establecer el contenido HTML
+                    sessionDTO.setHtmlContent(cS.wrapInHtml(session.getDescription()));
+                    return sessionDTO;
+                }).collect(Collectors.toList()));
 
-        return ResponseEntity.ok(moduleDTOs);
+                return unitDTO;
+            }).collect(Collectors.toList()));
 
+            return moduleDTO;
+        }).collect(Collectors.toList());
     }
 
     @DeleteMapping("/{id}")
@@ -68,21 +62,31 @@ public class ModuleController {
 
     @GetMapping("/{id}")
     public ModuleDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m = new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
         Module module = mS.listId(id);
-        ModuleDTO dto = m.map(module, ModuleDTO.class);
 
-        // Mapear el test si existe
-        if (module.getTest() != null) {
-            dto.setTest(m.map(module.getTest(), TestDTO.class));
+        if (module == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Módulo no encontrado");
         }
 
-        dto.setClasses(module.getClasses().stream()
-                .sorted(Comparator.comparing(Class::getClassId)) // Ordenar clases por 'classId'
-                .map(classEntity -> m.map(classEntity, ClassDTO.class)) // Mapear las clases a DTO
-                .collect(Collectors.toList())); // Usar List para garantizar el orden
+        ModuleDTO dto = modelMapper.map(module, ModuleDTO.class);
 
-        return dto; // Devuelve el módulo DTO
+        // Mapeo de unidades y sus sesiones
+        dto.setUnits(module.getUnits().stream().map(unit -> {
+            UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
+
+            // Mapeo de sesiones de la unidad
+            unitDTO.setSessions(unit.getSessions().stream().map(session -> {
+                SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
+                // Establecer el contenido HTML
+                sessionDTO.setHtmlContent(cS.wrapInHtml(session.getDescription()));
+                return sessionDTO;
+            }).collect(Collectors.toList()));
+
+            return unitDTO;
+        }).collect(Collectors.toList()));
+
+        return dto;
     }
     @PutMapping
     public void update(@RequestBody ModuleDTO dto) {

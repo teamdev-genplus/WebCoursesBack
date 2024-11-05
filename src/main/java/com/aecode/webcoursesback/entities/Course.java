@@ -1,32 +1,42 @@
 package com.aecode.webcoursesback.entities;
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "courses")
+@SequenceGenerator(name = "course_seq", sequenceName = "course_sequence", allocationSize = 1)
 public class Course {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_seq")
     private int courseId;
 
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(length = 255)
-    private String image;
+    @Column( length = 255)
+    private String videoUrl;
+
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Module> modules = new HashSet<>();
+    private List<Module> modules = new ArrayList<>();
 
     public Course() {
     }
 
-    public Course(int courseId, String title, String image, Set<Module> modules) {
+    public Course(int courseId, String title, String videoUrl, List<Module> modules) {
         this.courseId = courseId;
         this.title = title;
-        this.image = image;
+        this.videoUrl = videoUrl;
         this.modules = modules;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public int getCourseId() {
@@ -45,19 +55,11 @@ public class Course {
         this.title = title;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Set<Module> getModules() {
+    public List<Module> getModules() {
         return modules;
     }
 
-    public void setModules(Set<Module> modules) {
+    public void setModules(List<Module> modules) {
         this.modules = modules;
     }
 }

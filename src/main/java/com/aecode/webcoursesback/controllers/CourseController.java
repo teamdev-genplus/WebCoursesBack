@@ -1,29 +1,20 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.ClassDTO;
 import com.aecode.webcoursesback.dtos.CourseDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.entities.Class;
+import com.aecode.webcoursesback.dtos.SessionDTO;
+import com.aecode.webcoursesback.dtos.UnitDTO;
+import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.Course;
-import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.ICourseService;
-import com.aecode.webcoursesback.services.IUserProfileService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.aecode.webcoursesback.services.ISessionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,102 +26,85 @@ public class CourseController  {
     private String uploadDir;
     @Autowired
     private ICourseService cS;
+
     @Autowired
-    private IUserProfileService upS;
+    private ISessionService sS;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> insert(@RequestPart(value="file", required = false) MultipartFile imagen,
-                                         @RequestPart(value = "data", required = false) String dtoJson) {
-        String originalFilename = null;
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            CourseDTO dto= objectMapper.readValue(dtoJson, CourseDTO.class);
-
-            String userUploadDir = uploadDir + File.separator + "course";
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
-
-            // Manejo del archivo de script
-            if (imagen != null && !imagen.isEmpty()) {
-                originalFilename = imagen.getOriginalFilename();;
-                byte[] bytes = imagen.getBytes();
-                Path path = userUploadPath.resolve(originalFilename);
-                Files.write(path, bytes);
-            }
-
-            //Convertir DTO a entidad
-            ModelMapper modelMapper = new ModelMapper();
-            Course course = modelMapper.map(dto, Course.class);
-            //Establecer la ruta del archivo en la entidad
-            course.setImage("course/"+originalFilename);
-            cS.insert(course);
-
-            return ResponseEntity.ok("Curso guardado correctamente");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al insertar el objeto en la base de datos: " + e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<String> insert(@RequestBody CourseDTO dto) {
+        ModelMapper m = new ModelMapper();
+        Course c = m.map(dto, Course.class);
+        cS.insert(c);
+        return ResponseEntity.status(201).body("created successfully");
     }
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam String email) {
-        // Buscar al usuario por su email
-        UserProfile user = upS.findByEmail(email);
-        // Verificar si el usuario tiene acceso
-        if (user == null || !user.isHasAccess()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Access Denied: No access to courses.");
-        }
+    public List<CourseDTO> list() {
+        ModelMapper modelMapper = new ModelMapper();
+        return cS.list().stream().map(course -> {
+            CourseDTO courseDTO = modelMapper.map(course, CourseDTO.class);
 
-        ModelMapper m = new ModelMapper();
-        List<CourseDTO> courseDTOs = cS.list().stream()
-                .map(course -> {
-                    CourseDTO dto = m.map(course, CourseDTO.class);
-                    dto.setModules(course.getModules().stream()
-                            .sorted(Comparator.comparing(Module::getModuleId))  // Ordenar por 'moduleId'
-                            .map(module -> {
-                                ModuleDTO moduleDTO = m.map(module, ModuleDTO.class);
-                                // Ordenar las clases por 'classId' dentro de cada módulo
-                                moduleDTO.setClasses(module.getClasses().stream()
-                                        .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
-                                        .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
-                                        .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden
+            // Mapeo de módulos y sus unidades y sesiones
+            courseDTO.setModules(course.getModules().stream().map(module -> {
+                ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
 
-                                return moduleDTO;
-                            })
-                            .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden en módulos
+                // Mapeo de unidades
+                moduleDTO.setUnits(module.getUnits().stream().map(unit -> {
+                    UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
 
-                    return dto;
-                })
-                .collect(Collectors.toList());
+                    // Mapeo de sesiones de la unidad
+                    unitDTO.setSessions(unit.getSessions().stream().map(session -> {
+                        SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
+                        // Establecer el contenido HTML
+                        sessionDTO.setHtmlContent(sS.wrapInHtml(session.getDescription()));
+                        return sessionDTO;
+                    }).collect(Collectors.toList()));
 
-        return ResponseEntity.ok(courseDTOs);
+                    return unitDTO;
+                }).collect(Collectors.toList()));
+
+                return moduleDTO;
+            }).collect(Collectors.toList()));
+
+            return courseDTO;
+        }).collect(Collectors.toList());
     }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Integer id){cS.delete(id);}
 
     @GetMapping("/{id}")
     public CourseDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
         Course course = cS.listId(id);
-        CourseDTO dto = m.map(course, CourseDTO.class);
-        dto.setModules(course.getModules().stream()
-                .sorted(Comparator.comparing(Module::getModuleId))  // Ordenar por 'moduleId'
-                .map(module -> {
-                    ModuleDTO moduleDTO = m.map(module, ModuleDTO.class);
 
-                    // Ordenar las clases por 'classId' dentro de cada módulo
-                    moduleDTO.setClasses(module.getClasses().stream()
-                            .sorted(Comparator.comparing(Class::getClassId))  // Ordenar clases por 'classId'
-                            .map(classEntity -> m.map(classEntity, ClassDTO.class))  // Mapear las clases a DTO
-                            .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden
+        if (course == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado");
+        }
 
-                    return moduleDTO;
-                })
-                .collect(Collectors.toList()));  // Usar ArrayList para garantizar el orden en módulos
+        CourseDTO dto = modelMapper.map(course, CourseDTO.class);
+
+        // Mapeo de módulos y sus unidades y sesiones
+        dto.setModules(course.getModules().stream().map(module -> {
+            ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
+
+            // Mapeo de unidades
+            moduleDTO.setUnits(module.getUnits().stream().map(unit -> {
+                UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
+
+                // Mapeo de sesiones de la unidad
+                unitDTO.setSessions(unit.getSessions().stream().map(session -> {
+                    SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
+                    // Establecer el contenido HTML
+                    sessionDTO.setHtmlContent(sS.wrapInHtml(session.getDescription()));
+                    return sessionDTO;
+                }).collect(Collectors.toList()));
+
+                return unitDTO;
+            }).collect(Collectors.toList()));
+
+            return moduleDTO;
+        }).collect(Collectors.toList()));
 
         return dto;
     }

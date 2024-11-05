@@ -1,14 +1,15 @@
 package com.aecode.webcoursesback.entities;
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "modules")
+@SequenceGenerator(name = "module_seq", sequenceName = "module_sequence", allocationSize = 1)
 public class Module {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "module_seq")
     private int moduleId;
 
     @ManyToOne
@@ -22,21 +23,21 @@ public class Module {
     private int orderNumber;
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Class> classes = new HashSet<>();
+    private List<Unit> units =  new ArrayList<>();
 
     @OneToOne(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Test test;
+    private RelatedWork relatedworks;
 
     public Module() {
     }
 
-    public Module(int moduleId, Course course, String title, int orderNumber, Set<Class> classes, Test test) {
+    public Module(int moduleId, Course course, String title, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
         this.moduleId = moduleId;
         this.course = course;
         this.title = title;
         this.orderNumber = orderNumber;
-        this.classes = classes;
-        this.test = test;
+        this.units = units;
+        this.relatedworks = relatedworks;
     }
 
     public int getModuleId() {
@@ -71,19 +72,19 @@ public class Module {
         this.orderNumber = orderNumber;
     }
 
-    public Set<Class> getClasses() {
-        return classes;
+    public List<Unit> getUnits() {
+        return units;
     }
 
-    public void setClasses(Set<Class> classes) {
-        this.classes = classes;
+    public void setUnits(List<Unit> units) {
+        this.units = units;
     }
 
-    public Test getTest() {
-        return test;
+    public RelatedWork getRelatedworks() {
+        return relatedworks;
     }
 
-    public void setTest(Test test) {
-        this.test = test;
+    public void setRelatedworks(RelatedWork relatedworks) {
+        this.relatedworks = relatedworks;
     }
 }
