@@ -3,12 +3,12 @@ package com.aecode.webcoursesback.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "userprogressunit")
-@SequenceGenerator(name = "progressunit_seq", sequenceName = "progressunit_sequence", allocationSize = 1)
+@Table(name = "userprogressrw")
+@SequenceGenerator(name = "progressrw_seq", sequenceName = "progressrw_sequence", allocationSize = 1)
 
-public class UserProgressUnit {
+public class UserProgressRW {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "progressunit_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "progressrw_seq")
 
     private int progressId;
 
@@ -17,19 +17,19 @@ public class UserProgressUnit {
     private UserProfile userProfile;
 
     @ManyToOne
-    @JoinColumn(name = "unit_id", nullable = false)
-    private Unit unit;
+    @JoinColumn(name = "work_id", nullable = false)
+    private RelatedWork rw;
 
     @Column(nullable = false)
     private boolean isCompleted;
 
-    public UserProgressUnit() {
+    public UserProgressRW() {
     }
 
-    public UserProgressUnit(int progressId, UserProfile userProfile, Unit unit, boolean isCompleted) {
+    public UserProgressRW(int progressId, UserProfile userProfile, RelatedWork rw, boolean isCompleted) {
         this.progressId = progressId;
         this.userProfile = userProfile;
-        this.unit = unit;
+        this.rw = rw;
         this.isCompleted = isCompleted;
     }
 
@@ -49,12 +49,12 @@ public class UserProgressUnit {
         this.userProfile = userProfile;
     }
 
-    public Unit getUnit() {
-        return unit;
+    public RelatedWork getRw() {
+        return rw;
     }
 
-    public void setUnit(Unit unit) {
-        this.unit = unit;
+    public void setRw(RelatedWork rw) {
+        this.rw = rw;
     }
 
     public boolean isCompleted() {

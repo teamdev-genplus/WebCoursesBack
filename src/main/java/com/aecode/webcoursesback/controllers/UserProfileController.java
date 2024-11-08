@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.LoginDTO;
 import com.aecode.webcoursesback.dtos.UserProfileDTO;
+import com.aecode.webcoursesback.dtos.UserProgressRwDTO;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import org.modelmapper.ModelMapper;
@@ -47,9 +48,28 @@ public class UserProfileController {
     // Listado de todos los usuarios
     @GetMapping("/list")
     public List<UserProfileDTO> listUsers() {
-        return upS.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            return m.map(x, UserProfileDTO.class);
+        ModelMapper modelMapper = new ModelMapper();
+
+        return upS.list().stream().map(user -> {
+            // Convertir el usuario al DTO de perfil
+            UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
+
+            // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
+            List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
+                    .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
+                    .map(progress -> {
+                        // Aquí mapeamos el UserProgressRW a UserProgressRwDTO
+                        UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
+                        progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignamos el workId
+
+                        return progressDTO;
+                    })
+                    .collect(Collectors.toList());
+
+            // Actualizamos el DTO de UserProfile con solo los elementos válidos de UserProgressRwDTO
+            userProfileDTO.setUserprogressrw(filteredUserProgressRw);
+
+            return userProfileDTO;
         }).collect(Collectors.toList());
     }
 
