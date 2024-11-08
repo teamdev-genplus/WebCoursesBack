@@ -9,6 +9,7 @@ public class UserProfileDTO {
     private String passwordHash;
     private String rol;
     private List<UserProgressSessionDTO> userprogresssessions;
+    private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
 
     public int getUserId() {
@@ -57,6 +58,14 @@ public class UserProfileDTO {
 
     public void setUserprogresssessions(List<UserProgressSessionDTO> userprogresssessions) {
         this.userprogresssessions = userprogresssessions;
+    }
+
+    public List<UserProgressRwDTO> getUserprogressrw() {
+        return userprogressrw;
+    }
+
+    public void setUserprogressrw(List<UserProgressRwDTO> userprogressrw) {
+        this.userprogressrw = userprogressrw;
     }
 
     public List<UserCourseDTO> getUsercourseaccess() {
