@@ -20,7 +20,6 @@ public class Course {
     @Column( length = 255)
     private String videoUrl;
 
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 

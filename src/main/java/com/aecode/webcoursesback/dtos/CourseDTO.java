@@ -5,6 +5,7 @@ import java.util.List;
 public class CourseDTO {
     private int courseId;
     private String title;
+    private String tag;
     private String videoUrl;
     private List<ModuleDTO> modules;
 
@@ -18,6 +19,14 @@ public class CourseDTO {
 
     public String getTitle() {
         return title;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getVideoUrl() {
