@@ -17,7 +17,7 @@ public class Session {
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String videoUrl;
 
     @Column(columnDefinition = "TEXT")
@@ -26,7 +26,7 @@ public class Session {
     @Column( length = 255)
     private String resourceDocument;
 
-    @Column(nullable = false)
+    @Column()
     private int orderNumber;
 
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
