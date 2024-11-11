@@ -22,7 +22,7 @@ public class Module {
     @Column( length = 255)
     private String videoUrl;
 
-    @Column(nullable = false)
+    @Column()
     private int orderNumber;
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
