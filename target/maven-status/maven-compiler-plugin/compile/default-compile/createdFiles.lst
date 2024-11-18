@@ -27,6 +27,8 @@ com\aecode\webcoursesback\controllers\ModuleController.class
 com\aecode\webcoursesback\controllers\UserCourseController.class
 com\aecode\webcoursesback\servicesimplement\UserProgressSessionServiceImp.class
 com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.class
+com\aecode\webcoursesback\repositories\IUserDetailRepo.class
+com\aecode\webcoursesback\servicesimplement\UserDetailServiceImp.class
 com\aecode\webcoursesback\repositories\IUserProfileRepository.class
 com\aecode\webcoursesback\services\ICourseService.class
 com\aecode\webcoursesback\dtos\CourseDTO.class
@@ -45,6 +47,7 @@ com\aecode\webcoursesback\services\IUserProgressSessionService.class
 com\aecode\webcoursesback\dtos\SessionTestDTO.class
 com\aecode\webcoursesback\servicesimplement\SessionServiceImp.class
 com\aecode\webcoursesback\services\ISessionService.class
+com\aecode\webcoursesback\dtos\UserDetailDTO.class
 com\aecode\webcoursesback\config\CorsConfig.class
 com\aecode\webcoursesback\servicesimplement\UserProgressRwServiceImp.class
 com\aecode\webcoursesback\services\IModuleService.class
@@ -63,8 +66,10 @@ com\aecode\webcoursesback\entities\Unit.class
 com\aecode\webcoursesback\ServletInitializer.class
 com\aecode\webcoursesback\controllers\UnitController.class
 com\aecode\webcoursesback\dtos\SessionAnswerDTO.class
+com\aecode\webcoursesback\services\IUserDetailService.class
 com\aecode\webcoursesback\services\ISessionTestService.class
 com\aecode\webcoursesback\repositories\ISessionRepo.class
+com\aecode\webcoursesback\controllers\UserDetailController.class
 com\aecode\webcoursesback\entities\UserProgressSession.class
 com\aecode\webcoursesback\servicesimplement\CourseServiceImp.class
 com\aecode\webcoursesback\entities\UserProfile.class
