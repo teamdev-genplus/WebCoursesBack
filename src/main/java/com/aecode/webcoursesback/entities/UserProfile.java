@@ -23,8 +23,11 @@ public class UserProfile {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(length = 200)
-    private String rol;
+    @Column(length = 100)
+    private String rol = "Estudiante";
+
+    @Column(length = 100)
+    private String status = "Activo";
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProgressSession> userprogresssessions = new ArrayList<>();
@@ -38,12 +41,13 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, String rol, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
         this.rol = rol;
+        this.status = status;
         this.userprogresssessions = userprogresssessions;
         this.userprogressrw = userprogressrw;
         this.usercourseaccess = usercourseaccess;
@@ -87,6 +91,14 @@ public class UserProfile {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<UserProgressSession> getUserprogresssessions() {

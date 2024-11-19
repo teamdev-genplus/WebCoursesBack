@@ -75,11 +75,36 @@ public class UserProfileController {
 
     // Obtener un usuario por ID
     @GetMapping("/{id}")
-    public UserProfileDTO listId(@PathVariable("id")Integer id) {
-        ModelMapper m=new ModelMapper();
-        UserProfileDTO dto=m.map(upS.listId(id),UserProfileDTO.class);
-        return dto;
+    public UserProfileDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        // Buscar el usuario por ID
+        UserProfile user = upS.listId(id);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado"); // Manejo de error, opcional
+        }
+
+        // Convertir el usuario a UserProfileDTO
+        UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
+
+        // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
+        List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
+                .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
+                .map(progress -> {
+                    // Mapear el UserProgressRW a UserProgressRwDTO
+                    UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
+                    progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignar el workId
+
+                    return progressDTO;
+                })
+                .collect(Collectors.toList());
+
+        // Actualizar el UserProfileDTO con los elementos filtrados
+        userProfileDTO.setUserprogressrw(filteredUserProgressRw);
+
+        return userProfileDTO;
     }
+
 
     // Eliminar un usuario por ID
     @DeleteMapping("/{id}")
