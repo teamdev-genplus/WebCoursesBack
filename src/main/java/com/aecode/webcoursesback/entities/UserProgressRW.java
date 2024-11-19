@@ -23,6 +23,7 @@ public class UserProgressRW {
     @Column(nullable = false)
     private boolean isCompleted;
 
+
     public UserProgressRW() {
     }
 

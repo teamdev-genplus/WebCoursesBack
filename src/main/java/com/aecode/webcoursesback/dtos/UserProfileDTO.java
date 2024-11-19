@@ -8,6 +8,7 @@ public class UserProfileDTO {
     private String email;
     private String passwordHash;
     private String rol;
+    private String status;
     private List<UserProgressSessionDTO> userprogresssessions;
     private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
@@ -50,6 +51,14 @@ public class UserProfileDTO {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public List<UserProgressSessionDTO> getUserprogresssessions() {
