@@ -1,9 +1,12 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
 import com.aecode.webcoursesback.entities.SessionAnswer;
+import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.services.ISessionAnswerService;
+import com.aecode.webcoursesback.services.ISessionTestService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,8 @@ import java.util.stream.Collectors;
 public class SessionAnswerController {
     @Autowired
     private ISessionAnswerService aS;
+    @Autowired
+    private ISessionTestService stS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody SessionAnswerDTO dto) {
@@ -44,11 +49,41 @@ public class SessionAnswerController {
         SessionAnswerDTO dto=m.map(aS.listId(id), SessionAnswerDTO.class);
         return dto;
     }
-    @PutMapping
-    public void update(@RequestBody SessionAnswerDTO dto) {
-        ModelMapper m = new ModelMapper();
-        SessionAnswer a = m.map(dto, SessionAnswer.class);
-        aS.insert(a);
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> update(
+            @PathVariable("id") Integer id,
+            @RequestBody SessionAnswerDTO dto) {
+        try {
+            // Obtener la respuesta existente por ID
+            SessionAnswer existingAnswer = aS.listId(id);
+            if (existingAnswer == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Respuesta no encontrada");
+            }
+
+            // Actualizar campos solo si están presentes en el DTO
+            if (dto.getAnswerText() != null) {
+                existingAnswer.setAnswerText(dto.getAnswerText());
+            }
+            if (dto.isCorrect() != existingAnswer.isCorrect()) {
+                existingAnswer.setCorrect(dto.isCorrect());
+            }
+            if (dto.getTestId() != 0) {
+                // Validar si existe el SessionTest asociado
+                SessionTest sessionTest = stS.listId(dto.getTestId());
+                if (sessionTest == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Test asociado no encontrado");
+                }
+                existingAnswer.setSessiontest(sessionTest);
+            }
+
+            // Guardar los cambios en la base de datos
+            aS.insert(existingAnswer);
+
+            return ResponseEntity.ok("Respuesta actualizada correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la respuesta: " + e.getMessage());
+        }
     }
+
 
 }

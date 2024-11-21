@@ -44,10 +44,33 @@ public class CourseController  {
         CourseDTO dto=m.map(cS.listId(id),CourseDTO.class);
         return dto;
     }
-    @PutMapping
-    public void update(@RequestBody CourseDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Course c = m.map(dto, Course.class);
-        cS.insert(c);
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody CourseDTO courseDTO) {
+        try {
+            // Obtener el curso existente por ID
+            Course existingCourse = cS.listId(id);
+            if (existingCourse == null || existingCourse.getCourseId() == 0) {
+                return ResponseEntity.status(404).body("Curso no encontrado");
+            }
+
+            // Actualizar solo los campos proporcionados en el DTO
+            if (courseDTO.getTitle() != null) {
+                existingCourse.setTitle(courseDTO.getTitle());
+            }
+            if (courseDTO.getTag() != null) {
+                existingCourse.setTag(courseDTO.getTag());
+            }
+            if (courseDTO.getVideoUrl() != null) {
+                existingCourse.setVideoUrl(courseDTO.getVideoUrl());
+            }
+
+            // Guardar los cambios
+            cS.insert(existingCourse);
+
+            return ResponseEntity.ok("Curso actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar el curso: " + e.getMessage());
+        }
     }
+
 }
