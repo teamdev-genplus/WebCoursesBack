@@ -2,7 +2,9 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.SessionDTO;
 import com.aecode.webcoursesback.entities.Session;
+import com.aecode.webcoursesback.entities.Unit;
 import com.aecode.webcoursesback.services.ISessionService;
+import com.aecode.webcoursesback.services.IUnitService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ public class SessionController {
 
     @Autowired
     private ISessionService cS;
+    @Autowired
+    private IUnitService uS;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value="file", required = false) MultipartFile imagen,
@@ -105,54 +109,86 @@ public class SessionController {
         dto.setHtmlContent(cS.wrapInHtml(session.getDescription())); // aqui se añade el HTML formateado
         return dto;
     }
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> update(@RequestPart(value="file", required = false) MultipartFile document,
-                                         @RequestPart(value = "data", required = false) String dtoJson) {
-        String originalFilename = null;
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> update(
+            @PathVariable("id") Integer id,
+            @RequestPart(value = "file", required = false) MultipartFile document,
+            @RequestPart(value = "data", required = false) String dtoJson) {
+
         try {
-            // Convertir el JSON a SessionDTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            SessionDTO dto = objectMapper.readValue(dtoJson, SessionDTO.class);
-
-            // Obtener la clase existente desde la base de datos
-            Session existingSession = cS.listId(dto.getSessionId());
+            // Obtener la sesión existente por ID
+            Session existingSession = cS.listId(id);
             if (existingSession == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clase no encontrada");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sesión no encontrada");
             }
 
-            String userUploadDir = uploadDir + File.separator + "class";
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
+            // Procesar datos enviados en JSON
+            if (dtoJson != null && !dtoJson.isEmpty()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                SessionDTO dto = objectMapper.readValue(dtoJson, SessionDTO.class);
+
+                // Actualizar campos solo si están presentes
+                if (dto.getTitle() != null) {
+                    existingSession.setTitle(dto.getTitle());
+                }
+                if (dto.getVideoUrl() != null) {
+                    existingSession.setVideoUrl(dto.getVideoUrl());
+                }
+                if (dto.getDescription() != null) {
+                    existingSession.setDescription(dto.getDescription());
+                }
+                if (dto.getTaskName() != null) {
+                    existingSession.setTaskName(dto.getTaskName());
+                }
+                if (dto.getTaskUrl() != null) {
+                    existingSession.setTaskUrl(dto.getTaskUrl());
+                }
+                if (dto.getOrderNumber() != 0) {
+                    existingSession.setOrderNumber(dto.getOrderNumber());
+                }
+                if (dto.getUnitId() != 0) {
+                    Unit unit = uS.listId(dto.getUnitId());
+                    if (unit == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unidad asociada no encontrada");
+                    }
+                    existingSession.setUnit(unit);
+                }
             }
 
-            // Manejo del archivo de documento
+            // Procesar archivo opcional
             if (document != null && !document.isEmpty()) {
-                // Si se sube un nuevo documento, reemplazar el documento actual
-                originalFilename = document.getOriginalFilename();
+                String userUploadDir = uploadDir + File.separator + "session";
+                Path userUploadPath = Paths.get(userUploadDir);
+
+                if (!Files.exists(userUploadPath)) {
+                    Files.createDirectories(userUploadPath);
+                }
+
+                // Subir y reemplazar el documento
+                String originalFilename = document.getOriginalFilename();
                 byte[] bytes = document.getBytes();
                 Path path = userUploadPath.resolve(originalFilename);
                 Files.write(path, bytes);
 
-                // Actualizar la ruta del documento en la entidad
-                existingSession.setResourceDocument("/uploads/session/"+ originalFilename);
+                // Actualizar la ruta del documento
+                existingSession.setResourceDocument("/uploads/session/" + originalFilename);
             }
 
-            // Actualizar otros datos de la clase
-            ModelMapper modelMapper = new ModelMapper();
-            modelMapper.map(dto, existingSession);  // Mapear solo los cambios del DTO a la clase existente
-
-            // Guardar los cambios en la base de datos
+            // Guardar la sesión actualizada
             cS.insert(existingSession);
 
-            return ResponseEntity.ok("Sesion actualizada correctamente");
+            return ResponseEntity.ok("Sesión actualizada correctamente");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de documento: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la clase: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la sesión: " + e.getMessage());
         }
     }
 
 
-
+    @GetMapping("/by-course")
+    public List<Session> getSessionsByCourseTitle(@RequestParam("title") String courseTitle) {
+        return cS.findSessionsByCourseTitle(courseTitle);
+    }
+    
 }

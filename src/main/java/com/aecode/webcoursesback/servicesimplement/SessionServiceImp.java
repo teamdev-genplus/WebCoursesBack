@@ -65,4 +65,9 @@ public class SessionServiceImp implements ISessionService {
 
         return htmlBuilder.toString();
     }
+
+    @Override
+    public List<Session> findSessionsByCourseTitle(String courseTitle) {
+        return cR.findSessionsByCourseTitle(courseTitle);
+    }
 }

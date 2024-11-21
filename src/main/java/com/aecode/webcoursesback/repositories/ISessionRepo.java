@@ -13,4 +13,7 @@ public interface ISessionRepo extends JpaRepository<Session,Integer> {
     @Query("SELECT s FROM Session s WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     List<Session> searchByTitle(@Param("title") String title);
 
+    @Query("SELECT s FROM Session s WHERE s.unit.module.course.title LIKE %:courseTitle%")
+    List<Session> findSessionsByCourseTitle(@Param("courseTitle") String courseTitle);
+
 }
