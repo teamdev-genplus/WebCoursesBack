@@ -1,13 +1,17 @@
 package com.aecode.webcoursesback.controllers;
+import com.aecode.webcoursesback.dtos.SessionDTO;
 import com.aecode.webcoursesback.dtos.UnitDTO;
 import com.aecode.webcoursesback.entities.Module;
+import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.Unit;
 import com.aecode.webcoursesback.services.IModuleService;
 import com.aecode.webcoursesback.services.IUnitService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +89,19 @@ public class UnitController {
 
 
     @GetMapping("/by-course")
-    public List<Unit> getUnitsByCourseTitle(@RequestParam("title") String courseTitle) {
-        return uS.findUnitsByCourseTitle(courseTitle);
+    public List<UnitDTO> getUnitsByCourseTitle(@RequestParam("title") String courseTitle) {
+        List<Unit> units = uS.findUnitsByCourseTitle(courseTitle);
+
+        if (units.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron unidades para el curso especificado");
+        }
+
+        // Convertir la lista de sesiones a SessionDTO
+        ModelMapper modelMapper = new ModelMapper();
+        return units.stream().map(unidad -> {
+            UnitDTO dto = modelMapper.map(unidad, UnitDTO.class);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

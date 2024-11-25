@@ -187,8 +187,21 @@ public class SessionController {
 
 
     @GetMapping("/by-course")
-    public List<Session> getSessionsByCourseTitle(@RequestParam("title") String courseTitle) {
-        return cS.findSessionsByCourseTitle(courseTitle);
+    public List<SessionDTO> getSessionsByCourseTitle(@RequestParam("title") String courseTitle) {
+        List<Session> sessions = cS.findSessionsByCourseTitle(courseTitle);
+
+        if (sessions.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron sesiones para el curso especificado");
+        }
+
+        // Convertir la lista de sesiones a SessionDTO
+        ModelMapper modelMapper = new ModelMapper();
+        return sessions.stream().map(session -> {
+            SessionDTO dto = modelMapper.map(session, SessionDTO.class);
+            // Agregar HTML formateado si es necesario
+            dto.setHtmlContent(cS.wrapInHtml(session.getDescription()));
+            return dto;
+        }).collect(Collectors.toList());
     }
     
 }
