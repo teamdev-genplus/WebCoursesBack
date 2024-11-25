@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.controllers;
+import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
 import com.aecode.webcoursesback.dtos.SessionTestDTO;
 import com.aecode.webcoursesback.entities.Session;
+import com.aecode.webcoursesback.entities.SessionAnswer;
 import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.services.ISessionService;
 import com.aecode.webcoursesback.services.ISessionTestService;
@@ -34,13 +36,30 @@ public class SessionTestController {
 
     @GetMapping
     public List<SessionTestDTO> list() {
-        return qS.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            return m.map(x, SessionTestDTO.class);
+        ModelMapper modelMapper = new ModelMapper();
+
+        return qS.list().stream().map(test -> {
+            // Convertir el SessionTest a SessionTestDTO
+            SessionTestDTO dto = modelMapper.map(test, SessionTestDTO.class);
+
+            // Mapear las respuestas asociadas correctamente
+            List<SessionAnswerDTO> mappedAnswers = test.getSessionanswers().stream()
+                    .map(answer -> {
+                        SessionAnswerDTO answerDTO = modelMapper.map(answer, SessionAnswerDTO.class);
+                        answerDTO.setTestId(test.getTestId()); // Asignar el testId manualmente
+                        return answerDTO;
+                    })
+                    .collect(Collectors.toList());
+
+            // Establecer las respuestas mapeadas en el DTO
+            dto.setSessionanswers(mappedAnswers);
+
+            return dto;
         }).collect(Collectors.toList());
     }
 
-        @DeleteMapping("/{id}")
+
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")Integer id){qS.delete(id);}
 
     @GetMapping("/{id}")

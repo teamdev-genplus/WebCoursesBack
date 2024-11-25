@@ -1,7 +1,6 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
-import com.aecode.webcoursesback.entities.SessionAnswer;
-import com.aecode.webcoursesback.entities.SessionTest;
+import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.services.ISessionAnswerService;
 import com.aecode.webcoursesback.services.ISessionTestService;
 import org.modelmapper.ModelMapper;
@@ -24,9 +23,22 @@ public class SessionAnswerController {
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody SessionAnswerDTO dto) {
         ModelMapper m = new ModelMapper();
-        SessionAnswer s = m.map(dto, SessionAnswer.class);
-        aS.insert(s);
-        return ResponseEntity.status(201).body("created successfully");
+
+        SessionTest stest = stS.listId(dto.getTestId());
+
+        if (stest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Test no encontrado");
+        }
+        // Mapear el DTO a la entidad
+        SessionAnswer sanswer = new SessionAnswer();
+        sanswer.setSessiontest(stest);
+        sanswer.setAnswerText(dto.getAnswerText());
+        sanswer.setCorrect(dto.isCorrect());
+
+        // Guardar en la base de datos
+        aS.insert(sanswer);
+
+        return ResponseEntity.ok("Respuesta guardado correctamente");
     }
 
     @GetMapping
