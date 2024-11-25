@@ -40,6 +40,13 @@ public class SessionServiceImp implements ISessionService {
 
     @Override
     public String wrapInHtml(String resourceText) {
+        // Validación para manejar valores nulos o vacíos
+        if (resourceText == null || resourceText.trim().isEmpty()) {
+            // Si el texto está vacío o es nulo, devolvemos un HTML vacío o un mensaje predeterminado
+            return "<p></p>";
+        }
+
+        // Construcción del HTML para contenido válido
         StringBuilder htmlBuilder = new StringBuilder();
         htmlBuilder.append("<!DOCTYPE html>");
         htmlBuilder.append("<html lang='es'>");
@@ -57,7 +64,7 @@ public class SessionServiceImp implements ISessionService {
         // Agrega cada párrafo con un tag <p>
         String[] paragraphs = resourceText.split("\n\n");
         for (String paragraph : paragraphs) {
-            htmlBuilder.append("<p>").append(paragraph).append("</p>");
+            htmlBuilder.append("<p>").append(paragraph.trim()).append("</p>");
         }
 
         htmlBuilder.append("</body>");
@@ -65,6 +72,7 @@ public class SessionServiceImp implements ISessionService {
 
         return htmlBuilder.toString();
     }
+
 
     @Override
     public List<Session> findSessionsByCourseTitle(String courseTitle) {
