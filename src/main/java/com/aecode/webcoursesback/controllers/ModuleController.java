@@ -6,8 +6,11 @@ import com.aecode.webcoursesback.services.ICourseService;
 import com.aecode.webcoursesback.services.IModuleService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +81,19 @@ public class ModuleController {
     }
 
     @GetMapping("/by-course")
-    public List<Module> getModulesByCourseTitle(@RequestParam("title") String courseTitle) {
-        return mS.findModulesByCourseTitle(courseTitle);
+    public List<ModuleDTO> getModulesByCourseTitle(@RequestParam("title") String courseTitle) {
+        List<Module> modules = mS.findModulesByCourseTitle(courseTitle);
+
+        if (modules.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron modulos para el curso especificado");
+        }
+
+        // Convertir la lista de sesiones a SessionDTO
+        ModelMapper modelMapper = new ModelMapper();
+        return modules.stream().map(module -> {
+            ModuleDTO dto = modelMapper.map(module, ModuleDTO.class);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
