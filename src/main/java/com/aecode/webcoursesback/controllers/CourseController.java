@@ -1,20 +1,12 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.CourseDTO;
-import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.dtos.SessionDTO;
-import com.aecode.webcoursesback.dtos.UnitDTO;
 import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.Course;
-import com.aecode.webcoursesback.services.ICourseService;
-import com.aecode.webcoursesback.services.ISessionService;
-import org.modelmapper.ModelMapper;
+import com.aecode.webcoursesback.services.ICourseService;import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,9 +19,6 @@ public class CourseController  {
     @Autowired
     private ICourseService cS;
 
-    @Autowired
-    private ISessionService sS;
-
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody CourseDTO dto) {
         ModelMapper m = new ModelMapper();
@@ -40,33 +29,9 @@ public class CourseController  {
 
     @GetMapping
     public List<CourseDTO> list() {
-        ModelMapper modelMapper = new ModelMapper();
-        return cS.list().stream().map(course -> {
-            CourseDTO courseDTO = modelMapper.map(course, CourseDTO.class);
-
-            // Mapeo de módulos y sus unidades y sesiones
-            courseDTO.setModules(course.getModules().stream().map(module -> {
-                ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
-
-                // Mapeo de unidades
-                moduleDTO.setUnits(module.getUnits().stream().map(unit -> {
-                    UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
-
-                    // Mapeo de sesiones de la unidad
-                    unitDTO.setSessions(unit.getSessions().stream().map(session -> {
-                        SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
-                        // Establecer el contenido HTML
-                        sessionDTO.setHtmlContent(sS.wrapInHtml(session.getDescription()));
-                        return sessionDTO;
-                    }).collect(Collectors.toList()));
-
-                    return unitDTO;
-                }).collect(Collectors.toList()));
-
-                return moduleDTO;
-            }).collect(Collectors.toList()));
-
-            return courseDTO;
+        return cS.list().stream().map(x -> {
+            ModelMapper m = new ModelMapper();
+            return m.map(x, CourseDTO.class);
         }).collect(Collectors.toList());
     }
 
@@ -75,43 +40,37 @@ public class CourseController  {
 
     @GetMapping("/{id}")
     public CourseDTO listId(@PathVariable("id")Integer id){
-        ModelMapper modelMapper = new ModelMapper();
-        Course course = cS.listId(id);
-
-        if (course == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado");
-        }
-
-        CourseDTO dto = modelMapper.map(course, CourseDTO.class);
-
-        // Mapeo de módulos y sus unidades y sesiones
-        dto.setModules(course.getModules().stream().map(module -> {
-            ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
-
-            // Mapeo de unidades
-            moduleDTO.setUnits(module.getUnits().stream().map(unit -> {
-                UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
-
-                // Mapeo de sesiones de la unidad
-                unitDTO.setSessions(unit.getSessions().stream().map(session -> {
-                    SessionDTO sessionDTO = modelMapper.map(session, SessionDTO.class);
-                    // Establecer el contenido HTML
-                    sessionDTO.setHtmlContent(sS.wrapInHtml(session.getDescription()));
-                    return sessionDTO;
-                }).collect(Collectors.toList()));
-
-                return unitDTO;
-            }).collect(Collectors.toList()));
-
-            return moduleDTO;
-        }).collect(Collectors.toList()));
-
+        ModelMapper m=new ModelMapper();
+        CourseDTO dto=m.map(cS.listId(id),CourseDTO.class);
         return dto;
     }
-    @PutMapping
-    public void update(@RequestBody CourseDTO dto) {
-        ModelMapper m = new ModelMapper();
-        Course c = m.map(dto, Course.class);
-        cS.insert(c);
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody CourseDTO courseDTO) {
+        try {
+            // Obtener el curso existente por ID
+            Course existingCourse = cS.listId(id);
+            if (existingCourse == null || existingCourse.getCourseId() == 0) {
+                return ResponseEntity.status(404).body("Curso no encontrado");
+            }
+
+            // Actualizar solo los campos proporcionados en el DTO
+            if (courseDTO.getTitle() != null) {
+                existingCourse.setTitle(courseDTO.getTitle());
+            }
+            if (courseDTO.getTag() != null) {
+                existingCourse.setTag(courseDTO.getTag());
+            }
+            if (courseDTO.getVideoUrl() != null) {
+                existingCourse.setVideoUrl(courseDTO.getVideoUrl());
+            }
+
+            // Guardar los cambios
+            cS.insert(existingCourse);
+
+            return ResponseEntity.ok("Curso actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar el curso: " + e.getMessage());
+        }
     }
+
 }

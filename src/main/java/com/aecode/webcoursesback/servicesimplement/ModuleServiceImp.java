@@ -33,4 +33,9 @@ public class ModuleServiceImp implements IModuleService {
     public Module listId(int moduleId) {
         return mR.findById(moduleId).orElse(new Module());
     }
+
+    @Override
+    public List<Module> findModulesByCourseTitle(String courseTitle) {
+        return mR.findModulesByCourseTitle(courseTitle);
+    }
 }

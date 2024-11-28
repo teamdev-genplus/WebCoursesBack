@@ -33,4 +33,9 @@ public class UnitServiceImp implements IUnitService {
     public Unit listId(int unitId) {
         return uR.findById(unitId).orElse(new Unit());
     }
+
+    @Override
+    public List<Unit> findUnitsByCourseTitle(String courseTitle) {
+        return uR.findUnitsByCourseTitle(courseTitle);
+    }
 }

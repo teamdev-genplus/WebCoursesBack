@@ -11,4 +11,6 @@ public interface ISessionService {
     public Session listId(int classId);
     List<Session> findByTitle(String title);
     public String wrapInHtml(String resourceText);
+    List<Session> findSessionsByCourseTitle(String courseTitle);
+
 }

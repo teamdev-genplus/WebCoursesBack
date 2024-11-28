@@ -40,21 +40,42 @@ public class SessionServiceImp implements ISessionService {
 
     @Override
     public String wrapInHtml(String resourceText) {
-        if (resourceText == null) {
-            // Retorna un HTML vacío o un mensaje indicando que no hay contenido
-            return "<p class=\"parrafo\">No hay contenido disponible</p>";
+        // Validación para manejar valores nulos o vacíos
+        if (resourceText == null || resourceText.trim().isEmpty()) {
+            // Si el texto está vacío o es nulo, devolvemos un HTML vacío o un mensaje predeterminado
+            return "<p></p>";
         }
 
+        // Construcción del HTML para contenido válido
         StringBuilder htmlBuilder = new StringBuilder();
-        String[] paragraphs = resourceText.split("\n\n");
+        htmlBuilder.append("<!DOCTYPE html>");
+        htmlBuilder.append("<html lang='es'>");
+        htmlBuilder.append("<head>");
+        htmlBuilder.append("<meta charset='UTF-8'>");
+        htmlBuilder.append("<title>Descripción de la Sesión</title>");
+        htmlBuilder.append("<link href='https://fonts.googleapis.com/css?family=Plus+Jakarta+Sans&display=swap' rel='stylesheet'>");
+        htmlBuilder.append("<style>");
+        htmlBuilder.append("body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #000; line-height: 24px; text-align: justify; font-style: normal; font-weight: 300; }");
+        htmlBuilder.append("p { margin-bottom: 15px; }");
+        htmlBuilder.append("</style>");
+        htmlBuilder.append("</head>");
+        htmlBuilder.append("<body>");
 
-        // Construcción del contenido de párrafos con la clase "parrafo" en cada <p>
+        // Agrega cada párrafo con un tag <p>
+        String[] paragraphs = resourceText.split("\n\n");
         for (String paragraph : paragraphs) {
-            htmlBuilder.append("<p class=\"parrafo\">")
-                    .append(paragraph.trim()).append("</p>");
+            htmlBuilder.append("<p>").append(paragraph.trim()).append("</p>");
         }
+
+        htmlBuilder.append("</body>");
+        htmlBuilder.append("</html>");
 
         return htmlBuilder.toString();
     }
 
+
+    @Override
+    public List<Session> findSessionsByCourseTitle(String courseTitle) {
+        return cR.findSessionsByCourseTitle(courseTitle);
+    }
 }

@@ -25,8 +25,8 @@ public class Session {
 
     @Column( length = 255)
     private String resourceDocument;
- 
-    @Column(nullable = false)
+
+    @Column()
     private int orderNumber;
 
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)

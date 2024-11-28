@@ -7,7 +7,10 @@ public class UserProfileDTO {
     private String fullname;
     private String email;
     private String passwordHash;
+    private String rol;
+    private String status;
     private List<UserProgressSessionDTO> userprogresssessions;
+    private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
 
     public int getUserId() {
@@ -42,12 +45,36 @@ public class UserProfileDTO {
         this.passwordHash = passwordHash;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
     public List<UserProgressSessionDTO> getUserprogresssessions() {
         return userprogresssessions;
     }
 
     public void setUserprogresssessions(List<UserProgressSessionDTO> userprogresssessions) {
         this.userprogresssessions = userprogresssessions;
+    }
+
+    public List<UserProgressRwDTO> getUserprogressrw() {
+        return userprogressrw;
+    }
+
+    public void setUserprogressrw(List<UserProgressRwDTO> userprogressrw) {
+        this.userprogressrw = userprogressrw;
     }
 
     public List<UserCourseDTO> getUsercourseaccess() {
