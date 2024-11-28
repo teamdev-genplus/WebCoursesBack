@@ -19,7 +19,10 @@ public class Module {
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(nullable = false)
+    @Column( length = 255)
+    private String videoUrl;
+
+    @Column()
     private int orderNumber;
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -31,10 +34,11 @@ public class Module {
     public Module() {
     }
 
-    public Module(int moduleId, Course course, String title, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
+    public Module(int moduleId, Course course, String title, String videoUrl, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
         this.moduleId = moduleId;
         this.course = course;
         this.title = title;
+        this.videoUrl = videoUrl;
         this.orderNumber = orderNumber;
         this.units = units;
         this.relatedworks = relatedworks;
@@ -62,6 +66,14 @@ public class Module {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public int getOrderNumber() {

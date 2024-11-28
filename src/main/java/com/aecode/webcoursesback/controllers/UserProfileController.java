@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.LoginDTO;
 import com.aecode.webcoursesback.dtos.UserProfileDTO;
+import com.aecode.webcoursesback.dtos.UserProgressRwDTO;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import org.modelmapper.ModelMapper;
@@ -47,19 +48,63 @@ public class UserProfileController {
     // Listado de todos los usuarios
     @GetMapping("/list")
     public List<UserProfileDTO> listUsers() {
-        return upS.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            return m.map(x, UserProfileDTO.class);
+        ModelMapper modelMapper = new ModelMapper();
+
+        return upS.list().stream().map(user -> {
+            // Convertir el usuario al DTO de perfil
+            UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
+
+            // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
+            List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
+                    .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
+                    .map(progress -> {
+                        // Aquí mapeamos el UserProgressRW a UserProgressRwDTO
+                        UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
+                        progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignamos el workId
+
+                        return progressDTO;
+                    })
+                    .collect(Collectors.toList());
+
+            // Actualizamos el DTO de UserProfile con solo los elementos válidos de UserProgressRwDTO
+            userProfileDTO.setUserprogressrw(filteredUserProgressRw);
+
+            return userProfileDTO;
         }).collect(Collectors.toList());
     }
 
     // Obtener un usuario por ID
     @GetMapping("/{id}")
-    public UserProfileDTO listId(@PathVariable("id")Integer id) {
-        ModelMapper m=new ModelMapper();
-        UserProfileDTO dto=m.map(upS.listId(id),UserProfileDTO.class);
-        return dto;
+    public UserProfileDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        // Buscar el usuario por ID
+        UserProfile user = upS.listId(id);
+        if (user == null) {
+            throw new RuntimeException("Usuario no encontrado"); // Manejo de error, opcional
+        }
+
+        // Convertir el usuario a UserProfileDTO
+        UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
+
+        // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
+        List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
+                .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
+                .map(progress -> {
+                    // Mapear el UserProgressRW a UserProgressRwDTO
+                    UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
+                    progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignar el workId
+
+                    return progressDTO;
+                })
+                .collect(Collectors.toList());
+
+        // Actualizar el UserProfileDTO con los elementos filtrados
+        userProfileDTO.setUserprogressrw(filteredUserProgressRw);
+
+        return userProfileDTO;
     }
+
 
     // Eliminar un usuario por ID
     @DeleteMapping("/{id}")
@@ -67,11 +112,40 @@ public class UserProfileController {
 
 
     // Actualizar un usuario
-    @PutMapping
-    public void update(@RequestBody UserProfileDTO dto) {
-        ModelMapper m = new ModelMapper();
-        UserProfile p = m.map(dto, UserProfile.class);
-        upS.update(p);
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody UserProfileDTO userProfileDTO) {
+        try {
+            // Buscar el usuario existente
+            UserProfile existingUser = upS.listId(id);
+            if (existingUser == null || existingUser.getUserId() == 0) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            }
+
+            // Actualizar solo los campos proporcionados en el DTO
+            if (userProfileDTO.getFullname() != null) {
+                existingUser.setFullname(userProfileDTO.getFullname());
+            }
+            if (userProfileDTO.getEmail() != null) {
+                existingUser.setEmail(userProfileDTO.getEmail());
+            }
+            if (userProfileDTO.getPasswordHash() != null) {
+                existingUser.setPasswordHash(userProfileDTO.getPasswordHash());
+            }
+            if (userProfileDTO.getRol() != null) {
+                existingUser.setRol(userProfileDTO.getRol());
+            }
+            if (userProfileDTO.getStatus() != null) {
+                existingUser.setStatus(userProfileDTO.getStatus());
+            }
+
+            // Guardar los cambios
+            upS.update(existingUser);
+
+            return ResponseEntity.ok("Usuario actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el usuario: " + e.getMessage());
+        }
     }
+
 
 }

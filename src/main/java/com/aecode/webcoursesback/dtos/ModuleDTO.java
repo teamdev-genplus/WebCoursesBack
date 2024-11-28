@@ -1,15 +1,11 @@
 package com.aecode.webcoursesback.dtos;
-
-import com.aecode.webcoursesback.entities.RelatedWork;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 public class ModuleDTO {
     private int moduleId;
     private int courseId;
     private String title;
+    private String videoUrl;
     private int orderNumber;
     private List<UnitDTO> units;
     private RelatedWorkDTO relatedworks;
@@ -36,6 +32,14 @@ public class ModuleDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public int getOrderNumber() {

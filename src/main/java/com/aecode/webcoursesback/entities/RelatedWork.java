@@ -2,6 +2,9 @@ package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "relatedworks")
 @SequenceGenerator(name = "work_seq", sequenceName = "work_sequence", allocationSize = 1)
@@ -21,14 +24,18 @@ public class RelatedWork {
     @Column(nullable = false, length = 255)
     private String title;
 
+    @OneToMany(mappedBy = "rw", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProgressRW> userprogressrw = new ArrayList<>();
+
     public RelatedWork() {
     }
 
-    public RelatedWork(int workId, Module module, String formUrl, String title) {
+    public RelatedWork(int workId, Module module, String formUrl, String title, List<UserProgressRW> userprogressrw) {
         this.workId = workId;
         this.module = module;
         this.formUrl = formUrl;
         this.title = title;
+        this.userprogressrw = userprogressrw;
     }
 
     public int getWorkId() {
@@ -62,4 +69,13 @@ public class RelatedWork {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public List<UserProgressRW> getUserprogressrw() {
+        return userprogressrw;
+    }
+
+    public void setUserprogressrw(List<UserProgressRW> userprogressrw) {
+        this.userprogressrw = userprogressrw;
+    }
+
 }

@@ -22,7 +22,7 @@ public class Unit {
     @Column(length = 255)
     private String videoUrl;
 
-    @Column(nullable = false)
+    @Column()
     private int orderNumber;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)

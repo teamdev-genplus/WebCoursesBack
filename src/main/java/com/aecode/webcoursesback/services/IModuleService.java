@@ -9,4 +9,6 @@ public interface IModuleService {
     List<Module> list();
     public void delete(int moduleId);
     public Module listId(int moduleId);
+    List<Module> findModulesByCourseTitle(String courseTitle);
+
 }

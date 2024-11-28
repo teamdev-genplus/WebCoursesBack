@@ -23,6 +23,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
         userProfile.setFullname(userdto.getFullname());
         userProfile.setEmail(userdto.getEmail());
         userProfile.setPasswordHash(userdto.getPasswordHash());
+        userProfile.setRol(userdto.getRol());
         upR.save(userProfile);
     }
 

@@ -23,11 +23,17 @@ public class UserProfile {
     @Column(nullable = false)
     private String passwordHash;
 
+    @Column(length = 100)
+    private String rol = "Estudiante";
+
+    @Column(length = 100)
+    private String status = "Activo";
+
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProgressSession> userprogresssessions = new ArrayList<>();
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserProgressUnit> progressUnits = new ArrayList<>();
+    private List<UserProgressRW> userprogressrw = new ArrayList<>();
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourseAccess> usercourseaccess = new ArrayList<>();
@@ -35,13 +41,15 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, List<UserProgressSession> userprogresssessions, List<UserProgressUnit> progressUnits, List<UserCourseAccess> usercourseaccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.rol = rol;
+        this.status = status;
         this.userprogresssessions = userprogresssessions;
-        this.progressUnits = progressUnits;
+        this.userprogressrw = userprogressrw;
         this.usercourseaccess = usercourseaccess;
     }
 
@@ -77,6 +85,22 @@ public class UserProfile {
         this.passwordHash = passwordHash;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public List<UserProgressSession> getUserprogresssessions() {
         return userprogresssessions;
     }
@@ -85,12 +109,12 @@ public class UserProfile {
         this.userprogresssessions = userprogresssessions;
     }
 
-    public List<UserProgressUnit> getProgressUnits() {
-        return progressUnits;
+    public List<UserProgressRW> getUserprogressrw() {
+        return userprogressrw;
     }
 
-    public void setProgressUnits(List<UserProgressUnit> progressUnits) {
-        this.progressUnits = progressUnits;
+    public void setUserprogressrw(List<UserProgressRW> userprogressrw) {
+        this.userprogressrw = userprogressrw;
     }
 
     public List<UserCourseAccess> getUsercourseaccess() {
@@ -100,4 +124,5 @@ public class UserProfile {
     public void setUsercourseaccess(List<UserCourseAccess> usercourseaccess) {
         this.usercourseaccess = usercourseaccess;
     }
+
 }

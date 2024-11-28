@@ -14,9 +14,11 @@ public class Course {
     @Column(nullable = false, length = 255)
     private String title;
 
+    @Column(length = 255)
+    private String tag;
+
     @Column( length = 255)
     private String videoUrl;
-
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
@@ -24,9 +26,10 @@ public class Course {
     public Course() {
     }
 
-    public Course(int courseId, String title, String videoUrl, List<Module> modules) {
+    public Course(int courseId, String title, String tag, String videoUrl, List<Module> modules) {
         this.courseId = courseId;
         this.title = title;
+        this.tag = tag;
         this.videoUrl = videoUrl;
         this.modules = modules;
     }
@@ -53,6 +56,14 @@ public class Course {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public List<Module> getModules() {

@@ -8,4 +8,7 @@ public interface IUnitService {
     List<Unit> list();
     public void delete(int unitId);
     public Unit listId(int unitId);
+
+    List<Unit> findUnitsByCourseTitle(String courseTitle);
+
 }
