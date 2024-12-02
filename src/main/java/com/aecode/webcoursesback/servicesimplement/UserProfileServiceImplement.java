@@ -55,4 +55,18 @@ public class UserProfileServiceImplement implements IUserProfileService {
         }
         return null;
     }
+
+    @Override
+    public void changePassword(int userId, String currentPassword, String newPassword) {
+        // Validar que la contraseña actual es correcta
+        boolean isCurrentPasswordValid = upR.validateCurrentPassword(userId, currentPassword);
+        if (!isCurrentPasswordValid) {
+            throw new IllegalArgumentException("La contraseña actual es incorrecta");
+        }
+
+        // Buscar el usuario y actualizar la contraseña
+        UserProfile user = upR.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        user.setPasswordHash(newPassword); // Reemplaza esto por encriptación si es necesario
+        upR.save(user); // Guarda los cambios
+    }
 }

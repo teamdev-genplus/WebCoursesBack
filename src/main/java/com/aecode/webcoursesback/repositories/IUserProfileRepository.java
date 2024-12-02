@@ -20,4 +20,9 @@ public interface IUserProfileRepository extends JpaRepository<UserProfile, Integ
     @Query("SELECT u FROM UserProfile u WHERE u.email LIKE %?1%")
     List<UserProfile> findByEmailContaining(String partialEmail);
 
+    // Verificar si la contraseña actual es correcta
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
+            "FROM UserProfile u WHERE u.userId = :userId AND u.passwordHash = :currentPassword")
+    boolean validateCurrentPassword(@Param("userId") int userId, @Param("currentPassword") String currentPassword);
+
 }
