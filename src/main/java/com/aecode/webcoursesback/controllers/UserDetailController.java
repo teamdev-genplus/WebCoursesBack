@@ -1,9 +1,6 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
 import com.aecode.webcoursesback.dtos.UserDetailDTO;
-import com.aecode.webcoursesback.entities.SessionAnswer;
-import com.aecode.webcoursesback.entities.UserDetail;
-import com.aecode.webcoursesback.entities.UserProfile;
+import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.services.IUserDetailService;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -135,56 +132,67 @@ public class UserDetailController {
         return dto;
     }
 
-    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> updatePartial(@RequestPart(value = "file", required = false) MultipartFile document,
-                                                @RequestPart(value = "data", required = false) String dtoJson) {
-        String originalFilename = null;
-        try {
-            // Convertir el JSON a UserDetailDTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            UserDetailDTO dto = objectMapper.readValue(dtoJson, UserDetailDTO.class);
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> update(
+            @PathVariable("id") Integer id,
+            @RequestPart(value = "file", required = false) MultipartFile picture,
+            @RequestPart(value = "data", required = false) String dtoJson) {
 
-            // Obtener la clase existente desde la base de datos
-            UserDetail existingUserDetail = udS.listId(dto.getDetailsId());
-            if (existingUserDetail == null) {
+        try {
+            // Obtener el UserDetail existente por ID
+            UserDetail existingUDetail = udS.listId(id);
+            if (existingUDetail == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Información del usuario no encontrada");
             }
 
-            // Manejo del archivo de documento (si es que se ha subido uno)
-            if (document != null && !document.isEmpty()) {
-                // Si se sube un nuevo documento, reemplazar el documento actual
-                originalFilename = document.getOriginalFilename();
-                byte[] bytes = document.getBytes();
-                Path path = Paths.get(uploadDir + File.separator + "userdetail").resolve(originalFilename);
+            UserProfile userProfile = existingUDetail.getUserProfile();
+
+            // Procesar datos enviados en JSON
+            if (dtoJson != null && !dtoJson.isEmpty()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                UserDetailDTO dto = objectMapper.readValue(dtoJson, UserDetailDTO.class);
+
+                // Actualizar campos del DTO
+                if (dto.getUserId() != 0 && dto.getUserId() != userProfile.getUserId()) {
+                    UserProfile newUserProfile = upS.listId(dto.getUserId());
+                    if (newUserProfile == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario asociado no encontrado");
+                    }
+                    existingUDetail.setUserProfile(newUserProfile);
+                    userProfile = newUserProfile; // Actualizar el perfil para usarlo en la ruta de la imagen
+                }
+
+                if (dto.getProfilepicture() != null) {
+                    existingUDetail.setProfilepicture(dto.getProfilepicture());
+                }
+            }
+
+            // Procesar archivo de imagen opcional
+            if (picture != null && !picture.isEmpty()) {
+                String userUploadDir = uploadDir + File.separator + "userdetail" + File.separator + userProfile.getUserId();
+                Path userUploadPath = Paths.get(userUploadDir);
+
+                if (!Files.exists(userUploadPath)) {
+                    Files.createDirectories(userUploadPath);
+                }
+
+                String originalFilename = picture.getOriginalFilename();
+                byte[] bytes = picture.getBytes();
+                Path path = userUploadPath.resolve(originalFilename);
                 Files.write(path, bytes);
 
-                // Actualizar la ruta del documento en la entidad
-                existingUserDetail.setProfilepicture("/uploads/userdetail/" + originalFilename);
+                // Actualizar la ruta de la imagen
+                existingUDetail.setProfilepicture("/uploads/userdetail/" + userProfile.getUserId() + "/" + originalFilename);
             }
 
-            // Actualizar parcialmente los campos del UserDetail (si están presentes en el DTO)
-            if (dto.getUserId() != 0) {
-                // Buscar el UserProfile y asignarlo
-                UserProfile userProfile = upS.listId(dto.getUserId());
-                if (userProfile == null) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no encontrado con el ID proporcionado");
-                }
-                existingUserDetail.setUserProfile(userProfile);
-            }
-
-            // Actualizar otros campos de la entidad si se proporcionan en el DTO
-            if (dto.getProfilepicture() != null) {
-                existingUserDetail.setProfilepicture(dto.getProfilepicture());
-            }
-
-            // Guardar los cambios en la base de datos
-            udS.insert(existingUserDetail);
+            // Guardar la información actualizada en la base de datos
+            udS.insert(existingUDetail);
 
             return ResponseEntity.ok("Información del usuario actualizada correctamente");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de documento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la clase: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la información del usuario: " + e.getMessage());
         }
     }
 
