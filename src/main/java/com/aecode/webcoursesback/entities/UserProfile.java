@@ -39,7 +39,7 @@ public class UserProfile {
     private String experience;
 
     @Column(length = 100)
-    private String rol = "Estudiante";
+    private String rol = "user";
 
     @Column(length = 100)
     private String status = "Activo";
