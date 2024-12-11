@@ -16,7 +16,7 @@ public class FreqQuest {
     private String questionText;
 
     @ManyToMany(mappedBy = "freqquests")
-    private List<Course> courses;
+    private List<SecondaryCourses> secondary_courses;
 
     @Column(length = 255)
     private String answerText;
@@ -24,11 +24,19 @@ public class FreqQuest {
     public FreqQuest() {
     }
 
-    public FreqQuest(int freqquestId, String questionText, List<Course> courses, String answerText) {
+    public FreqQuest(int freqquestId, String questionText, List<SecondaryCourses> secondary_courses, String answerText) {
         this.freqquestId = freqquestId;
         this.questionText = questionText;
-        this.courses = courses;
+        this.secondary_courses = secondary_courses;
         this.answerText = answerText;
+    }
+
+    public List<SecondaryCourses> getSecondary_courses() {
+        return secondary_courses;
+    }
+
+    public void setSecondary_courses(List<SecondaryCourses> secondary_courses) {
+        this.secondary_courses = secondary_courses;
     }
 
     public int getFreqquestId() {
@@ -45,14 +53,6 @@ public class FreqQuest {
 
     public void setQuestionText(String questionText) {
         this.questionText = questionText;
-    }
-
-    public List<Course> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(List<Course> courses) {
-        this.courses = courses;
     }
 
     public String getAnswerText() {
