@@ -61,13 +61,9 @@ public class SecondaryCourses {
         )
         private List<Tool> tools;
 
-        @ManyToMany
-        @JoinTable(
-            name = "secondcourse_studyplans",
-            joinColumns = @JoinColumn(name = "seccourse_id"),
-            inverseJoinColumns = @JoinColumn(name = "studyplan_id")
-    )
-    private List<StudyPlan> studyplans;
+        @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<StudyPlan> studyplans = new ArrayList<>();
+
 
         @ManyToMany
         @JoinTable(

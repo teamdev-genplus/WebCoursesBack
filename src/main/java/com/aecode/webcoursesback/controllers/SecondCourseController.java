@@ -265,17 +265,6 @@ public class SecondCourseController {
                             }).collect(Collectors.toList());
                     existingCourse.setFreqquests(freqquests);
                 }
-
-                // Actualizar el plan de estudio del curso
-                if (courseDTO.getStudyplanIds() != null) {
-                    List<StudyPlan> studyPlans = courseDTO.getStudyplanIds().stream()
-                            .map(studyplanId -> {
-                                StudyPlan studyPlan = new StudyPlan();
-                                studyPlan.setStudyplanId(studyplanId); // Solo asignamos el ID aquí
-                                return studyPlan;
-                            }).collect(Collectors.toList());
-                    existingCourse.setStudyplans(studyPlans);
-                }
             }
 
 

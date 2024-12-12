@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.dtos;
-
-import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
-import com.aecode.webcoursesback.entities.StudyPlan;
 
 import java.util.List;
 
@@ -17,7 +14,9 @@ public class SecondCourseDTO {
     // Usado para POST/PATCH: IDs solamente
     private List<Integer> toolIds;
     private List<Integer> freqquestIds;
-    private List<Integer> studyplanIds;
+
+
+    private List<StudyPlanDTO> studyplans;
 
 
     // Usado para GET: objetos completos
@@ -34,12 +33,12 @@ public class SecondCourseDTO {
     private String exterallink;
     private String videoUrl;
 
-    public List<Integer> getStudyplanIds() {
-        return studyplanIds;
+    public List<StudyPlanDTO> getStudyplans() {
+        return studyplans;
     }
 
-    public void setStudyplanIds(List<Integer> studyplanIds) {
-        this.studyplanIds = studyplanIds;
+    public void setStudyplans(List<StudyPlanDTO> studyplans) {
+        this.studyplans = studyplans;
     }
 
     public int getSeccourseId() {

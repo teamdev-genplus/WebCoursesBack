@@ -17,8 +17,9 @@ public class StudyPlan {
     @Column(length = 255)
     private String unit;
 
-    @ManyToMany(mappedBy = "studyplans")
-    private List<SecondaryCourses> secondary_courses;
+    @ManyToOne
+    @JoinColumn(name = "seccourse_id", nullable = false)
+    private SecondaryCourses secondary_course;
 
     @ElementCollection
     @CollectionTable(name = "studyplan_session", joinColumns = @JoinColumn(name = "studyplan_id"))
@@ -29,11 +30,19 @@ public class StudyPlan {
     public StudyPlan() {
     }
 
-    public StudyPlan(int studyplanId, String unit, List<SecondaryCourses> secondary_courses, List<String> sessions) {
+    public StudyPlan(int studyplanId, String unit, SecondaryCourses secondary_course, List<String> sessions) {
         this.studyplanId = studyplanId;
         this.unit = unit;
-        this.secondary_courses = secondary_courses;
+        this.secondary_course = secondary_course;
         this.sessions = sessions;
+    }
+
+    public SecondaryCourses getSecondary_course() {
+        return secondary_course;
+    }
+
+    public void setSecondary_course(SecondaryCourses secondary_course) {
+        this.secondary_course = secondary_course;
     }
 
     public int getStudyplanId() {
@@ -50,14 +59,6 @@ public class StudyPlan {
 
     public void setUnit(String unit) {
         this.unit = unit;
-    }
-
-    public List<SecondaryCourses> getSecondary_courses() {
-        return secondary_courses;
-    }
-
-    public void setSecondary_courses(List<SecondaryCourses> secondary_courses) {
-        this.secondary_courses = secondary_courses;
     }
 
     public List<String> getSessions() {

@@ -6,6 +6,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SessionAnswerController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SessionController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SessionTestController.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\StudyPlanController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\ToolController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UnitController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserCourseController.java
@@ -22,6 +23,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SessionAnswerDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SessionDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SessionTestDTO.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\StudyPlanDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\ToolDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UnitDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserCourseDTO.java
@@ -52,6 +54,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\ISessionAnswerRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\ISessionRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\ISessionTestRepo.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IStudyPlanRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IToolRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUnitRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserCourseRepo.java
@@ -66,6 +69,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ISessionAnswerService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ISessionService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ISessionTestService.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IStudyPlanService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IToolService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUnitService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserCourseService.java
@@ -81,6 +85,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\SessionSequenceSyncRunner.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\SessionServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\SessionTestImp.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\StudyPlanServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ToolServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UnitServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserCourseServiceImp.java
