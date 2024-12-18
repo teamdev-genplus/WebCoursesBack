@@ -37,6 +37,7 @@ public class StudyPlanController {
         StudyPlan studyPlan = new StudyPlan();
         studyPlan.setSecondary_course(seccourse);
         studyPlan.setSessions(dto.getSessions());
+        studyPlan.setHours(dto.getHours());
         studyPlan.setUnit(dto.getUnit());
 
 
@@ -79,6 +80,9 @@ public class StudyPlanController {
             }
             if (studyPlanDTO.getSessions() != null) {
                 existingStudyPlan.setSessions(studyPlanDTO.getSessions());
+            }
+            if (studyPlanDTO.getHours() != 0) {
+                existingStudyPlan.setHours(studyPlanDTO.getHours());
             }
             if (studyPlanDTO.getSeccourseId() != 0) {
                 // Relacionar el módulo con otro curso si el curso ID es diferente

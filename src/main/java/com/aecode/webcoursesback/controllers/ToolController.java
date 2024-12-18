@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ToolDTO;
 import com.aecode.webcoursesback.entities.Tool;
+import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.ICourseService;
 import com.aecode.webcoursesback.services.IToolService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,36 +40,37 @@ public class ToolController {
                                          @RequestPart(value = "data", required = false) String dtoJson) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
             ToolDTO dto = objectMapper.readValue(dtoJson, ToolDTO.class);
 
+            // Convertir DTO a entidad
+            ModelMapper modelMapper = new ModelMapper();
+            Tool tool = modelMapper.map(dto, Tool.class);
+
+            // Guardar la herramienta sin la imagen para obtener el ID generado
+            tS.insert(tool);
+
             // Crear directorio único para el usuario si no existe
-            String userUploadDir = uploadDir + File.separator + "tool" + File.separator + dto.getToolId();
+            String userUploadDir = uploadDir + File.separator + "tool" + File.separator + tool.getToolId();
             Path userUploadPath = Paths.get(userUploadDir);
             if (!Files.exists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
             }
 
             String originalFilename = null;
+
             // Manejo del archivo de imagen
             if (imagen != null && !imagen.isEmpty()) {
                 originalFilename = imagen.getOriginalFilename();
                 byte[] bytes = imagen.getBytes();
                 Path path = userUploadPath.resolve(originalFilename);
                 Files.write(path, bytes);
+
+                // Asignar la ruta de la imagen a la herramienta
+                tool.setPicture("/uploads/tool/" + tool.getToolId() + "/" + originalFilename);
+                tS.insert(tool); // Actualizar con la imagen
             }
 
-            // Convertir DTO a entidad
-            ModelMapper modelMapper = new ModelMapper();
-            Tool tool = modelMapper.map(dto, Tool.class);
-
-            // Asignar el UserProfile y la ruta de la imagen
-            tool.setPicture("/uploads/tool/" + dto.getToolId() + "/" + originalFilename);
-
-            // Guardar los detalles del usuario
-            tS.insert(tool);
-
-            return ResponseEntity.ok("Herramienta guardada correctamente");
+            return ResponseEntity.ok("Herramienta guardada correctamente con ID: " + tool.getToolId());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
         } catch (Exception e) {
@@ -80,14 +82,11 @@ public class ToolController {
 
     @GetMapping
     public List<ToolDTO> list() {
+        return tS.list().stream().map(tool -> {
         ModelMapper modelMapper = new ModelMapper();
-        List<Tool> tools = tS.list();
+        ToolDTO dto = modelMapper.map(tool, ToolDTO.class);
 
-        return tools.stream().map(tool -> {
-            // Convertir la entidad Tool a su DTO correspondiente
-            ToolDTO dto = modelMapper.map(tool, ToolDTO.class);
-
-            return dto;
+        return dto;
         }).collect(Collectors.toList());
     }
 

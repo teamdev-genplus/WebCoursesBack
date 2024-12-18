@@ -14,6 +14,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProfileController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressRWController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressSessionController.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\CouponDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\CourseDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\FreqQuestDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\LoginDTO.java
@@ -31,6 +32,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProfileDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressRwDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressSessionDTO.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Coupon.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Course.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\FreqQuest.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Module.java

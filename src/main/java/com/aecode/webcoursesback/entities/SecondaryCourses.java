@@ -17,9 +17,6 @@ public class SecondaryCourses {
         private String title;
 
         @Column( length = 255)
-        private String coverimage;
-
-        @Column( length = 255)
         private String principalimage;
 
         @Column(columnDefinition = "TEXT")
@@ -29,7 +26,10 @@ public class SecondaryCourses {
         private String videoUrl;
 
         @Column(length = 255)
-        private Double price;
+        private Double priceRegular;
+
+        @Column(length = 255)
+        private Double priceAcademy;
 
         @Enumerated(EnumType.STRING)
         @Column(length = 50)
@@ -62,7 +62,10 @@ public class SecondaryCourses {
         private List<Tool> tools;
 
         @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
-        private List<StudyPlan> studyplans = new ArrayList<>();
+            private List<StudyPlan> studyplans = new ArrayList<>();
+
+    @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coupon> coupons = new ArrayList<>();
 
 
         @ManyToMany
@@ -110,14 +113,14 @@ public class SecondaryCourses {
     public SecondaryCourses() {
     }
 
-    public SecondaryCourses(int seccourseId, String title, String coverimage, String principalimage, String description, String videoUrl, Double price, Level level, Mode mode, String achievement, String exterallink, List<String> benefits, String schedule, List<Tool> tools, List<StudyPlan> studyplans, List<FreqQuest> freqquests) {
+    public SecondaryCourses(int seccourseId, String title, String principalimage, String description, String videoUrl, Double priceRegular, Double priceAcademy, Level level, Mode mode, String achievement, String exterallink, List<String> benefits, String schedule, List<Tool> tools, List<StudyPlan> studyplans, List<Coupon> coupons, List<FreqQuest> freqquests) {
         this.seccourseId = seccourseId;
         this.title = title;
-        this.coverimage = coverimage;
         this.principalimage = principalimage;
         this.description = description;
         this.videoUrl = videoUrl;
-        this.price = price;
+        this.priceRegular = priceRegular;
+        this.priceAcademy = priceAcademy;
         this.level = level;
         this.mode = mode;
         this.achievement = achievement;
@@ -126,7 +129,24 @@ public class SecondaryCourses {
         this.schedule = schedule;
         this.tools = tools;
         this.studyplans = studyplans;
+        this.coupons = coupons;
         this.freqquests = freqquests;
+    }
+
+    public Double getPriceRegular() {
+        return priceRegular;
+    }
+
+    public void setPriceRegular(Double priceRegular) {
+        this.priceRegular = priceRegular;
+    }
+
+    public Double getPriceAcademy() {
+        return priceAcademy;
+    }
+
+    public void setPriceAcademy(Double priceAcademy) {
+        this.priceAcademy = priceAcademy;
     }
 
     public List<StudyPlan> getStudyplans() {
@@ -153,14 +173,6 @@ public class SecondaryCourses {
         this.title = title;
     }
 
-    public String getCoverimage() {
-        return coverimage;
-    }
-
-    public void setCoverimage(String coverimage) {
-        this.coverimage = coverimage;
-    }
-
     public String getPrincipalimage() {
         return principalimage;
     }
@@ -183,14 +195,6 @@ public class SecondaryCourses {
 
     public void setVideoUrl(String videoUrl) {
         this.videoUrl = videoUrl;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
     }
 
     public Level getLevel() {
@@ -255,5 +259,13 @@ public class SecondaryCourses {
 
     public void setFreqquests(List<FreqQuest> freqquests) {
         this.freqquests = freqquests;
+    }
+
+    public List<Coupon> getCoupons() {
+        return coupons;
+    }
+
+    public void setCoupons(List<Coupon> coupons) {
+        this.coupons = coupons;
     }
 }

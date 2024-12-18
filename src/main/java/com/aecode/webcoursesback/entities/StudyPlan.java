@@ -21,6 +21,9 @@ public class StudyPlan {
     @JoinColumn(name = "seccourse_id", nullable = false)
     private SecondaryCourses secondary_course;
 
+    @Column(length = 255)
+    private int hours;
+
     @ElementCollection
     @CollectionTable(name = "studyplan_session", joinColumns = @JoinColumn(name = "studyplan_id"))
     @Column(name = "session")
@@ -30,11 +33,20 @@ public class StudyPlan {
     public StudyPlan() {
     }
 
-    public StudyPlan(int studyplanId, String unit, SecondaryCourses secondary_course, List<String> sessions) {
+    public StudyPlan(int studyplanId, String unit, SecondaryCourses secondary_course, int hours, List<String> sessions) {
         this.studyplanId = studyplanId;
         this.unit = unit;
         this.secondary_course = secondary_course;
+        this.hours = hours;
         this.sessions = sessions;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
     }
 
     public SecondaryCourses getSecondary_course() {

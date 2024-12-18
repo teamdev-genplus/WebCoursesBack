@@ -38,6 +38,7 @@ com\aecode\webcoursesback\repositories\ICourseRepo.class
 com\aecode\webcoursesback\dtos\UserCourseDTO.class
 com\aecode\webcoursesback\entities\Course.class
 com\aecode\webcoursesback\controllers\CourseController.class
+com\aecode\webcoursesback\entities\Coupon.class
 com\aecode\webcoursesback\entities\Tool.class
 com\aecode\webcoursesback\entities\Unit.class
 com\aecode\webcoursesback\servicesimplement\ToolServiceImp.class
@@ -96,4 +97,5 @@ com\aecode\webcoursesback\repositories\ISessionRepo.class
 com\aecode\webcoursesback\controllers\UserDetailController.class
 com\aecode\webcoursesback\entities\UserProgressSession.class
 com\aecode\webcoursesback\dtos\ToolDTO.class
+com\aecode\webcoursesback\dtos\CouponDTO.class
 com\aecode\webcoursesback\dtos\UserProgressSessionDTO.class

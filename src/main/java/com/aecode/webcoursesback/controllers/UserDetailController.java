@@ -95,7 +95,6 @@ public class UserDetailController {
 
         return u.stream().map(userdetail -> {
             UserDetailDTO dto = m.map(userdetail, UserDetailDTO.class);
-
             // Validar si userProfile no es null
             if (userdetail.getUserProfile() != null) {
                 dto.setUserId(userdetail.getUserProfile().getUserId());
@@ -103,7 +102,6 @@ public class UserDetailController {
                 // Manejar casos donde userProfile es null (opcional)
                 dto.setUserId(0); // O asignar un valor por defecto
             }
-
             return dto;
         }).collect(Collectors.toList());
     }

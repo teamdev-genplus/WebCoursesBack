@@ -6,6 +6,7 @@ public class StudyPlanDTO {
     private int studyplanId;
     private int seccourseId;
     private String unit;
+    private int hours;
     private List<String> sessions;
 
     public int getStudyplanId() {
@@ -22,6 +23,14 @@ public class StudyPlanDTO {
 
     public void setSeccourseId(int seccourseId) {
         this.seccourseId = seccourseId;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
     }
 
     public String getUnit() {

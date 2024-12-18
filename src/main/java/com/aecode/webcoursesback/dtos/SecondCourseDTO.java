@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.dtos;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
+import jakarta.persistence.Column;
 
 import java.util.List;
 
@@ -7,16 +8,15 @@ public class SecondCourseDTO {
 
     private int seccourseId;
     private String title;
-    private String coverimage;
     private String principalimage;
     private String description;
-    private Double price;
     // Usado para POST/PATCH: IDs solamente
     private List<Integer> toolIds;
     private List<Integer> freqquestIds;
 
 
     private List<StudyPlanDTO> studyplans;
+    private List<CouponDTO> coupons;
 
 
     // Usado para GET: objetos completos
@@ -32,6 +32,32 @@ public class SecondCourseDTO {
     private String achievement;
     private String exterallink;
     private String videoUrl;
+    private Double priceRegular;
+    private Double priceAcademy;
+
+    public List<CouponDTO> getCoupons() {
+        return coupons;
+    }
+
+    public void setCoupons(List<CouponDTO> coupons) {
+        this.coupons = coupons;
+    }
+
+    public Double getPriceRegular() {
+        return priceRegular;
+    }
+
+    public void setPriceRegular(Double priceRegular) {
+        this.priceRegular = priceRegular;
+    }
+
+    public Double getPriceAcademy() {
+        return priceAcademy;
+    }
+
+    public void setPriceAcademy(Double priceAcademy) {
+        this.priceAcademy = priceAcademy;
+    }
 
     public List<StudyPlanDTO> getStudyplans() {
         return studyplans;
@@ -57,14 +83,6 @@ public class SecondCourseDTO {
         this.title = title;
     }
 
-    public String getCoverimage() {
-        return coverimage;
-    }
-
-    public void setCoverimage(String coverimage) {
-        this.coverimage = coverimage;
-    }
-
     public String getPrincipalimage() {
         return principalimage;
     }
@@ -81,13 +99,6 @@ public class SecondCourseDTO {
         this.description = description;
     }
 
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
 
     public List<Integer> getToolIds() {
         return toolIds;

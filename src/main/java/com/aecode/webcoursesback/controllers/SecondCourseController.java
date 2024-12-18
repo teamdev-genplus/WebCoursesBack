@@ -45,24 +45,14 @@ public class SecondCourseController {
             SecondCourseDTO dto = objectMapper.readValue(dtoJson, SecondCourseDTO.class);
 
             // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "secondcourse";
+            String userUploadDir = uploadDir + File.separator + "secondcourse"+ File.separator + dto.getSeccourseId();
             Path userUploadPath = Paths.get(userUploadDir);
             if (!Files.exists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
             }
 
             // Variables para guardar los nombres de archivo
-            String coverImageFilename = null;
             String principalImageFilename = null;
-
-            // Manejo del archivo de portada (coverImage)
-            if (coverImage != null && !coverImage.isEmpty()) {
-                coverImageFilename = coverImage.getOriginalFilename();
-                byte[] bytes = coverImage.getBytes();
-                Path path = userUploadPath.resolve(coverImageFilename);
-                Files.write(path, bytes);
-            }
-
             // Manejo del archivo de imagen principal (principalImage)
             if (principalImage != null && !principalImage.isEmpty()) {
                 principalImageFilename = principalImage.getOriginalFilename();
@@ -97,12 +87,8 @@ public class SecondCourseController {
                 courses.setFreqquests(freqquests);
             }
 
-            // Establecer las rutas de las imágenes en la entidad
-            if (coverImageFilename != null) {
-                courses.setCoverimage("/uploads/secondcourse/" + coverImageFilename);
-            }
             if (principalImageFilename != null) {
-                courses.setPrincipalimage("/uploads/secondcourse/" + principalImageFilename);
+                courses.setPrincipalimage("/uploads/secondcourse/"+courses.getSeccourseId()+"/" + principalImageFilename);
             }
 
             // Guardar el curso
@@ -144,6 +130,7 @@ public class SecondCourseController {
                 }).collect(Collectors.toList());
                 courseDTO.setFreqquests(freqQuestDTOs);
             }
+
             return courseDTO;
         }).collect(Collectors.toList());
     }
@@ -219,8 +206,11 @@ public class SecondCourseController {
                 if (courseDTO.getDescription() != null) {
                     existingCourse.setDescription(courseDTO.getDescription());
                 }
-                if (courseDTO.getPrice() != null) {
-                    existingCourse.setPrice(courseDTO.getPrice());
+                if (courseDTO.getPriceRegular() != null) {
+                    existingCourse.setPriceRegular(courseDTO.getPriceRegular());
+                }
+                if(courseDTO.getPriceAcademy()!=null){
+                    existingCourse.setPriceAcademy(courseDTO.getPriceAcademy());
                 }
                 if (courseDTO.getLevel() != null) {
                     existingCourse.setLevel(courseDTO.getLevel());
@@ -249,7 +239,7 @@ public class SecondCourseController {
                     List<Tool> tools = courseDTO.getToolIds().stream()
                             .map(toolId -> {
                                 Tool tool = new Tool();
-                                tool.setToolId(toolId); // Solo asignamos el ID aquí
+                                tool.setToolId(toolId);
                                 return tool;
                             }).collect(Collectors.toList());
                     existingCourse.setTools(tools);
@@ -260,7 +250,7 @@ public class SecondCourseController {
                     List<FreqQuest> freqquests = courseDTO.getFreqquestIds().stream()
                             .map(freqquestId -> {
                                 FreqQuest freqQuest = new FreqQuest();
-                                freqQuest.setFreqquestId(freqquestId); // Solo asignamos el ID aquí
+                                freqQuest.setFreqquestId(freqquestId);
                                 return freqQuest;
                             }).collect(Collectors.toList());
                     existingCourse.setFreqquests(freqquests);
@@ -275,24 +265,12 @@ public class SecondCourseController {
                 Files.createDirectories(userUploadPath);
             }
 
-            // Actualizar la imagen de portada (coverImage)
-            if (coverImage != null && !coverImage.isEmpty()) {
-                String coverImageFilename = coverImage.getOriginalFilename();
-                byte[] bytes = coverImage.getBytes();
-                Path path = userUploadPath.resolve(coverImageFilename);
-                Files.write(path, bytes);
-
-                // Establecer la nueva ruta en la entidad
-                existingCourse.setCoverimage("/uploads/secondcourse/" + id + "/" + coverImageFilename);
-            }
-
             // Actualizar la imagen principal (principalImage)
             if (principalImage != null && !principalImage.isEmpty()) {
                 String principalImageFilename = principalImage.getOriginalFilename();
                 byte[] bytes = principalImage.getBytes();
                 Path path = userUploadPath.resolve(principalImageFilename);
                 Files.write(path, bytes);
-
                 // Establecer la nueva ruta en la entidad
                 existingCourse.setPrincipalimage("/uploads/secondcourse/" + id + "/" + principalImageFilename);
             }
