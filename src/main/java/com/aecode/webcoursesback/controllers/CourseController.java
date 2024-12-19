@@ -1,12 +1,9 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.CourseDTO;
-import com.aecode.webcoursesback.dtos.FreqQuestDTO;
+import com.aecode.webcoursesback.dtos.SecondCourseDTO;
 import com.aecode.webcoursesback.dtos.ToolDTO;
-import com.aecode.webcoursesback.dtos.UserDetailDTO;
 import com.aecode.webcoursesback.entities.Course;
-import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.Tool;
-import com.aecode.webcoursesback.entities.UserDetail;
 import com.aecode.webcoursesback.services.ICourseService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -14,12 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,8 +42,13 @@ public class CourseController  {
             ObjectMapper objectMapper = new ObjectMapper();
             CourseDTO dto = objectMapper.readValue(dtoJson, CourseDTO.class);
 
+            // Convertir DTO a entidad
+            ModelMapper modelMapper = new ModelMapper();
+            Course courses = modelMapper.map(dto, Course.class);
+            cS.insert(courses);
+
             // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "course";
+            String userUploadDir = uploadDir + File.separator + "course"+ File.separator + dto.getCourseId();
             Path userUploadPath = Paths.get(userUploadDir);
             if (!Files.exists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
@@ -65,15 +65,20 @@ public class CourseController  {
                 Files.write(path, bytes);
             }
 
-
-            // Convertir DTO a entidad
-            ModelMapper modelMapper = new ModelMapper();
-            Course courses = modelMapper.map(dto, Course.class);
-
+            // Asociar herramientas al curso
+            if (dto.getToolIds() != null) {
+                List<Tool> tools = dto.getToolIds().stream()
+                        .map(toolId -> {
+                            Tool tool = new Tool();
+                            tool.setToolId(toolId);
+                            return tool;
+                        }).collect(Collectors.toList());
+                courses.setTools(tools);
+            }
 
             // Establecer las rutas de las imágenes en la entidad
             if (coverImageFilename != null) {
-                courses.setCoverimage("/uploads/course/" + coverImageFilename);
+                courses.setCoverimage("/uploads/course/"+courses.getCourseId() +"/"+ coverImageFilename);
             }
                 // Guardar el curso
                 cS.insert(courses);
@@ -92,8 +97,22 @@ public class CourseController  {
     @GetMapping
     public List<CourseDTO> list() {
         return cS.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            return m.map(x, CourseDTO.class);
+            ModelMapper modelMapper = new ModelMapper();
+            CourseDTO courseDTO = modelMapper.map(x, CourseDTO.class);
+
+            if (x.getTools() != null) {
+                List<ToolDTO> toolDTOs = x.getTools().stream().map(tool -> {
+                    ToolDTO toolDTO = new ToolDTO();
+                    toolDTO.setToolId(tool.getToolId());
+                    toolDTO.setName(tool.getName());
+                    toolDTO.setPicture(tool.getPicture());
+                    return toolDTO;
+                }).collect(Collectors.toList());
+                courseDTO.setTools(toolDTOs);
+            }
+
+
+            return modelMapper.map(x, CourseDTO.class);
         }).collect(Collectors.toList());
     }
 
@@ -113,7 +132,6 @@ public class CourseController  {
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
             @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
-            @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = false) String courseDTOJson) {
         try {
             // Obtener el curso existente por ID
@@ -133,7 +151,25 @@ public class CourseController  {
                 if(courseDTO.getVideoUrl()!=null){
                     existingCourse.setVideoUrl(courseDTO.getVideoUrl());
                 }
-
+                // Actualizar las herramientas del curso
+                if (courseDTO.getToolIds() != null) {
+                    List<Tool> tools = courseDTO.getToolIds().stream()
+                            .map(toolId -> {
+                                Tool tool = new Tool();
+                                tool.setToolId(toolId);
+                                return tool;
+                            }).collect(Collectors.toList());
+                    existingCourse.setTools(tools);
+                }
+                if(courseDTO.getHours()!=0){
+                    existingCourse.setHours(courseDTO.getHours());
+                }
+                if(courseDTO.getPrice()!=0) {
+                    existingCourse.setPrice(courseDTO.getPrice());
+                }
+                if(courseDTO.getPercentage()!=0) {
+                    existingCourse.setPercentage(courseDTO.getPercentage());
+                }
             }
 
             // Crear directorio para guardar imágenes basado en el ID del curso

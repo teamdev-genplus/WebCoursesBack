@@ -6,9 +6,36 @@ public class ModuleDTO {
     private int courseId;
     private String title;
     private String videoUrl;
+    private int hours;
+    private int percentage;
+    private double price;
     private int orderNumber;
     private List<UnitDTO> units;
     private RelatedWorkDTO relatedworks;
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
 
     public int getModuleId() {
         return moduleId;

@@ -4,7 +4,6 @@ import com.aecode.webcoursesback.dtos.SecondCourseDTO;
 import com.aecode.webcoursesback.dtos.ToolDTO;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
-import com.aecode.webcoursesback.entities.StudyPlan;
 import com.aecode.webcoursesback.entities.Tool;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +35,6 @@ public class SecondCourseController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(
-            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
             @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = true) String dtoJson) {
         try {
@@ -44,6 +42,9 @@ public class SecondCourseController {
             ObjectMapper objectMapper = new ObjectMapper();
             SecondCourseDTO dto = objectMapper.readValue(dtoJson, SecondCourseDTO.class);
 
+            ModelMapper modelMapper = new ModelMapper();
+            SecondaryCourses courses = modelMapper.map(dto, SecondaryCourses.class);
+            scS.insert(courses);
             // Crear directorio para guardar imágenes basado en el ID del curso
             String userUploadDir = uploadDir + File.separator + "secondcourse"+ File.separator + dto.getSeccourseId();
             Path userUploadPath = Paths.get(userUploadDir);
@@ -60,10 +61,6 @@ public class SecondCourseController {
                 Path path = userUploadPath.resolve(principalImageFilename);
                 Files.write(path, bytes);
             }
-
-            // Convertir DTO a entidad
-            ModelMapper modelMapper = new ModelMapper();
-            SecondaryCourses courses = modelMapper.map(dto, SecondaryCourses.class);
 
             // Asociar herramientas al curso
             if (dto.getToolIds() != null) {
@@ -185,7 +182,6 @@ public class SecondCourseController {
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
-            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
             @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = false) String courseDTOJson) {
         try {
@@ -232,6 +228,9 @@ public class SecondCourseController {
                 }
                 if(courseDTO.getExterallink()!=null){
                     existingCourse.setExterallink(courseDTO.getExterallink());
+                }
+                if(courseDTO.getPercentage()!=0){
+                    existingCourse.setPercentage(courseDTO.getPercentage());
                 }
 
                 // Actualizar las herramientas del curso

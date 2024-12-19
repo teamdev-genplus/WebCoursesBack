@@ -13,6 +13,9 @@ public class Tool{
     @ManyToMany(mappedBy = "tools")
     private List<SecondaryCourses> secondary_courses;
 
+    @ManyToMany(mappedBy = "tools")
+    private List<Course> courses;
+
     @Column(length = 255)
     private String name;
 
@@ -22,11 +25,20 @@ public class Tool{
     public Tool() {
     }
 
-    public Tool(int toolId, List<SecondaryCourses> secondary_courses, String name, String picture) {
+    public Tool(int toolId, List<SecondaryCourses> secondary_courses, List<Course> courses, String name, String picture) {
         this.toolId = toolId;
         this.secondary_courses = secondary_courses;
+        this.courses = courses;
         this.name = name;
         this.picture = picture;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
     }
 
     public int getToolId() {

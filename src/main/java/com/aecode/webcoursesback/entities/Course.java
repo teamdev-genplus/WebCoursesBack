@@ -21,20 +21,70 @@ public class Course {
 
     @Column( length = 255)
     private String videoUrl;
+    @Column()
+    private int percentage;
+    @Column()
+    private double price;
+    @Column()
+    private int hours;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "course_tools",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id")
+    )
+    private List<Tool> tools;
 
 
     public Course() {
     }
 
-    public Course(int courseId, String title, String coverimage, String videoUrl, List<Module> modules) {
+    public Course(int courseId, String title, String coverimage, String videoUrl, int percentage, double price, int hours, List<Module> modules, List<Tool> tools) {
         this.courseId = courseId;
         this.title = title;
         this.coverimage = coverimage;
         this.videoUrl = videoUrl;
+        this.percentage = percentage;
+        this.price = price;
+        this.hours = hours;
         this.modules = modules;
+        this.tools = tools;
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
+    }
+
+    public List<Tool> getTools() {
+        return tools;
+    }
+
+    public void setTools(List<Tool> tools) {
+        this.tools = tools;
     }
 
     public List<Module> getModules() {

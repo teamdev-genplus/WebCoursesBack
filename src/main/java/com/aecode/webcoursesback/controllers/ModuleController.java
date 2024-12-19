@@ -69,6 +69,15 @@ public class ModuleController {
                 }
                 existingModule.setCourse(course);
             }
+            if(moduleDTO.getPrice() != 0) {
+                existingModule.setPrice(moduleDTO.getPrice());
+            }
+            if(moduleDTO.getPercentage() != 0) {
+                existingModule.setPercentage(moduleDTO.getPercentage());
+            }
+            if(moduleDTO.getHours() != 0) {
+                existingModule.setHours(moduleDTO.getHours());
+            }
 
 
             // Guardar los cambios

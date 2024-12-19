@@ -14,6 +14,9 @@ public class SecondCourseDTO {
     private List<Integer> toolIds;
     private List<Integer> freqquestIds;
 
+    private int percentage;
+
+
 
     private List<StudyPlanDTO> studyplans;
     private List<CouponDTO> coupons;
@@ -41,6 +44,14 @@ public class SecondCourseDTO {
 
     public void setCoupons(List<CouponDTO> coupons) {
         this.coupons = coupons;
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
     }
 
     public Double getPriceRegular() {

@@ -31,6 +31,9 @@ public class SecondaryCourses {
         @Column(length = 255)
         private Double priceAcademy;
 
+        @Column()
+        private int percentage;
+
         @Enumerated(EnumType.STRING)
         @Column(length = 50)
         private Level level;
@@ -113,13 +116,14 @@ public class SecondaryCourses {
     public SecondaryCourses() {
     }
 
-    public SecondaryCourses(int seccourseId, String title, String principalimage, String description, String videoUrl, Double priceRegular, Double priceAcademy, Level level, Mode mode, String achievement, String exterallink, List<String> benefits, String schedule, List<Tool> tools, List<StudyPlan> studyplans, List<Coupon> coupons, List<FreqQuest> freqquests) {
+    public SecondaryCourses(int seccourseId, String title, String principalimage, String description, String videoUrl, Double priceRegular, int percentage, Double priceAcademy, Level level, Mode mode, String achievement, String exterallink, List<String> benefits, String schedule, List<Tool> tools, List<Coupon> coupons, List<StudyPlan> studyplans, List<FreqQuest> freqquests) {
         this.seccourseId = seccourseId;
         this.title = title;
         this.principalimage = principalimage;
         this.description = description;
         this.videoUrl = videoUrl;
         this.priceRegular = priceRegular;
+        this.percentage = percentage;
         this.priceAcademy = priceAcademy;
         this.level = level;
         this.mode = mode;
@@ -128,9 +132,17 @@ public class SecondaryCourses {
         this.benefits = benefits;
         this.schedule = schedule;
         this.tools = tools;
-        this.studyplans = studyplans;
         this.coupons = coupons;
+        this.studyplans = studyplans;
         this.freqquests = freqquests;
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
     }
 
     public Double getPriceRegular() {
