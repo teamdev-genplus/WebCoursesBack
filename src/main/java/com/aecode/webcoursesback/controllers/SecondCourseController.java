@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.FreqQuestDTO;
 import com.aecode.webcoursesback.dtos.SecondCourseDTO;
+import com.aecode.webcoursesback.dtos.StudyPlanDTO;
 import com.aecode.webcoursesback.dtos.ToolDTO;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
@@ -126,6 +127,19 @@ public class SecondCourseController {
                     return freqQuestDTO;
                 }).collect(Collectors.toList());
                 courseDTO.setFreqquests(freqQuestDTOs);
+            }
+            if (course.getStudyplans() != null) {
+                List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream().map(studyPlan -> {
+                    StudyPlanDTO studyPlanDTO = new StudyPlanDTO();
+                    studyPlanDTO.setStudyplanId(studyPlan.getStudyplanId());
+                    studyPlanDTO.setUnit(studyPlan.getUnit());
+                    studyPlanDTO.setHours(studyPlan.getHours());
+                    studyPlanDTO.setSessions(studyPlan.getSessions());
+                    // Asignar el ID del curso secundario al DTO
+                    studyPlanDTO.setSeccourseId(course.getSeccourseId());
+                    return studyPlanDTO;
+                }).collect(Collectors.toList());
+                courseDTO.setStudyplans(studyPlanDTOs);
             }
 
             return courseDTO;

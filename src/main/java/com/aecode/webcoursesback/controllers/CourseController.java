@@ -1,6 +1,5 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.CourseDTO;
-import com.aecode.webcoursesback.dtos.SecondCourseDTO;
 import com.aecode.webcoursesback.dtos.ToolDTO;
 import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.entities.Tool;
@@ -169,6 +168,9 @@ public class CourseController  {
                 }
                 if(courseDTO.getPercentage()!=0) {
                     existingCourse.setPercentage(courseDTO.getPercentage());
+                }
+                if(courseDTO.getSubtitle()!=null) {
+                    existingCourse.setSubtitle(courseDTO.getSubtitle());
                 }
             }
 

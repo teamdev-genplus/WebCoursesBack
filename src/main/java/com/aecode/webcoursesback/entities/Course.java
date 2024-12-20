@@ -39,13 +39,16 @@ public class Course {
     )
     private List<Tool> tools;
 
+    @Column(length = 255)
+    private String subtitle;
 
     public Course() {
     }
 
-    public Course(int courseId, String title, String coverimage, String videoUrl, int percentage, double price, int hours, List<Module> modules, List<Tool> tools) {
+    public Course(int courseId, String title, String subtitle, String coverimage, String videoUrl, int percentage, double price, int hours, List<Module> modules, List<Tool> tools) {
         this.courseId = courseId;
         this.title = title;
+        this.subtitle = subtitle;
         this.coverimage = coverimage;
         this.videoUrl = videoUrl;
         this.percentage = percentage;
@@ -53,6 +56,14 @@ public class Course {
         this.hours = hours;
         this.modules = modules;
         this.tools = tools;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
     }
 
     public int getPercentage() {
