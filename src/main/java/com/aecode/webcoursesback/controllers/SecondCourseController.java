@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.FreqQuestDTO;
-import com.aecode.webcoursesback.dtos.SecondCourseDTO;
-import com.aecode.webcoursesback.dtos.StudyPlanDTO;
-import com.aecode.webcoursesback.dtos.ToolDTO;
+import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.Tool;
@@ -141,6 +138,16 @@ public class SecondCourseController {
                 }).collect(Collectors.toList());
                 courseDTO.setStudyplans(studyPlanDTOs);
             }
+            if(course.getCoupons() != null) {
+                List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
+                    CouponDTO couponDTO = new CouponDTO();
+                    couponDTO.setCouponId(coupon.getCouponId());
+                    couponDTO.setName(coupon.getName());
+                    couponDTO.setDiscount(coupon.getDiscount());
+                    return couponDTO;
+                }).collect(Collectors.toList());
+                courseDTO.setCoupons(couponDTOs);
+            }
 
             return courseDTO;
         }).collect(Collectors.toList());
@@ -188,6 +195,28 @@ public class SecondCourseController {
                 return freqQuestDTO;
             }).collect(Collectors.toList());
             courseDTO.setFreqquests(freqQuestDTOs);
+        }
+        if (course.getStudyplans() != null) {
+            List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream().map(studyPlan -> {
+                StudyPlanDTO studyPlanDTO = new StudyPlanDTO();
+                studyPlanDTO.setStudyplanId(studyPlan.getStudyplanId());
+                studyPlanDTO.setUnit(studyPlan.getUnit());
+                studyPlanDTO.setHours(studyPlan.getHours());
+                studyPlanDTO.setSessions(studyPlan.getSessions());
+                studyPlanDTO.setSeccourseId(course.getSeccourseId());
+                return studyPlanDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setStudyplans(studyPlanDTOs);
+        }
+        if(course.getCoupons() != null) {
+            List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
+                CouponDTO couponDTO = new CouponDTO();
+                couponDTO.setCouponId(coupon.getCouponId());
+                couponDTO.setName(coupon.getName());
+                couponDTO.setDiscount(coupon.getDiscount());
+                return couponDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setCoupons(couponDTOs);
         }
 
         return courseDTO;

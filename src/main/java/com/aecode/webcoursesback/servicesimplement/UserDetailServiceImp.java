@@ -31,4 +31,10 @@ public class UserDetailServiceImp implements IUserDetailService {
     public UserDetail listId(int userD) {
         return udR.findById(userD).orElse(new UserDetail());
     }
+
+    @Override
+    public UserDetail findByUserId(int userId) {
+        return udR.findByUserId(userId);
+    }
+
 }

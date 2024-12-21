@@ -130,6 +130,19 @@ public class UserDetailController {
         return dto;
     }
 
+    @GetMapping("/by-user/{userId}") // Nuevo endpoint para buscar por userId
+    public UserDetailDTO findByUserId(@PathVariable int userId) {
+        UserDetail userDetail = udS.findByUserId(userId);
+        if (userDetail == null) {
+            return null;
+        }
+        UserDetailDTO dto = new UserDetailDTO();
+        dto.setDetailsId(userDetail.getDetailsId());
+        dto.setUserId(userDetail.getUserProfile().getUserId());
+        dto.setProfilepicture(userDetail.getProfilepicture());
+        return dto;
+    }
+
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
