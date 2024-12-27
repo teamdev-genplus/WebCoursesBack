@@ -20,13 +20,22 @@ public class Course {
     private String coverimage;
 
     @Column( length = 255)
+    private String gift;
+
+    @Column( length = 255)
+    private String moduleimage;
+
+    @Column( length = 255)
+    private String urlkit;
+
+    @Column( length = 255)
     private String videoUrl;
-    @Column()
-    private int percentage;
-    @Column()
-    private double price;
-    @Column()
-    private int hours;
+    @Column
+    private Integer percentage;
+    @Column
+    private Double price;
+    @Column
+    private Integer hours;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
@@ -45,17 +54,44 @@ public class Course {
     public Course() {
     }
 
-    public Course(int courseId, String title, String subtitle, String coverimage, String videoUrl, int percentage, double price, int hours, List<Module> modules, List<Tool> tools) {
+    public Course(int courseId, String title, String coverimage, String gift, String moduleimage, String urlkit, String videoUrl, Integer percentage, Double price, List<Module> modules, Integer hours, List<Tool> tools, String subtitle) {
         this.courseId = courseId;
         this.title = title;
-        this.subtitle = subtitle;
         this.coverimage = coverimage;
+        this.gift = gift;
+        this.moduleimage = moduleimage;
+        this.urlkit = urlkit;
         this.videoUrl = videoUrl;
         this.percentage = percentage;
         this.price = price;
-        this.hours = hours;
         this.modules = modules;
+        this.hours = hours;
         this.tools = tools;
+        this.subtitle = subtitle;
+    }
+
+    public String getUrlkit() {
+        return urlkit;
+    }
+
+    public void setUrlkit(String urlkit) {
+        this.urlkit = urlkit;
+    }
+
+    public String getGift() {
+        return gift;
+    }
+
+    public void setGift(String gift) {
+        this.gift = gift;
+    }
+
+    public String getModuleimage() {
+        return moduleimage;
+    }
+
+    public void setModuleimage(String moduleimage) {
+        this.moduleimage = moduleimage;
     }
 
     public String getSubtitle() {
@@ -66,27 +102,27 @@ public class Course {
         this.subtitle = subtitle;
     }
 
-    public int getPercentage() {
+    public Integer getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(int percentage) {
+    public void setPercentage(Integer percentage) {
         this.percentage = percentage;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public int getHours() {
+    public Integer getHours() {
         return hours;
     }
 
-    public void setHours(int hours) {
+    public void setHours(Integer hours) {
         this.hours = hours;
     }
 

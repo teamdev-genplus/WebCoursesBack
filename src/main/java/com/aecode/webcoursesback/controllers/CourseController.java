@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,8 @@ public class CourseController  {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(
             @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestPart(value = "giftImage", required = false) MultipartFile giftImage,
+            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
             @RequestPart(value = "data", required = true) String dtoJson) {
         try {
             // Convertir el JSON recibido a un DTO
@@ -47,21 +50,34 @@ public class CourseController  {
             cS.insert(courses);
 
             // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "course"+ File.separator + dto.getCourseId();
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
+            String courseUploadDir = uploadDir + File.separator + "course" + File.separator + courses.getCourseId();
+            Path courseUploadPath = Paths.get(courseUploadDir);
+            if (!Files.exists(courseUploadPath)) {
+                Files.createDirectories(courseUploadPath);
             }
-
-            // Variables para guardar los nombres de archivo
-            String coverImageFilename = null;
 
             // Manejo del archivo de portada (coverImage)
             if (coverImage != null && !coverImage.isEmpty()) {
-                coverImageFilename = coverImage.getOriginalFilename();
-                byte[] bytes = coverImage.getBytes();
-                Path path = userUploadPath.resolve(coverImageFilename);
-                Files.write(path, bytes);
+                String coverImageFilename = "cover_" + coverImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(coverImageFilename);
+                Files.write(path, coverImage.getBytes());
+                courses.setCoverimage("/uploads/course/" + courses.getCourseId() + "/" + coverImageFilename);
+            }
+
+            // Manejo del archivo de regalo (giftImage)
+            if (giftImage != null && !giftImage.isEmpty()) {
+                String giftImageFilename = "gift_" + giftImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(giftImageFilename);
+                Files.write(path, giftImage.getBytes());
+                courses.setGift("/uploads/course/" + courses.getCourseId() + "/" + giftImageFilename);
+            }
+
+            // Manejo del archivo de imagen de módulo (moduleImage)
+            if (moduleImage != null && !moduleImage.isEmpty()) {
+                String moduleImageFilename = "module_" + moduleImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(moduleImageFilename);
+                Files.write(path, moduleImage.getBytes());
+                courses.setModuleimage("/uploads/course/" + courses.getCourseId() + "/" + moduleImageFilename);
             }
 
             // Asociar herramientas al curso
@@ -75,22 +91,20 @@ public class CourseController  {
                 courses.setTools(tools);
             }
 
-            // Establecer las rutas de las imágenes en la entidad
-            if (coverImageFilename != null) {
-                courses.setCoverimage("/uploads/course/"+courses.getCourseId() +"/"+ coverImageFilename);
-            }
-                // Guardar el curso
-                cS.insert(courses);
+            // Guardar el curso con imágenes y relaciones
+            cS.insert(courses);
 
-                return ResponseEntity.ok("Curso guardado correctamente con imágenes");
+            return ResponseEntity.ok("Curso guardado correctamente con imágenes.");
         } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.badRequest().body("Error en el formato del JSON: " + e.getMessage());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.badRequest().body("Error procesando el JSON: " + e.getMessage());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar los archivos: " + e.getMessage());
         }
     }
+
+
 
 
     @GetMapping
@@ -131,6 +145,8 @@ public class CourseController  {
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
             @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestPart(value = "giftImage", required = false) MultipartFile giftImage,
+            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
             @RequestPart(value = "data", required = false) String courseDTOJson) {
         try {
             // Obtener el curso existente por ID
@@ -172,25 +188,40 @@ public class CourseController  {
                 if(courseDTO.getSubtitle()!=null) {
                     existingCourse.setSubtitle(courseDTO.getSubtitle());
                 }
+                if(courseDTO.getUrlkit()!=null) {
+                    existingCourse.setUrlkit(courseDTO.getUrlkit());
+                }
             }
 
             // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "course" + File.separator + id;
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
+            String courseUploadDir = uploadDir + File.separator + "course" + File.separator + id;
+            Path courseUploadPath = Paths.get(courseUploadDir);
+            if (!Files.exists(courseUploadPath)) {
+                Files.createDirectories(courseUploadPath);
             }
 
-            // Actualizar la imagen de portada (coverImage)
+            // Manejo de imágenes
             if (coverImage != null && !coverImage.isEmpty()) {
-                String coverImageFilename = coverImage.getOriginalFilename();
-                byte[] bytes = coverImage.getBytes();
-                Path path = userUploadPath.resolve(coverImageFilename);
-                Files.write(path, bytes);
-
-                // Establecer la nueva ruta en la entidad
+                String coverImageFilename = "cover_" + coverImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(coverImageFilename);
+                Files.write(path, coverImage.getBytes());
                 existingCourse.setCoverimage("/uploads/course/" + id + "/" + coverImageFilename);
             }
+
+            if (giftImage != null && !giftImage.isEmpty()) {
+                String giftImageFilename = "gift_" + giftImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(giftImageFilename);
+                Files.write(path, giftImage.getBytes());
+                existingCourse.setGift("/uploads/course/" + id + "/" + giftImageFilename);
+            }
+
+            if (moduleImage != null && !moduleImage.isEmpty()) {
+                String moduleImageFilename = "module_" + moduleImage.getOriginalFilename();
+                Path path = courseUploadPath.resolve(moduleImageFilename);
+                Files.write(path, moduleImage.getBytes());
+                existingCourse.setModuleimage("/uploads/course/" + id + "/" + moduleImageFilename);
+            }
+
 
 
             // Guardar los cambios

@@ -11,6 +11,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UnitController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserCourseController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserDetailController.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserModuleController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProfileController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressRWController.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\UserProgressSessionController.java
@@ -29,6 +30,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UnitDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserCourseDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserDetailDTO.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserModuleDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProfileDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressRwDTO.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\UserProgressSessionDTO.java
@@ -46,6 +48,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\Unit.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserCourseAccess.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserDetail.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserModuleAccess.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserProfile.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserProgressRW.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\entities\UserProgressSession.java
@@ -61,6 +64,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUnitRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserCourseRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserDetailRepo.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserModuleRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProfileRepository.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressRwRepo.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressSessionRepo.java
@@ -76,6 +80,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUnitService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserCourseService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserDetailService.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserModuleService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProfileService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressRwService.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressSessionService.java
@@ -92,6 +97,7 @@ C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\co
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UnitServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserCourseServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserDetailServiceImp.java
+C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserModuleServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProfileServiceImplement.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProgressRwServiceImp.java
 C:\Users\MANUEL\Desktop\Producto digital_oficial\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\UserProgressSessionServiceImp.java

@@ -53,10 +53,13 @@ public class UserProfile {
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourseAccess> usercourseaccess = new ArrayList<>();
 
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserModuleAccess> usermoduleaccess = new ArrayList<>();
+
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, LocalDate birthdate, String phoneNumber, String gender, String experience, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, LocalDate birthdate, String phoneNumber, String gender, String experience, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess, List<UserModuleAccess> usermoduleaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
@@ -70,6 +73,15 @@ public class UserProfile {
         this.userprogresssessions = userprogresssessions;
         this.userprogressrw = userprogressrw;
         this.usercourseaccess = usercourseaccess;
+        this.usermoduleaccess = usermoduleaccess;
+    }
+
+    public List<UserModuleAccess> getUsermoduleaccess() {
+        return usermoduleaccess;
+    }
+
+    public void setUsermoduleaccess(List<UserModuleAccess> usermoduleaccess) {
+        this.usermoduleaccess = usermoduleaccess;
     }
 
     public int getUserId() {

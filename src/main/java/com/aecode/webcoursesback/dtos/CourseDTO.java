@@ -7,15 +7,26 @@ public class CourseDTO {
     private int courseId;
     private String title;
     private String coverimage;
+    private String gift;
+    private String moduleimage;
+    private String urlkit;
     private String videoUrl;
-    private int percentage;
-    private double price;
-    private int hours;
+    private Integer percentage;
+    private Double price;
+    private Integer hours;
     private List<ModuleDTO> modules;
     private List<Integer> toolIds;
     private List<ToolDTO> tools;
 
     private String subtitle;
+
+    public String getUrlkit() {
+        return urlkit;
+    }
+
+    public void setUrlkit(String urlkit) {
+        this.urlkit = urlkit;
+    }
 
     public String getSubtitle() {
         return subtitle;
@@ -25,28 +36,44 @@ public class CourseDTO {
         this.subtitle = subtitle;
     }
 
-    public int getPercentage() {
+    public Integer getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(int percentage) {
+    public void setPercentage(Integer percentage) {
         this.percentage = percentage;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public int getHours() {
+    public Integer getHours() {
         return hours;
     }
 
-    public void setHours(int hours) {
+    public void setHours(Integer hours) {
         this.hours = hours;
+    }
+
+    public String getGift() {
+        return gift;
+    }
+
+    public void setGift(String gift) {
+        this.gift = gift;
+    }
+
+    public String getModuleimage() {
+        return moduleimage;
+    }
+
+    public void setModuleimage(String moduleimage) {
+        this.moduleimage = moduleimage;
     }
 
     public List<Integer> getToolIds() {

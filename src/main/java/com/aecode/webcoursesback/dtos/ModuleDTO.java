@@ -12,6 +12,15 @@ public class ModuleDTO {
     private int orderNumber;
     private List<UnitDTO> units;
     private RelatedWorkDTO relatedworks;
+    private String moduleimage;
+
+    public String getModuleimage() {
+        return moduleimage;
+    }
+
+    public void setModuleimage(String moduleimage) {
+        this.moduleimage = moduleimage;
+    }
 
     public int getHours() {
         return hours;

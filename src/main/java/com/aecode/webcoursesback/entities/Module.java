@@ -16,6 +16,9 @@ public class Module {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @Column( length = 255)
+    private String moduleimage;
+
     @Column(nullable = false, length = 255)
     private String title;
 
@@ -40,9 +43,10 @@ public class Module {
     public Module() {
     }
 
-    public Module(int moduleId, Course course, String title, String videoUrl, int hours, int percentage, double price, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
+    public Module(int moduleId, Course course, String moduleimage, String title, String videoUrl, int hours, int percentage, double price, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
         this.moduleId = moduleId;
         this.course = course;
+        this.moduleimage = moduleimage;
         this.title = title;
         this.videoUrl = videoUrl;
         this.hours = hours;
@@ -51,6 +55,14 @@ public class Module {
         this.orderNumber = orderNumber;
         this.units = units;
         this.relatedworks = relatedworks;
+    }
+
+    public String getModuleimage() {
+        return moduleimage;
+    }
+
+    public void setModuleimage(String moduleimage) {
+        this.moduleimage = moduleimage;
     }
 
     public int getHours() {

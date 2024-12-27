@@ -1,3 +1,4 @@
+com\aecode\webcoursesback\services\IUserModuleService.class
 com\aecode\webcoursesback\servicesimplement\UserCourseServiceImp.class
 com\aecode\webcoursesback\services\IUserProgressRwService.class
 com\aecode\webcoursesback\dtos\SecondCourseDTO.class
@@ -12,6 +13,7 @@ com\aecode\webcoursesback\repositories\IToolRepo.class
 com\aecode\webcoursesback\controllers\StudyPlanController.class
 com\aecode\webcoursesback\dtos\RelatedWorkDTO.class
 com\aecode\webcoursesback\controllers\SecondCourseController.class
+com\aecode\webcoursesback\servicesimplement\UserModuleServiceImp.class
 com\aecode\webcoursesback\dtos\UnitDTO.class
 com\aecode\webcoursesback\entities\FreqQuest.class
 com\aecode\webcoursesback\repositories\IUserProgressRwRepo.class
@@ -20,6 +22,7 @@ com\aecode\webcoursesback\servicesimplement\UserProgressSessionServiceImp.class
 com\aecode\webcoursesback\controllers\ToolController.class
 com\aecode\webcoursesback\servicesimplement\SessionSequenceSyncRunner.class
 com\aecode\webcoursesback\entities\SessionTest.class
+com\aecode\webcoursesback\entities\UserModuleAccess.class
 com\aecode\webcoursesback\entities\UserProgressRW.class
 com\aecode\webcoursesback\entities\RelatedWork.class
 com\aecode\webcoursesback\repositories\IUserProgressSessionRepo.class
@@ -50,6 +53,7 @@ com\aecode\webcoursesback\services\ISessionTestService.class
 com\aecode\webcoursesback\servicesimplement\CourseServiceImp.class
 com\aecode\webcoursesback\entities\UserProfile.class
 com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.class
+com\aecode\webcoursesback\controllers\UserModuleController.class
 com\aecode\webcoursesback\dtos\SessionDTO.class
 com\aecode\webcoursesback\services\IRelatedWorkService.class
 com\aecode\webcoursesback\controllers\SessionTestController.class
@@ -77,6 +81,7 @@ com\aecode\webcoursesback\services\IToolService.class
 com\aecode\webcoursesback\entities\SecondaryCourses$Mode.class
 com\aecode\webcoursesback\repositories\ISessionTestRepo.class
 com\aecode\webcoursesback\services\IUserCourseService.class
+com\aecode\webcoursesback\dtos\UserModuleDTO.class
 com\aecode\webcoursesback\repositories\ISessionAnswerRepo.class
 com\aecode\webcoursesback\repositories\IStudyPlanRepo.class
 com\aecode\webcoursesback\entities\SessionAnswer.class
@@ -93,6 +98,7 @@ com\aecode\webcoursesback\repositories\IRelatedWorkRepo.class
 com\aecode\webcoursesback\controllers\RelatedWorkController.class
 com\aecode\webcoursesback\ServletInitializer.class
 com\aecode\webcoursesback\controllers\UnitController.class
+com\aecode\webcoursesback\repositories\IUserModuleRepo.class
 com\aecode\webcoursesback\repositories\ISessionRepo.class
 com\aecode\webcoursesback\controllers\UserDetailController.class
 com\aecode\webcoursesback\entities\UserProgressSession.class

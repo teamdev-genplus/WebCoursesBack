@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.dtos;
 
+import com.aecode.webcoursesback.entities.UserModuleAccess;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 
@@ -23,6 +24,15 @@ public class UserProfileDTO {
     private List<UserProgressSessionDTO> userprogresssessions;
     private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
+    private List<UserModuleDTO> usermoduleaccess;
+
+    public List<UserModuleDTO> getUsermoduleaccess() {
+        return usermoduleaccess;
+    }
+
+    public void setUsermoduleaccess(List<UserModuleDTO> usermoduleaccess) {
+        this.usermoduleaccess = usermoduleaccess;
+    }
 
     public int getUserId() {
         return userId;

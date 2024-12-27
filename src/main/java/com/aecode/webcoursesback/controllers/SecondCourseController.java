@@ -214,6 +214,7 @@ public class SecondCourseController {
                 couponDTO.setCouponId(coupon.getCouponId());
                 couponDTO.setName(coupon.getName());
                 couponDTO.setDiscount(coupon.getDiscount());
+                couponDTO.setSeccourseId(course.getSeccourseId());
                 return couponDTO;
             }).collect(Collectors.toList());
             courseDTO.setCoupons(couponDTOs);
