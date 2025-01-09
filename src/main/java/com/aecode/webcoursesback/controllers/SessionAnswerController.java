@@ -46,9 +46,8 @@ public class SessionAnswerController {
         ModelMapper m = new ModelMapper();
         List<SessionAnswer> a = aS.list();
         return a.stream().map(answer -> {
-            // Convertir la entidad a DTO y asignar el questionId manualmente
             SessionAnswerDTO dto = m.map(answer, SessionAnswerDTO.class);
-            dto.setTestId(answer.getSessiontest().getTestId());  // Asignar manualmente el questionId
+            dto.setTestId(answer.getSessiontest().getTestId());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -57,8 +56,12 @@ public class SessionAnswerController {
 
     @GetMapping("/{id}")
     public SessionAnswerDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        SessionAnswerDTO dto=m.map(aS.listId(id), SessionAnswerDTO.class);
+        ModelMapper m = new ModelMapper();
+        SessionAnswer answer = aS.listId(id);
+
+        SessionAnswerDTO dto = m.map(answer, SessionAnswerDTO.class);
+        dto.setTestId(answer.getSessiontest().getTestId());
+
         return dto;
     }
     @PatchMapping("/{id}")

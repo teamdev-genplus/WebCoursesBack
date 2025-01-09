@@ -13,4 +13,7 @@ public interface IUserProfileService {
     public UserProfile listId(int userId);
     public void update(UserProfile userprofile);
     public UserProfile authenticateUser(LoginDTO logindto);
+
+    void changePassword(int userId, String currentPassword, String newPassword);
+
 }

@@ -15,41 +15,20 @@ public class UserDetail {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userdetail_seq")
     private int detailsId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER) // Cambiar a EAGER para cargar siempre el UserProfile
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private UserProfile userProfile;
 
     @Column( length = 255)
     private String profilepicture;
 
-    @Column( length = 255)
-    private String Country;
-
-    @Column( length = 255)
-    private String city;
-
-    @Column(columnDefinition = "TEXT")
-    private String bio;
-
-    @Column
-    @JsonFormat(pattern = "dd/MM/yyyy")
-    private LocalDate birthdate;
-
-    @Column( length = 255)
-    private String phoneNumber;
-
     public UserDetail() {
     }
 
-    public UserDetail(int detailsId, UserProfile userProfile, String profilepicture, String country, String city, String bio, LocalDate birthdate, String phoneNumber) {
+    public UserDetail(int detailsId, UserProfile userProfile, String profilepicture) {
         this.detailsId = detailsId;
         this.userProfile = userProfile;
         this.profilepicture = profilepicture;
-        Country = country;
-        this.city = city;
-        this.bio = bio;
-        this.birthdate = birthdate;
-        this.phoneNumber = phoneNumber;
     }
 
     public int getDetailsId() {
@@ -74,45 +53,5 @@ public class UserDetail {
 
     public void setProfilepicture(String profilepicture) {
         this.profilepicture = profilepicture;
-    }
-
-    public String getCountry() {
-        return Country;
-    }
-
-    public void setCountry(String country) {
-        Country = country;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public LocalDate getBirthdate() {
-        return birthdate;
-    }
-
-    public void setBirthdate(LocalDate birthdate) {
-        this.birthdate = birthdate;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 }

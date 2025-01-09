@@ -8,4 +8,7 @@ public interface IUserDetailService {
     List<UserDetail> list();
     public void delete(int userD);
     public UserDetail listId(int userD);
+
+    UserDetail findByUserId(int userId);
+
 }

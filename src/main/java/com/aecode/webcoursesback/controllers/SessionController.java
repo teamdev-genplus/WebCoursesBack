@@ -109,14 +109,14 @@ public class SessionController {
         dto.setHtmlContent(cS.wrapInHtml(session.getDescription())); // aqui se añade el HTML formateado
         return dto;
     }
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
             @RequestPart(value = "file", required = false) MultipartFile document,
             @RequestPart(value = "data", required = false) String dtoJson) {
 
         try {
-            // Obtener la sesión existente por ID
+            // Buscar la sesión existente por ID
             Session existingSession = cS.listId(id);
             if (existingSession == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sesión no encontrada");
@@ -127,26 +127,26 @@ public class SessionController {
                 ObjectMapper objectMapper = new ObjectMapper();
                 SessionDTO dto = objectMapper.readValue(dtoJson, SessionDTO.class);
 
-                // Actualizar campos solo si están presentes
-                if (dto.getTitle() != null) {
+                // Actualizar los campos según el contenido del JSON
+                if (dto.getTitle() != null && !dto.getTitle().isEmpty()) {
                     existingSession.setTitle(dto.getTitle());
                 }
-                if (dto.getVideoUrl() != null) {
+                if (dto.getVideoUrl() != null && !dto.getVideoUrl().isEmpty()) {
                     existingSession.setVideoUrl(dto.getVideoUrl());
                 }
-                if (dto.getDescription() != null) {
+                if (dto.getDescription() != null && !dto.getDescription().isEmpty()) {
                     existingSession.setDescription(dto.getDescription());
                 }
-                if (dto.getTaskName() != null) {
+                if (dto.getTaskName() != null && !dto.getTaskName().isEmpty()) {
                     existingSession.setTaskName(dto.getTaskName());
                 }
-                if (dto.getTaskUrl() != null) {
+                if (dto.getTaskUrl() != null && !dto.getTaskUrl().isEmpty()) {
                     existingSession.setTaskUrl(dto.getTaskUrl());
                 }
-                if (dto.getOrderNumber() != 0) {
+                if (dto.getOrderNumber() > 0) {
                     existingSession.setOrderNumber(dto.getOrderNumber());
                 }
-                if (dto.getUnitId() != 0) {
+                if (dto.getUnitId() > 0) {
                     Unit unit = uS.listId(dto.getUnitId());
                     if (unit == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unidad asociada no encontrada");
@@ -155,22 +155,24 @@ public class SessionController {
                 }
             }
 
-            // Procesar archivo opcional
+            // Procesar el archivo enviado
             if (document != null && !document.isEmpty()) {
+                // Configurar ruta de almacenamiento del archivo
                 String userUploadDir = uploadDir + File.separator + "session";
                 Path userUploadPath = Paths.get(userUploadDir);
 
+                // Crear el directorio si no existe
                 if (!Files.exists(userUploadPath)) {
                     Files.createDirectories(userUploadPath);
                 }
 
-                // Subir y reemplazar el documento
+                // Guardar el archivo en el directorio
                 String originalFilename = document.getOriginalFilename();
                 byte[] bytes = document.getBytes();
                 Path path = userUploadPath.resolve(originalFilename);
                 Files.write(path, bytes);
 
-                // Actualizar la ruta del documento
+                // Actualizar la ruta del documento en la sesión
                 existingSession.setResourceDocument("/uploads/session/" + originalFilename);
             }
 
@@ -179,11 +181,12 @@ public class SessionController {
 
             return ResponseEntity.ok("Sesión actualizada correctamente");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de documento: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la sesión: " + e.getMessage());
         }
     }
+
 
 
     @GetMapping("/by-course")

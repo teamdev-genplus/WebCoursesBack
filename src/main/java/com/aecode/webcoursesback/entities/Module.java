@@ -16,12 +16,21 @@ public class Module {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @Column( length = 255)
+    private String moduleimage;
+
     @Column(nullable = false, length = 255)
     private String title;
 
     @Column( length = 255)
     private String videoUrl;
 
+    @Column()
+    private int hours;
+    @Column()
+    private int percentage;
+    @Column()
+    private double price;
     @Column()
     private int orderNumber;
 
@@ -34,14 +43,50 @@ public class Module {
     public Module() {
     }
 
-    public Module(int moduleId, Course course, String title, String videoUrl, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
+    public Module(int moduleId, Course course, String moduleimage, String title, String videoUrl, int hours, int percentage, double price, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
         this.moduleId = moduleId;
         this.course = course;
+        this.moduleimage = moduleimage;
         this.title = title;
         this.videoUrl = videoUrl;
+        this.hours = hours;
+        this.percentage = percentage;
+        this.price = price;
         this.orderNumber = orderNumber;
         this.units = units;
         this.relatedworks = relatedworks;
+    }
+
+    public String getModuleimage() {
+        return moduleimage;
+    }
+
+    public void setModuleimage(String moduleimage) {
+        this.moduleimage = moduleimage;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+
+    public void setHours(int hours) {
+        this.hours = hours;
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public int getModuleId() {
