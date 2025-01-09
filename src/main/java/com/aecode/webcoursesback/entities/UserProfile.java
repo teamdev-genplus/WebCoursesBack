@@ -1,7 +1,9 @@
 package com.aecode.webcoursesback.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +25,21 @@ public class UserProfile {
     @Column(nullable = false)
     private String passwordHash;
 
+    @Column
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate birthdate;
+
+    @Column( length = 255)
+    private String phoneNumber;
+
     @Column(length = 100)
-    private String rol = "Estudiante";
+    private String gender;
+
+    @Column(length = 100)
+    private String experience;
+
+    @Column(length = 100)
+    private String rol = "user";
 
     @Column(length = 100)
     private String status = "Activo";
@@ -38,19 +53,35 @@ public class UserProfile {
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourseAccess> usercourseaccess = new ArrayList<>();
 
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserModuleAccess> usermoduleaccess = new ArrayList<>();
+
     public UserProfile() {
     }
 
-    public UserProfile(int userId, String fullname, String email, String passwordHash, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess) {
+    public UserProfile(int userId, String fullname, String email, String passwordHash, LocalDate birthdate, String phoneNumber, String gender, String experience, String rol, String status, List<UserProgressSession> userprogresssessions, List<UserProgressRW> userprogressrw, List<UserCourseAccess> usercourseaccess, List<UserModuleAccess> usermoduleaccess) {
         this.userId = userId;
         this.fullname = fullname;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.birthdate = birthdate;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.experience = experience;
         this.rol = rol;
         this.status = status;
         this.userprogresssessions = userprogresssessions;
         this.userprogressrw = userprogressrw;
         this.usercourseaccess = usercourseaccess;
+        this.usermoduleaccess = usermoduleaccess;
+    }
+
+    public List<UserModuleAccess> getUsermoduleaccess() {
+        return usermoduleaccess;
+    }
+
+    public void setUsermoduleaccess(List<UserModuleAccess> usermoduleaccess) {
+        this.usermoduleaccess = usermoduleaccess;
     }
 
     public int getUserId() {
@@ -99,6 +130,38 @@ public class UserProfile {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getExperience() {
+        return experience;
+    }
+
+    public void setExperience(String experience) {
+        this.experience = experience;
     }
 
     public List<UserProgressSession> getUserprogresssessions() {

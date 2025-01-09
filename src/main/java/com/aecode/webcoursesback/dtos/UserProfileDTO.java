@@ -1,5 +1,10 @@
 package com.aecode.webcoursesback.dtos;
 
+import com.aecode.webcoursesback.entities.UserModuleAccess;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class UserProfileDTO {
@@ -9,9 +14,25 @@ public class UserProfileDTO {
     private String passwordHash;
     private String rol;
     private String status;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+        private LocalDate birthdate;
+    private String phoneNumber;
+    private String gender;
+    private String experience;
+
     private List<UserProgressSessionDTO> userprogresssessions;
     private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
+    private List<UserModuleDTO> usermoduleaccess;
+
+    public List<UserModuleDTO> getUsermoduleaccess() {
+        return usermoduleaccess;
+    }
+
+    public void setUsermoduleaccess(List<UserModuleDTO> usermoduleaccess) {
+        this.usermoduleaccess = usermoduleaccess;
+    }
 
     public int getUserId() {
         return userId;
@@ -59,6 +80,38 @@ public class UserProfileDTO {
 
     public String getStatus() {
         return status;
+    }
+
+    public LocalDate getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(LocalDate birthdate) {
+        this.birthdate = birthdate;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getExperience() {
+        return experience;
+    }
+
+    public void setExperience(String experience) {
+        this.experience = experience;
     }
 
     public List<UserProgressSessionDTO> getUserprogresssessions() {

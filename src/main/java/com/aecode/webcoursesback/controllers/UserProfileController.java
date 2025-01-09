@@ -5,12 +5,17 @@ import com.aecode.webcoursesback.dtos.UserProfileDTO;
 import com.aecode.webcoursesback.dtos.UserProgressRwDTO;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IUserProfileService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,15 +118,24 @@ public class UserProfileController {
 
     // Actualizar un usuario
     @PatchMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody UserProfileDTO userProfileDTO) {
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody String jsonPayload) {
         try {
+            // Configurar un ObjectMapper personalizado
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            objectMapper.setDateFormat(new SimpleDateFormat("dd/MM/yyyy"));
+
+            // Convertir el JSON en un DTO
+            UserProfileDTO userProfileDTO = objectMapper.readValue(jsonPayload, UserProfileDTO.class);
+
             // Buscar el usuario existente
             UserProfile existingUser = upS.listId(id);
             if (existingUser == null || existingUser.getUserId() == 0) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
             }
 
-            // Actualizar solo los campos proporcionados en el DTO
+            // Actualizar solo los campos proporcionados en el JSON
             if (userProfileDTO.getFullname() != null) {
                 existingUser.setFullname(userProfileDTO.getFullname());
             }
@@ -130,6 +144,18 @@ public class UserProfileController {
             }
             if (userProfileDTO.getPasswordHash() != null) {
                 existingUser.setPasswordHash(userProfileDTO.getPasswordHash());
+            }
+            if (userProfileDTO.getPhoneNumber() != null) {
+                existingUser.setPhoneNumber(userProfileDTO.getPhoneNumber());
+            }
+            if (userProfileDTO.getBirthdate() != null) {
+                existingUser.setBirthdate(userProfileDTO.getBirthdate());
+            }
+            if (userProfileDTO.getGender() != null) {
+                existingUser.setGender(userProfileDTO.getGender());
+            }
+            if (userProfileDTO.getExperience() != null) {
+                existingUser.setExperience(userProfileDTO.getExperience());
             }
             if (userProfileDTO.getRol() != null) {
                 existingUser.setRol(userProfileDTO.getRol());
@@ -142,10 +168,28 @@ public class UserProfileController {
             upS.update(existingUser);
 
             return ResponseEntity.ok("Usuario actualizado correctamente");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Formato de JSON inválido: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el usuario: " + e.getMessage());
         }
     }
 
+
+    @PatchMapping("/{id}/change-password")
+    public ResponseEntity<String> changePassword(
+            @PathVariable("id") int userId,
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword) {
+        try {
+            // Llamar al servicio para cambiar la contraseña
+            upS.changePassword(userId, currentPassword, newPassword);
+            return ResponseEntity.ok("Contraseña actualizada correctamente");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al cambiar la contraseña: " + e.getMessage());
+        }
+    }
 
 }
