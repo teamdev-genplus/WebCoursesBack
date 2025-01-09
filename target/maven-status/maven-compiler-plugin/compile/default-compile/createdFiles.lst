@@ -33,6 +33,7 @@ com\aecode\webcoursesback\servicesimplement\SessionServiceImp.class
 com\aecode\webcoursesback\dtos\FreqQuestDTO.class
 com\aecode\webcoursesback\entities\SecondaryCourses.class
 com\aecode\webcoursesback\servicesimplement\UserProgressRwServiceImp.class
+com\aecode\webcoursesback\services\EmailSenderService.class
 com\aecode\webcoursesback\entities\Session.class
 com\aecode\webcoursesback\dtos\UserProfileDTO.class
 com\aecode\webcoursesback\dtos\ModuleDTO.class
@@ -82,10 +83,12 @@ com\aecode\webcoursesback\entities\SecondaryCourses$Mode.class
 com\aecode\webcoursesback\repositories\ISessionTestRepo.class
 com\aecode\webcoursesback\services\IUserCourseService.class
 com\aecode\webcoursesback\dtos\UserModuleDTO.class
+com\aecode\webcoursesback\controllers\EmailSenderController.class
 com\aecode\webcoursesback\repositories\ISessionAnswerRepo.class
 com\aecode\webcoursesback\repositories\IStudyPlanRepo.class
 com\aecode\webcoursesback\entities\SessionAnswer.class
 com\aecode\webcoursesback\dtos\UserProgressRwDTO.class
+com\aecode\webcoursesback\dtos\EmailRequestDTO.class
 com\aecode\webcoursesback\services\IUserProfileService.class
 com\aecode\webcoursesback\services\ISessionService.class
 com\aecode\webcoursesback\dtos\UserDetailDTO.class
