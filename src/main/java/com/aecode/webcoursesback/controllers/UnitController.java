@@ -1,8 +1,7 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.SessionDTO;
+
 import com.aecode.webcoursesback.dtos.UnitDTO;
 import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.Unit;
 import com.aecode.webcoursesback.services.IModuleService;
 import com.aecode.webcoursesback.services.IUnitService;
@@ -15,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/unit")
@@ -42,14 +40,17 @@ public class UnitController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){uS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        uS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public UnitDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        UnitDTO dto=m.map(uS.listId(id),UnitDTO.class);
+    public UnitDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper m = new ModelMapper();
+        UnitDTO dto = m.map(uS.listId(id), UnitDTO.class);
         return dto;
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody UnitDTO unitDTO) {
         try {
@@ -87,13 +88,13 @@ public class UnitController {
         }
     }
 
-
     @GetMapping("/by-course")
     public List<UnitDTO> getUnitsByCourseTitle(@RequestParam("title") String courseTitle) {
         List<Unit> units = uS.findUnitsByCourseTitle(courseTitle);
 
         if (units.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontraron unidades para el curso especificado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontraron unidades para el curso especificado");
         }
 
         // Convertir la lista de sesiones a SessionDTO

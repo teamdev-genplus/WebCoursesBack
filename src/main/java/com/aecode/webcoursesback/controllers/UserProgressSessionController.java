@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.UserProgressSessionDTO;
 import com.aecode.webcoursesback.entities.Session;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -27,8 +28,7 @@ public class UserProgressSessionController {
     private ISessionService cS;
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody UserProgressSessionDTO dto){
-        ModelMapper m = new ModelMapper();
+    public ResponseEntity<String> insert(@RequestBody UserProgressSessionDTO dto) {
 
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
@@ -44,7 +44,7 @@ public class UserProgressSessionController {
         // Mapear el DTO a la entidad
         UserProgressSession userProgressSession = new UserProgressSession();
         userProgressSession.setUserProfile(user); // Asignar el UserProfile
-        userProgressSession.setSession(aSession);   // Asignar la Session
+        userProgressSession.setSession(aSession); // Asignar la Session
         userProgressSession.setCompleted(dto.isCompleted()); // Asignar si está completado
 
         // Guardar en la base de datos
@@ -62,14 +62,17 @@ public class UserProgressSessionController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){upS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        upS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public UserProgressSessionDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        UserProgressSessionDTO dto=m.map(upS.listId(id), UserProgressSessionDTO.class);
+    public UserProgressSessionDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper m = new ModelMapper();
+        UserProgressSessionDTO dto = m.map(upS.listId(id), UserProgressSessionDTO.class);
         return dto;
     }
+
     @PutMapping
     public void update(@RequestBody UserProgressSessionDTO dto) {
         ModelMapper m = new ModelMapper();

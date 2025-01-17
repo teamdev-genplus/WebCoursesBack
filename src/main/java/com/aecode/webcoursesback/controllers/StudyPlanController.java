@@ -1,8 +1,7 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
+
 import com.aecode.webcoursesback.dtos.StudyPlanDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
-import com.aecode.webcoursesback.entities.SessionAnswer;
 import com.aecode.webcoursesback.entities.StudyPlan;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IStudyPlanService;
@@ -23,10 +22,8 @@ public class StudyPlanController {
     @Autowired
     private ISecondCourseService scS;
 
-
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody StudyPlanDTO dto) {
-        ModelMapper m = new ModelMapper();
 
         SecondaryCourses seccourse = scS.listId(dto.getSeccourseId());
 
@@ -39,7 +36,6 @@ public class StudyPlanController {
         studyPlan.setSessions(dto.getSessions());
         studyPlan.setHours(dto.getHours());
         studyPlan.setUnit(dto.getUnit());
-
 
         spS.insert(studyPlan);
         return ResponseEntity.status(201).body("created successfully");
@@ -58,10 +54,12 @@ public class StudyPlanController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){spS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        spS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public StudyPlanDTO listId(@PathVariable("id")Integer id){
+    public StudyPlanDTO listId(@PathVariable("id") Integer id) {
         ModelMapper m = new ModelMapper();
         StudyPlan seccourse = spS.listId(id);
 
@@ -70,6 +68,7 @@ public class StudyPlanController {
 
         return dto;
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody StudyPlanDTO studyPlanDTO) {
         try {
@@ -92,7 +91,6 @@ public class StudyPlanController {
                 }
                 existingStudyPlan.setSecondary_course(seccourse);
             }
-
 
             // Guardar los cambios
             spS.insert(existingStudyPlan);

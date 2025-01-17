@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.UserModuleDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
@@ -27,7 +28,6 @@ public class UserModuleController {
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody UserModuleDTO dto) {
-        ModelMapper m = new ModelMapper();
 
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
@@ -43,7 +43,7 @@ public class UserModuleController {
         // Mapear el DTO a la entidad
         UserModuleAccess usermodule = new UserModuleAccess();
         usermodule.setUserProfile(user); // Asignar el UserProfile
-        usermodule.setModule(module);   // Asignar el modulo
+        usermodule.setModule(module); // Asignar el modulo
 
         // Guardar en la base de datos
         umS.insert(usermodule);
@@ -60,14 +60,17 @@ public class UserModuleController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){umS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        umS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public UserModuleDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        UserModuleDTO dto=m.map(umS.listId(id),UserModuleDTO.class);
+    public UserModuleDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper m = new ModelMapper();
+        UserModuleDTO dto = m.map(umS.listId(id), UserModuleDTO.class);
         return dto;
     }
+
     @PutMapping
     public void update(@RequestBody UserModuleDTO dto) {
         ModelMapper m = new ModelMapper();

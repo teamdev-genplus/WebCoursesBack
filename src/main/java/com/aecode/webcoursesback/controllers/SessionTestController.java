@@ -1,8 +1,8 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
 import com.aecode.webcoursesback.dtos.SessionTestDTO;
 import com.aecode.webcoursesback.entities.Session;
-import com.aecode.webcoursesback.entities.SessionAnswer;
 import com.aecode.webcoursesback.entities.SessionTest;
 import com.aecode.webcoursesback.services.ISessionService;
 import com.aecode.webcoursesback.services.ISessionTestService;
@@ -23,7 +23,6 @@ public class SessionTestController {
     private ISessionTestService qS;
     @Autowired
     private ISessionService sS;
-
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody SessionTestDTO dto) {
@@ -58,16 +57,18 @@ public class SessionTestController {
         }).collect(Collectors.toList());
     }
 
-
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){qS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        qS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public SessionTestDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        SessionTestDTO dto=m.map(qS.listId(id), SessionTestDTO.class);
+    public SessionTestDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper m = new ModelMapper();
+        SessionTestDTO dto = m.map(qS.listId(id), SessionTestDTO.class);
         return dto;
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
@@ -97,7 +98,8 @@ public class SessionTestController {
 
             return ResponseEntity.ok("Test actualizado correctamente");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el test: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el test: " + e.getMessage());
         }
     }
 
