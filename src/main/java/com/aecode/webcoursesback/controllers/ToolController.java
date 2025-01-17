@@ -1,8 +1,7 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.ToolDTO;
 import com.aecode.webcoursesback.entities.Tool;
-import com.aecode.webcoursesback.entities.UserProfile;
-import com.aecode.webcoursesback.services.ICourseService;
 import com.aecode.webcoursesback.services.IToolService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @RestController
 @RequestMapping("/tool")
 public class ToolController {
@@ -32,12 +30,12 @@ public class ToolController {
     private IToolService tS;
     @Value("${file.upload-dir}")
     private String uploadDir;
+
     @Autowired
-    private ICourseService cS;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value = "file", required = false) MultipartFile imagen,
-                                         @RequestPart(value = "data", required = false) String dtoJson) {
+            @RequestPart(value = "data", required = false) String dtoJson) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ToolDTO dto = objectMapper.readValue(dtoJson, ToolDTO.class);
@@ -72,29 +70,28 @@ public class ToolController {
 
             return ResponseEntity.ok("Herramienta guardada correctamente con ID: " + tool.getToolId());
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al guardar el archivo de imagen: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al insertar el objeto en la base de datos: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al insertar el objeto en la base de datos: " + e.getMessage());
         }
     }
-
-
 
     @GetMapping
     public List<ToolDTO> list() {
         return tS.list().stream().map(tool -> {
-        ModelMapper modelMapper = new ModelMapper();
-        ToolDTO dto = modelMapper.map(tool, ToolDTO.class);
+            ModelMapper modelMapper = new ModelMapper();
+            ToolDTO dto = modelMapper.map(tool, ToolDTO.class);
 
-        return dto;
+            return dto;
         }).collect(Collectors.toList());
     }
 
-
-
-
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){tS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        tS.delete(id);
+    }
 
     @GetMapping("/{id}")
     public ToolDTO listById(@PathVariable("id") Integer id) {
@@ -112,7 +109,6 @@ public class ToolController {
         ToolDTO dto = modelMapper.map(tool, ToolDTO.class);
         return dto;
     }
-
 
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
@@ -159,11 +155,12 @@ public class ToolController {
 
             return ResponseEntity.ok("Herramienta actualizada correctamente");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el archivo de imagen: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al guardar el archivo de imagen: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el objeto en la base de datos: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el objeto en la base de datos: " + e.getMessage());
         }
     }
-
 
 }

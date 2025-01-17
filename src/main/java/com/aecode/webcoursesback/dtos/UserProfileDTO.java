@@ -1,8 +1,6 @@
 package com.aecode.webcoursesback.dtos;
 
-import com.aecode.webcoursesback.entities.UserModuleAccess;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +14,7 @@ public class UserProfileDTO {
     private String status;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-        private LocalDate birthdate;
+    private LocalDate birthdate;
     private String phoneNumber;
     private String gender;
     private String experience;

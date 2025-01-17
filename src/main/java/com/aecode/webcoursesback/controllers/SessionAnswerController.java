@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.SessionAnswerDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.services.ISessionAnswerService;
@@ -22,7 +23,6 @@ public class SessionAnswerController {
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody SessionAnswerDTO dto) {
-        ModelMapper m = new ModelMapper();
 
         SessionTest stest = stS.listId(dto.getTestId());
 
@@ -51,11 +51,14 @@ public class SessionAnswerController {
             return dto;
         }).collect(Collectors.toList());
     }
+
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){aS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        aS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public SessionAnswerDTO listId(@PathVariable("id")Integer id){
+    public SessionAnswerDTO listId(@PathVariable("id") Integer id) {
         ModelMapper m = new ModelMapper();
         SessionAnswer answer = aS.listId(id);
 
@@ -64,6 +67,7 @@ public class SessionAnswerController {
 
         return dto;
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<String> update(
             @PathVariable("id") Integer id,
@@ -96,9 +100,9 @@ public class SessionAnswerController {
 
             return ResponseEntity.ok("Respuesta actualizada correctamente");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la respuesta: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar la respuesta: " + e.getMessage());
         }
     }
-
 
 }

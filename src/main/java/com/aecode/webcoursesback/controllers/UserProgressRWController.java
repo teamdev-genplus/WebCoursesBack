@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.UserProgressRwDTO;
 import com.aecode.webcoursesback.entities.RelatedWork;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -26,8 +27,7 @@ public class UserProgressRWController {
     private IRelatedWorkService rwS;
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody UserProgressRwDTO dto){
-        ModelMapper m = new ModelMapper();
+    public ResponseEntity<String> insert(@RequestBody UserProgressRwDTO dto) {
 
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
@@ -43,7 +43,7 @@ public class UserProgressRWController {
         // Mapear el DTO a la entidad
         UserProgressRW userProgressRW = new UserProgressRW();
         userProgressRW.setUserProfile(user); // Asignar el UserProfile
-        userProgressRW.setRw(rw);   // Asignar el trabajo relacionado
+        userProgressRW.setRw(rw); // Asignar el trabajo relacionado
         userProgressRW.setCompleted(dto.isCompleted()); // Asignar si está completado
 
         // Guardar en la base de datos
@@ -59,7 +59,8 @@ public class UserProgressRWController {
         // Configuración específica para el mapeo de workId
         modelMapper.typeMap(UserProgressRW.class, UserProgressRwDTO.class).addMappings(mapper -> {
             mapper.map(src -> src.getRw().getWorkId(), UserProgressRwDTO::setWorkId);
-            mapper.map(src -> src.getUserProfile().getUserId(), UserProgressRwDTO::setUserId);  // Para asegurar el userId también
+            mapper.map(src -> src.getUserProfile().getUserId(), UserProgressRwDTO::setUserId); // Para asegurar el
+                                                                                               // userId también
         });
 
         // Mapear la lista de UserProgressRW a UserProgressRwDTO
@@ -68,9 +69,10 @@ public class UserProgressRWController {
                 .collect(Collectors.toList());
     }
 
-
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){upuS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        upuS.delete(id);
+    }
 
     @GetMapping("/{id}")
     public UserProgressRwDTO listId(@PathVariable("id") Integer id) {

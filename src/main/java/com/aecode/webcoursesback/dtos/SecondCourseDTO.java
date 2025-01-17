@@ -1,6 +1,6 @@
 package com.aecode.webcoursesback.dtos;
+
 import com.aecode.webcoursesback.entities.SecondaryCourses;
-import jakarta.persistence.Column;
 
 import java.util.List;
 
@@ -16,11 +16,8 @@ public class SecondCourseDTO {
 
     private int percentage;
 
-
-
     private List<StudyPlanDTO> studyplans;
     private List<CouponDTO> coupons;
-
 
     // Usado para GET: objetos completos
     private List<ToolDTO> tools;
@@ -109,7 +106,6 @@ public class SecondCourseDTO {
     public void setDescription(String description) {
         this.description = description;
     }
-
 
     public List<Integer> getToolIds() {
         return toolIds;

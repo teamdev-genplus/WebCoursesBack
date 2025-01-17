@@ -1,5 +1,4 @@
 package com.aecode.webcoursesback.dtos;
-import jakarta.persistence.Column;
 
 import java.util.List;
 

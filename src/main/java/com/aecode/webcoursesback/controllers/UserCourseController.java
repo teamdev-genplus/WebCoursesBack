@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.UserCourseDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.services.ICourseService;
@@ -25,7 +26,6 @@ public class UserCourseController {
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody UserCourseDTO dto) {
-        ModelMapper m = new ModelMapper();
 
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
@@ -41,7 +41,7 @@ public class UserCourseController {
         // Mapear el DTO a la entidad
         UserCourseAccess usercourse = new UserCourseAccess();
         usercourse.setUserProfile(user); // Asignar el UserProfile
-        usercourse.setCourse(course);   // Asignar la Session
+        usercourse.setCourse(course); // Asignar la Session
 
         // Guardar en la base de datos
         ucS.insert(usercourse);
@@ -58,14 +58,17 @@ public class UserCourseController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){ucS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        ucS.delete(id);
+    }
 
     @GetMapping("/{id}")
-    public UserCourseDTO listId(@PathVariable("id")Integer id){
-        ModelMapper m=new ModelMapper();
-        UserCourseDTO dto=m.map(ucS.listId(id),UserCourseDTO.class);
+    public UserCourseDTO listId(@PathVariable("id") Integer id) {
+        ModelMapper m = new ModelMapper();
+        UserCourseDTO dto = m.map(ucS.listId(id), UserCourseDTO.class);
         return dto;
     }
+
     @PutMapping
     public void update(@RequestBody UserCourseDTO dto) {
         ModelMapper m = new ModelMapper();

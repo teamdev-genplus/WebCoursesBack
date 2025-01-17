@@ -1,9 +1,6 @@
 package com.aecode.webcoursesback.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "userdetail")
@@ -19,7 +16,7 @@ public class UserDetail {
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private UserProfile userProfile;
 
-    @Column( length = 255)
+    @Column(length = 255)
     private String profilepicture;
 
     public UserDetail() {
