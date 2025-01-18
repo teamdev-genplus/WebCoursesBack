@@ -9,6 +9,7 @@ com\aecode\webcoursesback\dtos\LoginDTO.class
 com\aecode\webcoursesback\repositories\ISecondCourseRepo.class
 com\aecode\webcoursesback\services\ISessionAnswerService.class
 com\aecode\webcoursesback\servicesimplement\SessionTestImp.class
+com\aecode\webcoursesback\controllers\PayPalController.class
 com\aecode\webcoursesback\repositories\IToolRepo.class
 com\aecode\webcoursesback\controllers\StudyPlanController.class
 com\aecode\webcoursesback\dtos\RelatedWorkDTO.class
@@ -42,6 +43,7 @@ com\aecode\webcoursesback\repositories\ICourseRepo.class
 com\aecode\webcoursesback\dtos\UserCourseDTO.class
 com\aecode\webcoursesback\entities\Course.class
 com\aecode\webcoursesback\controllers\CourseController.class
+com\aecode\webcoursesback\config\PaypalConfig.class
 com\aecode\webcoursesback\entities\Coupon.class
 com\aecode\webcoursesback\entities\Tool.class
 com\aecode\webcoursesback\entities\Unit.class
@@ -58,6 +60,7 @@ com\aecode\webcoursesback\controllers\UserModuleController.class
 com\aecode\webcoursesback\dtos\SessionDTO.class
 com\aecode\webcoursesback\services\IRelatedWorkService.class
 com\aecode\webcoursesback\controllers\SessionTestController.class
+com\aecode\webcoursesback\services\PayPalService.class
 com\aecode\webcoursesback\servicesimplement\SessionAnswerImp.class
 com\aecode\webcoursesback\controllers\SessionAnswerController.class
 com\aecode\webcoursesback\entities\UserCourseAccess.class
@@ -97,6 +100,7 @@ com\aecode\webcoursesback\config\CorsConfig.class
 com\aecode\webcoursesback\services\IModuleService.class
 com\aecode\webcoursesback\entities\Module.class
 com\aecode\webcoursesback\services\ISecondCourseService.class
+com\aecode\webcoursesback\dtos\PayPalOrderDTO.class
 com\aecode\webcoursesback\entities\StudyPlan.class
 com\aecode\webcoursesback\repositories\IRelatedWorkRepo.class
 com\aecode\webcoursesback\controllers\RelatedWorkController.class
