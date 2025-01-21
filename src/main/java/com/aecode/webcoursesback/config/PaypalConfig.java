@@ -13,6 +13,7 @@ import com.paypal.base.rest.PayPalRESTException;
 
 @Configuration
 public class PaypalConfig {
+
     @Value("${paypal.client.id}")
     private String clientId;
 
@@ -22,23 +23,25 @@ public class PaypalConfig {
     @Value("${paypal.mode}")
     private String mode;
 
+    // Configuración del SDK de PayPal
     @Bean
     public Map<String, String> paypalSdkConfig() {
         Map<String, String> configMap = new HashMap<>();
-        configMap.put("mode", mode);
+        configMap.put("mode", mode); // Define el entorno (sandbox o live)
+        configMap.put("clientId", clientId); // Client ID
+        configMap.put("clientSecret", clientSecret); // Client Secret
         return configMap;
     }
 
+    // Credenciales OAuth para obtener el token de acceso
     @Bean
     public OAuthTokenCredential oAuthTokenCredential() {
         return new OAuthTokenCredential(clientId, clientSecret, paypalSdkConfig());
     }
 
+    // APIContext que se usará para hacer las peticiones a PayPal
     @Bean
     public APIContext apiContext() throws PayPalRESTException {
-        APIContext context = new APIContext(oAuthTokenCredential().getAccessToken());
-        context.setConfigurationMap(paypalSdkConfig());
-        return context;
+        return new APIContext(oAuthTokenCredential().getAccessToken());
     }
-
 }
