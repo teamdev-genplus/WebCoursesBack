@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+
 import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,7 +46,7 @@ public class SecondCourseController {
             SecondaryCourses courses = modelMapper.map(dto, SecondaryCourses.class);
             scS.insert(courses);
             // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "secondcourse"+ File.separator + dto.getSeccourseId();
+            String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + dto.getSeccourseId();
             Path userUploadPath = Paths.get(userUploadDir);
             if (!Files.exists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
@@ -61,29 +63,30 @@ public class SecondCourseController {
             }
 
             // Asociar herramientas al curso
-            if (dto.getToolIds() != null) {
-                List<Tool> tools = dto.getToolIds().stream()
-                        .map(toolId -> {
+            if (dto.getTools() != null) {
+                List<Tool> tools = dto.getTools().stream()
+                        .map(toolItem -> {
                             Tool tool = new Tool();
-                            tool.setToolId(toolId);
+                            tool.setToolId(toolItem.getToolId());
                             return tool;
                         }).collect(Collectors.toList());
                 courses.setTools(tools);
             }
 
             // Asociar preguntas frecuentes al curso
-            if (dto.getFreqquestIds() != null) {
-                List<FreqQuest> freqquests = dto.getFreqquestIds().stream()
-                        .map(freqquestId -> {
+            if (dto.getFreqquests() != null) {
+                List<FreqQuest> freqquests = dto.getFreqquests().stream()
+                        .map(freqQuestItem -> {
                             FreqQuest freqQuest = new FreqQuest();
-                            freqQuest.setFreqquestId(freqquestId);
+                            freqQuest.setFreqquestId(freqQuestItem.getFreqquestId());
                             return freqQuest;
                         }).collect(Collectors.toList());
                 courses.setFreqquests(freqquests);
             }
 
             if (principalImageFilename != null) {
-                courses.setPrincipalimage("/uploads/secondcourse/"+courses.getSeccourseId()+"/" + principalImageFilename);
+                courses.setPrincipalimage(
+                        "/uploads/secondcourse/" + courses.getSeccourseId() + "/" + principalImageFilename);
             }
 
             // Guardar el curso
@@ -91,12 +94,13 @@ public class SecondCourseController {
 
             return ResponseEntity.ok("Curso guardado correctamente con imágenes");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar las imágenes: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al guardar las imágenes: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al insertar el curso en la base de datos: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al insertar el curso en la base de datos: " + e.getMessage());
         }
     }
-
 
     @GetMapping
     public List<SecondCourseDTO> list() {
@@ -138,7 +142,7 @@ public class SecondCourseController {
                 }).collect(Collectors.toList());
                 courseDTO.setStudyplans(studyPlanDTOs);
             }
-            if(course.getCoupons() != null) {
+            if (course.getCoupons() != null) {
                 List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
                     CouponDTO couponDTO = new CouponDTO();
                     couponDTO.setCouponId(coupon.getCouponId());
@@ -153,10 +157,10 @@ public class SecondCourseController {
         }).collect(Collectors.toList());
     }
 
-
-
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){scS.delete(id);}
+    public void delete(@PathVariable("id") Integer id) {
+        scS.delete(id);
+    }
 
     @GetMapping("/{id}")
     public SecondCourseDTO listId(@PathVariable("id") Integer id) {
@@ -208,7 +212,7 @@ public class SecondCourseController {
             }).collect(Collectors.toList());
             courseDTO.setStudyplans(studyPlanDTOs);
         }
-        if(course.getCoupons() != null) {
+        if (course.getCoupons() != null) {
             List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
                 CouponDTO couponDTO = new CouponDTO();
                 couponDTO.setCouponId(coupon.getCouponId());
@@ -232,100 +236,83 @@ public class SecondCourseController {
             // Obtener el curso existente por ID
             SecondaryCourses existingCourse = scS.listId(id);
             if (existingCourse == null || existingCourse.getSeccourseId() == 0) {
-                return ResponseEntity.status(404).body("Curso no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
             }
 
             // Procesar los datos JSON del DTO si están presentes
-            if (courseDTOJson != null) {
+            if (courseDTOJson != null && !courseDTOJson.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 SecondCourseDTO courseDTO = objectMapper.readValue(courseDTOJson, SecondCourseDTO.class);
 
-                if (courseDTO.getTitle() != null) {
-                    existingCourse.setTitle(courseDTO.getTitle());
-                }
-                if (courseDTO.getDescription() != null) {
-                    existingCourse.setDescription(courseDTO.getDescription());
-                }
-                if (courseDTO.getPriceRegular() != null) {
-                    existingCourse.setPriceRegular(courseDTO.getPriceRegular());
-                }
-                if(courseDTO.getPriceAcademy()!=null){
-                    existingCourse.setPriceAcademy(courseDTO.getPriceAcademy());
-                }
-                if (courseDTO.getLevel() != null) {
-                    existingCourse.setLevel(courseDTO.getLevel());
-                }
-                if (courseDTO.getMode() != null) {
-                    existingCourse.setMode(courseDTO.getMode());
-                }
-                if (courseDTO.getBenefits() != null) {
-                    existingCourse.setBenefits(courseDTO.getBenefits());
-                }
-                if (courseDTO.getSchedule() != null) {
-                    existingCourse.setSchedule(courseDTO.getSchedule());
-                }
-                if (courseDTO.getVideoUrl() != null) {
-                    existingCourse.setVideoUrl(courseDTO.getVideoUrl());
-                }
-                if (courseDTO.getAchievement() != null) {
-                    existingCourse.setAchievement(courseDTO.getAchievement());
-                }
-                if(courseDTO.getExterallink()!=null){
-                    existingCourse.setExterallink(courseDTO.getExterallink());
-                }
-                if(courseDTO.getPercentage()!=0){
-                    existingCourse.setPercentage(courseDTO.getPercentage());
-                }
+                // Actualizar los campos si están presentes
+                Optional.ofNullable(courseDTO.getTitle()).ifPresent(existingCourse::setTitle);
+                Optional.ofNullable(courseDTO.getDescription()).ifPresent(existingCourse::setDescription);
+                Optional.ofNullable(courseDTO.getProgramTitle()).ifPresent(existingCourse::setProgramTitle);
+                Optional.ofNullable(courseDTO.getStartDate()).ifPresent(existingCourse::setStartDate);
+                Optional.ofNullable(courseDTO.getCertificateDate()).ifPresent(existingCourse::setCertificateDate);
+                Optional.ofNullable(courseDTO.getPriceRegular()).ifPresent(existingCourse::setPriceRegular);
+                Optional.ofNullable(courseDTO.getDiscountPercentage()).ifPresent(existingCourse::setDiscountPercentage);
+                Optional.ofNullable(courseDTO.getPromptPaymentPrice()).ifPresent(existingCourse::setPromptPaymentPrice);
+                Optional.ofNullable(courseDTO.getMode())
+                        .ifPresent(mode -> existingCourse.setMode(SecondaryCourses.Mode.valueOf(mode.name())));
+                Optional.ofNullable(courseDTO.getAchievement()).ifPresent(existingCourse::setAchievement);
+                Optional.ofNullable(courseDTO.getVideoUrl()).ifPresent(existingCourse::setVideoUrl);
+                Optional.ofNullable(courseDTO.getPrincipalimage()).ifPresent(existingCourse::setPrincipalimage);
+                Optional.ofNullable(courseDTO.getTotalHours()).ifPresent(existingCourse::setTotalHours);
+                Optional.ofNullable(courseDTO.getNumberOfSessions()).ifPresent(existingCourse::setNumberOfSessions);
+                Optional.ofNullable(courseDTO.getNumberOfUnits()).ifPresent(existingCourse::setNumberOfUnits);
+                Optional.ofNullable(courseDTO.getSchedules()).ifPresent(existingCourse::setSchedules);
 
-                // Actualizar las herramientas del curso
-                if (courseDTO.getToolIds() != null) {
-                    List<Tool> tools = courseDTO.getToolIds().stream()
-                            .map(toolId -> {
+                // Actualizar las herramientas asociadas al curso
+                if (courseDTO.getTools() != null) {
+                    List<Tool> tools = courseDTO.getTools().stream()
+                            .map(toolItem -> {
                                 Tool tool = new Tool();
-                                tool.setToolId(toolId);
+                                tool.setToolId(toolItem.getToolId());
                                 return tool;
                             }).collect(Collectors.toList());
                     existingCourse.setTools(tools);
                 }
 
-                // Actualizar las preguntas frecuentes del curso
-                if (courseDTO.getFreqquestIds() != null) {
-                    List<FreqQuest> freqquests = courseDTO.getFreqquestIds().stream()
-                            .map(freqquestId -> {
+                // Actualizar las preguntas frecuentes asociadas al curso
+                if (courseDTO.getFreqquests() != null) {
+                    List<FreqQuest> freqquests = courseDTO.getFreqquests().stream()
+                            .map(freqquestItem -> {
                                 FreqQuest freqQuest = new FreqQuest();
-                                freqQuest.setFreqquestId(freqquestId);
+                                freqQuest.setFreqquestId(freqquestItem.getFreqquestId());
                                 return freqQuest;
                             }).collect(Collectors.toList());
                     existingCourse.setFreqquests(freqquests);
                 }
             }
 
-
-            // Crear directorio para guardar imágenes basado en el ID del curso
+            // Crear directorio para guardar imágenes si no existe
             String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + id;
             Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
+            if (Files.notExists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
             }
 
             // Actualizar la imagen principal (principalImage)
             if (principalImage != null && !principalImage.isEmpty()) {
                 String principalImageFilename = principalImage.getOriginalFilename();
-                byte[] bytes = principalImage.getBytes();
-                Path path = userUploadPath.resolve(principalImageFilename);
-                Files.write(path, bytes);
+                Path imagePath = userUploadPath.resolve(principalImageFilename);
+                Files.write(imagePath, principalImage.getBytes());
+
                 // Establecer la nueva ruta en la entidad
                 existingCourse.setPrincipalimage("/uploads/secondcourse/" + id + "/" + principalImageFilename);
             }
 
-            // Guardar los cambios
+            // Guardar los cambios en la base de datos
             scS.insert(existingCourse);
 
-            return ResponseEntity.ok("Curso actualizado correctamente con imágenes");
+            return ResponseEntity.ok("Curso actualizado correctamente");
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error al guardar las imágenes: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al guardar las imágenes: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar el curso: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el curso: " + e.getMessage());
         }
     }
 
