@@ -1,9 +1,7 @@
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\config\CorsConfig.java
-C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\config\PaypalConfig.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\CourseController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\EmailSenderController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\ModuleController.java
-C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\PayPalController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\RelatedWorkController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SecondCourseController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SessionAnswerController.java
@@ -24,7 +22,6 @@ C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\FreqQuestDTO.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\LoginDTO.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\ModuleDTO.java
-C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\PayPalOrderDTO.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\RelatedWorkDTO.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SecondCourseDTO.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\dtos\SessionAnswerDTO.java
@@ -91,7 +88,6 @@ C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProfileService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressRwService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressSessionService.java
-C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\PayPalService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\CourseServiceImp.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.java
