@@ -5,6 +5,7 @@ import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.Tool;
 import com.aecode.webcoursesback.services.ISecondCourseService;
+import com.aecode.webcoursesback.services.ImageUploadingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/secondarycourses")
 public class SecondCourseController {
-    @Value("${file.upload-dir}")
-    private String uploadDir;
     @Autowired
     private ISecondCourseService scS;
+
+    @Autowired
+    private ImageUploadingService imageUploadingService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(
@@ -45,22 +47,10 @@ public class SecondCourseController {
             ModelMapper modelMapper = new ModelMapper();
             SecondaryCourses courses = modelMapper.map(dto, SecondaryCourses.class);
             scS.insert(courses);
-            // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + dto.getSeccourseId();
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
 
-            // Variables para guardar los nombres de archivo
-            String principalImageFilename = null;
-            // Manejo del archivo de imagen principal (principalImage)
-            if (principalImage != null && !principalImage.isEmpty()) {
-                principalImageFilename = principalImage.getOriginalFilename();
-                byte[] bytes = principalImage.getBytes();
-                Path path = userUploadPath.resolve(principalImageFilename);
-                Files.write(path, bytes);
-            }
+            String pathDirectory = "secondcourse/" + dto.getTitle();
+
+            String principalImageUrl = imageUploadingService.upload(principalImage, pathDirectory);
 
             // Asociar herramientas al curso
             if (dto.getTools() != null) {
@@ -84,10 +74,7 @@ public class SecondCourseController {
                 courses.setFreqquests(freqquests);
             }
 
-            if (principalImageFilename != null) {
-                courses.setPrincipalimage(
-                        "/uploads/secondcourse/" + courses.getSeccourseId() + "/" + principalImageFilename);
-            }
+            courses.setPrincipalimage(principalImageUrl);
 
             // Guardar el curso
             scS.insert(courses);
@@ -287,7 +274,7 @@ public class SecondCourseController {
             }
 
             // Crear directorio para guardar imágenes si no existe
-            String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + id;
+            String userUploadDir = File.separator + "secondcourse" + File.separator + id;
             Path userUploadPath = Paths.get(userUploadDir);
             if (Files.notExists(userUploadPath)) {
                 Files.createDirectories(userUploadPath);
@@ -295,12 +282,12 @@ public class SecondCourseController {
 
             // Actualizar la imagen principal (principalImage)
             if (principalImage != null && !principalImage.isEmpty()) {
-                String principalImageFilename = principalImage.getOriginalFilename();
-                Path imagePath = userUploadPath.resolve(principalImageFilename);
-                Files.write(imagePath, principalImage.getBytes());
+                String imagePath = principalImage.getOriginalFilename();
+                Path principalImagePath = userUploadPath.resolve(imagePath);
+                Files.write(principalImagePath, principalImage.getBytes());
 
                 // Establecer la nueva ruta en la entidad
-                existingCourse.setPrincipalimage("/uploads/secondcourse/" + id + "/" + principalImageFilename);
+                existingCourse.setPrincipalimage("/uploads/secondcourse/" + id + "/" + imagePath);
             }
 
             // Guardar los cambios en la base de datos
