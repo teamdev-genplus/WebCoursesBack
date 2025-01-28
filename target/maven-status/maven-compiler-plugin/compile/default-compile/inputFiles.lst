@@ -1,6 +1,8 @@
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\config\CorsConfig.java
+C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\config\GoogleCloudConfig.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\CourseController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\EmailSenderController.java
+C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\ImageUploadingController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\ModuleController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\RelatedWorkController.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\controllers\SecondCourseController.java
@@ -73,6 +75,7 @@ C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\repositories\IUserProgressSessionRepo.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\EmailSenderService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ICourseService.java
+C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ImageUploadingService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IModuleService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IRelatedWorkService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\ISecondCourseService.java
@@ -88,6 +91,7 @@ C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProfileService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressRwService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\IUserProgressSessionService.java
+C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\services\SecreteManagerService.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\CourseServiceImp.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.java
 C:\Users\sthep\Desktop\Workspace\Backend\WebCoursesBack\src\main\java\com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.java
