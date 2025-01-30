@@ -37,7 +37,7 @@ public class SecondaryCourses {
     private String startDate;
 
     @Column(length = 255)
-    private String certificateDate;
+    private String certificateHours;
 
     @Column(length = 255)
     private Double priceRegular;
@@ -78,6 +78,9 @@ public class SecondaryCourses {
 
     @Column()
     private String[] schedules;
+
+    @Column()
+    private String[] requirements;
 
     @Builder.Default
     @ElementCollection

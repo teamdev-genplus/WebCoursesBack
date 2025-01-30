@@ -16,12 +16,15 @@ import com.google.cloud.secretmanager.v1.SecretManagerServiceSettings;
 public class GoogleCloudConfig {
     @Bean
     public SecretManagerServiceClient secretManagerServiceClient() throws IOException {
-        InputStream credentialsStream = new ClassPathResource("google-credentials.json").getInputStream();
-        GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsStream);
+        GoogleCredentials credentials;
+        try (InputStream credentialsStream = new ClassPathResource("google-credentials.json").getInputStream()) {
+            credentials = GoogleCredentials.fromStream(credentialsStream);
+        }
 
-        return SecretManagerServiceClient.create(
-                SecretManagerServiceSettings.newBuilder()
-                        .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
-                        .build());
+        SecretManagerServiceSettings settings = SecretManagerServiceSettings.newBuilder()
+                .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
+                .build();
+
+        return SecretManagerServiceClient.create(settings);
     }
 }

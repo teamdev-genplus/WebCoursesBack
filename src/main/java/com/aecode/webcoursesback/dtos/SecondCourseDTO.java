@@ -21,7 +21,7 @@ public class SecondCourseDTO {
     private String module;
     private String brochureUrl;
     private String startDate;
-    private String certificateDate;
+    private String certificateHours;
     private Double priceRegular;
     private int discountPercentage;
     private Double promptPaymentPrice;
@@ -33,6 +33,7 @@ public class SecondCourseDTO {
     private int numberOfSessions;
     private int numberOfUnits;
     private String[] schedules;
+    private String[] requirements;
     @Builder.Default
     private List<String> benefits = new ArrayList<>();
     @Builder.Default

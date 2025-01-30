@@ -9,7 +9,6 @@ import com.aecode.webcoursesback.services.ImageUploadingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -236,7 +235,7 @@ public class SecondCourseController {
                 Optional.ofNullable(courseDTO.getDescription()).ifPresent(existingCourse::setDescription);
                 Optional.ofNullable(courseDTO.getProgramTitle()).ifPresent(existingCourse::setProgramTitle);
                 Optional.ofNullable(courseDTO.getStartDate()).ifPresent(existingCourse::setStartDate);
-                Optional.ofNullable(courseDTO.getCertificateDate()).ifPresent(existingCourse::setCertificateDate);
+                Optional.ofNullable(courseDTO.getCertificateHours()).ifPresent(existingCourse::setCertificateHours);
                 Optional.ofNullable(courseDTO.getPriceRegular()).ifPresent(existingCourse::setPriceRegular);
                 Optional.ofNullable(courseDTO.getDiscountPercentage()).ifPresent(existingCourse::setDiscountPercentage);
                 Optional.ofNullable(courseDTO.getPromptPaymentPrice()).ifPresent(existingCourse::setPromptPaymentPrice);
@@ -249,6 +248,7 @@ public class SecondCourseController {
                 Optional.ofNullable(courseDTO.getNumberOfSessions()).ifPresent(existingCourse::setNumberOfSessions);
                 Optional.ofNullable(courseDTO.getNumberOfUnits()).ifPresent(existingCourse::setNumberOfUnits);
                 Optional.ofNullable(courseDTO.getSchedules()).ifPresent(existingCourse::setSchedules);
+                Optional.ofNullable(courseDTO.getRequirements()).ifPresent(existingCourse::setRequirements);
 
                 // Actualizar las herramientas asociadas al curso
                 if (courseDTO.getTools() != null) {
