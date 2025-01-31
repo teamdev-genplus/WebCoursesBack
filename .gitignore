@@ -33,4 +33,4 @@ build/
 /target/
 *.jar
 
-src/main/resources/google-credentials.json
+src/main/resources/google-credentials.jsonsrc/main/resources/*.json
