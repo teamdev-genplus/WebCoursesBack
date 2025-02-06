@@ -23,17 +23,13 @@ import com.google.cloud.storage.StorageOptions;
 @Service
 public class ImageUploadingService {
 
-    @Autowired
-    SecretManagerServiceClient secretManagerServiceClient;
+    private final SecretManagerServiceClient secretManagerServiceClient;
+
+    public ImageUploadingService(SecretManagerServiceClient secretManagerServiceClient) {
+        this.secretManagerServiceClient = secretManagerServiceClient;
+    }
 
     public String uploadFile(File file, String fileName, String directoryPath) throws IOException {
-        // InputStream inputStream = ImageUploadingService.class.getClassLoader()
-        // .getResourceAsStream("digitalproduct-6d2f8-firebase-adminsdk-2f88c-dafb14c702.json");
-
-        // if (inputStream == null) {
-        // throw new IllegalArgumentException("El archivo de credenciales no se encontró
-        // en el classpath");
-        // }
 
         // Obtener las credenciales desde Google Cloud Secret Manager
         String credentialsJson = getSecretPayload(
@@ -82,8 +78,7 @@ public class ImageUploadingService {
             AccessSecretVersionResponse response = secretManagerServiceClient.accessSecretVersion(secretName);
             return response.getPayload().getData().toStringUtf8();
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al acceder al secreto: " + secretName, e);
+            throw new RuntimeException("Error al obtener el secreto: " + secretName, e);
         }
     }
 

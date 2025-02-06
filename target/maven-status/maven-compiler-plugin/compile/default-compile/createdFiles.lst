@@ -75,7 +75,6 @@ com\aecode\webcoursesback\servicesimplement\UnitServiceImp.class
 com\aecode\webcoursesback\repositories\IUserCourseRepo.class
 com\aecode\webcoursesback\servicesimplement\SecondCourseServImp.class
 com\aecode\webcoursesback\WebCoursesBackApplication.class
-com\aecode\webcoursesback\services\SecreteManagerService.class
 com\aecode\webcoursesback\controllers\UserCourseController.class
 com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.class
 com\aecode\webcoursesback\repositories\IUserDetailRepo.class

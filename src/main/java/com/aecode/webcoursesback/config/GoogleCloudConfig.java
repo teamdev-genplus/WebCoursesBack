@@ -1,72 +1,103 @@
 package com.aecode.webcoursesback.config;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceSettings;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Configuration
 public class GoogleCloudConfig {
+
     private static final Logger logger = LoggerFactory.getLogger(GoogleCloudConfig.class);
 
-    @Value("${GOOGLE_CREDENTIALS}")
-    private String googleCredentialsJson;
+    @PostConstruct
+    public void init() {
+        // Este método se ejecutará después de la inyección de dependencias
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+
+        // Este método se ejecutará después de la inyección de dependencias
+        logger.info("Iniciando configuración de Google Cloud");
+        logger.info("Ruta de credenciales configurada: {}", credentialsPath);
+
+        // Verificación de las variables de entorno
+        logger.info("Variables de entorno disponibles:");
+        logger.info("GOOGLE_APPLICATION_CREDENTIALS: {}", credentialsPath);
+
+        if (credentialsPath == null) {
+            logger.error("La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está configurada");
+            throw new RuntimeException("La variable de entorno GOOGLE_APPLICATION_CREDENTIALS no está configurada.");
+        }
+    }
+
+    @PostConstruct
+    public void validateCredentialsFile() {
+        try {
+            String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            File file = new File(credentialsPath);
+            logger.info("Validando archivo de credenciales:");
+            logger.info("¿Existe?: {}", file.exists());
+            logger.info("¿Se puede leer?: {}", file.canRead());
+            logger.info("Tamaño: {} bytes", file.length());
+
+            // Intentar leer el contenido como JSON para validar
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.readTree(file);
+            logger.info("Archivo JSON válido");
+        } catch (Exception e) {
+            logger.error("Error validando archivo de credenciales", e);
+        }
+    }
 
     @Bean
-    public SecretManagerServiceClient secretManagerServiceClient() throws IOException {
+    public SecretManagerServiceClient secretManagerServiceClient() {
         try {
-            // Validar y formatear el JSON
-            String formattedJson = validateAndFormatJson(googleCredentialsJson);
+            logger.info("Intentando crear SecretManagerServiceClient");
 
-            GoogleCredentials credentials;
-            try (ByteArrayInputStream credentialsStream = new ByteArrayInputStream(formattedJson.getBytes())) {
-                credentials = GoogleCredentials.fromStream(credentialsStream);
+            String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            if (credentialsPath == null) {
+                throw new RuntimeException("La ruta de credenciales no está configurada.");
             }
+
+            File credentialsFile = new File(credentialsPath);
+            if (!credentialsFile.exists()) {
+                throw new RuntimeException("Archivo de credenciales no encontrado en: " + credentialsPath);
+            }
+
+            GoogleCredentials credentials = GoogleCredentials.fromStream(
+                    new FileInputStream(credentialsFile));
+
+            logger.info("Credenciales cargadas exitosamente");
 
             SecretManagerServiceSettings settings = SecretManagerServiceSettings.newBuilder()
                     .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
                     .build();
 
-            return SecretManagerServiceClient.create(settings);
+            SecretManagerServiceClient client = SecretManagerServiceClient.create(settings);
+            logger.info("Cliente de Secret Manager creado exitosamente");
+
+            return client;
+
+        } catch (IOException e) {
+            String errorMessage = "Error al crear SecretManagerServiceClient: " + e.getMessage();
+            logger.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
         } catch (Exception e) {
-            logger.error("Error al crear el cliente de Secret Manager. Contenido de GOOGLE_CREDENTIALS: {}",
-                    googleCredentialsJson.substring(0, Math.min(googleCredentialsJson.length(), 100)) + "...");
-            throw new RuntimeException("Error al inicializar Secret Manager Client", e);
-        }
-    }
-
-    private String validateAndFormatJson(String jsonString) {
-        try {
-            // Eliminar posibles caracteres especiales o espacios al inicio y final
-            jsonString = jsonString.trim();
-
-            // Si el JSON está envuelto en comillas simples o dobles, las removemos
-            if ((jsonString.startsWith("'") && jsonString.endsWith("'")) ||
-                    (jsonString.startsWith("\"") && jsonString.endsWith("\""))) {
-                jsonString = jsonString.substring(1, jsonString.length() - 1);
-            }
-
-            // Validar que sea un JSON válido
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
-
-            // Convertir de vuelta a string formateado
-            return gson.toJson(jsonObject);
-        } catch (Exception e) {
-            logger.error("Error al validar el JSON de credenciales", e);
-            throw new RuntimeException("El formato de las credenciales no es válido", e);
+            String errorMessage = "Error inesperado al crear SecretManagerServiceClient: " + e.getMessage();
+            logger.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
         }
     }
 }
