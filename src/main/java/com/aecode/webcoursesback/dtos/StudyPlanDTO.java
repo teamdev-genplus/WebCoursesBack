@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.dtos;
+
 import java.util.List;
 
 public class StudyPlanDTO {

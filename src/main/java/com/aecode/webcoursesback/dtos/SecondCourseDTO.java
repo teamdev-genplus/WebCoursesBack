@@ -1,197 +1,64 @@
 package com.aecode.webcoursesback.dtos;
 
-import com.aecode.webcoursesback.entities.SecondaryCourses;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SecondCourseDTO {
 
     private int seccourseId;
     private String title;
-    private String principalimage;
+    private String programTitle;
     private String description;
-    // Usado para POST/PATCH: IDs solamente
-    private List<Integer> toolIds;
-    private List<Integer> freqquestIds;
-
-    private int percentage;
-
-    private List<StudyPlanDTO> studyplans;
-    private List<CouponDTO> coupons;
-
-    // Usado para GET: objetos completos
-    private List<ToolDTO> tools;
-    private List<FreqQuestDTO> freqquests;
-
-    private SecondaryCourses.Level level;
-
-    private SecondaryCourses.Mode mode;
-
-    private List<String> benefits;
-    private String schedule;
-    private String achievement;
-    private String exterallink;
-    private String videoUrl;
+    private String module;
+    private String brochureUrl;
+    private String startDate;
+    private String certificateHours;
     private Double priceRegular;
-    private Double priceAcademy;
+    private int discountPercentage;
+    private Double promptPaymentPrice;
+    private Boolean isOnSale;
+    private String achievement;
+    private String videoUrl;
+    private String principalimage;
+    private int totalHours;
+    private int numberOfSessions;
+    private int numberOfUnits;
+    private String[] schedules;
+    private String[] requirements;
+    @Builder.Default
+    private List<String> benefits = new ArrayList<>();
+    @Builder.Default
+    private List<ToolDTO> tools = new ArrayList<>();
+    @Builder.Default
+    private List<StudyPlanDTO> studyplans = new ArrayList<>();
+    @Builder.Default
+    private List<CouponDTO> coupons = new ArrayList<>();
+    @Builder.Default
+    private List<FreqQuestDTO> freqquests = new ArrayList<>();
+    private Mode mode;
 
-    public List<CouponDTO> getCoupons() {
-        return coupons;
-    }
+    public enum Mode {
+        SINCRONO("Síncrono"),
+        ASINCRONO("Asíncrono"),
+        EN_VIVO("En Vivo");
 
-    public void setCoupons(List<CouponDTO> coupons) {
-        this.coupons = coupons;
-    }
+        private final String displayName;
 
-    public int getPercentage() {
-        return percentage;
-    }
+        Mode(String displayName) {
+            this.displayName = displayName;
+        }
 
-    public void setPercentage(int percentage) {
-        this.percentage = percentage;
-    }
-
-    public Double getPriceRegular() {
-        return priceRegular;
-    }
-
-    public void setPriceRegular(Double priceRegular) {
-        this.priceRegular = priceRegular;
-    }
-
-    public Double getPriceAcademy() {
-        return priceAcademy;
-    }
-
-    public void setPriceAcademy(Double priceAcademy) {
-        this.priceAcademy = priceAcademy;
-    }
-
-    public List<StudyPlanDTO> getStudyplans() {
-        return studyplans;
-    }
-
-    public void setStudyplans(List<StudyPlanDTO> studyplans) {
-        this.studyplans = studyplans;
-    }
-
-    public int getSeccourseId() {
-        return seccourseId;
-    }
-
-    public void setSeccourseId(int seccourseId) {
-        this.seccourseId = seccourseId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getPrincipalimage() {
-        return principalimage;
-    }
-
-    public void setPrincipalimage(String principalimage) {
-        this.principalimage = principalimage;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public List<Integer> getToolIds() {
-        return toolIds;
-    }
-
-    public void setToolIds(List<Integer> toolIds) {
-        this.toolIds = toolIds;
-    }
-
-    public List<Integer> getFreqquestIds() {
-        return freqquestIds;
-    }
-
-    public void setFreqquestIds(List<Integer> freqquestIds) {
-        this.freqquestIds = freqquestIds;
-    }
-
-    public List<ToolDTO> getTools() {
-        return tools;
-    }
-
-    public void setTools(List<ToolDTO> tools) {
-        this.tools = tools;
-    }
-
-    public List<FreqQuestDTO> getFreqquests() {
-        return freqquests;
-    }
-
-    public void setFreqquests(List<FreqQuestDTO> freqquests) {
-        this.freqquests = freqquests;
-    }
-
-    public List<String> getBenefits() {
-        return benefits;
-    }
-
-    public void setBenefits(List<String> benefits) {
-        this.benefits = benefits;
-    }
-
-    public String getSchedule() {
-        return schedule;
-    }
-
-    public void setSchedule(String schedule) {
-        this.schedule = schedule;
-    }
-
-    public String getAchievement() {
-        return achievement;
-    }
-
-    public void setAchievement(String achievement) {
-        this.achievement = achievement;
-    }
-
-    public String getExterallink() {
-        return exterallink;
-    }
-
-    public void setExterallink(String exterallink) {
-        this.exterallink = exterallink;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
-
-    public SecondaryCourses.Level getLevel() {
-        return level;
-    }
-
-    public void setLevel(SecondaryCourses.Level level) {
-        this.level = level;
-    }
-
-    public SecondaryCourses.Mode getMode() {
-        return mode;
-    }
-
-    public void setMode(SecondaryCourses.Mode mode) {
-        this.mode = mode;
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 }
