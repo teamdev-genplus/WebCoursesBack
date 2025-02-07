@@ -31,8 +31,6 @@ public class ToolController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @Autowired
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value = "file", required = false) MultipartFile imagen,
             @RequestPart(value = "data", required = false) String dtoJson) {

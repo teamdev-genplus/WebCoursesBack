@@ -1,9 +1,9 @@
 package com.aecode.webcoursesback.entities;
+
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 @Table(name = "courses")
@@ -16,19 +16,22 @@ public class Course {
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column( length = 255)
+    @Column(nullable = true, length = 255)
+    private String description;
+
+    @Column(length = 255)
     private String coverimage;
 
-    @Column( length = 255)
+    @Column(length = 255)
     private String gift;
 
-    @Column( length = 255)
+    @Column(length = 255)
     private String moduleimage;
 
-    @Column( length = 255)
+    @Column(length = 255)
     private String urlkit;
 
-    @Column( length = 255)
+    @Column(length = 255)
     private String videoUrl;
     @Column
     private Integer percentage;
@@ -37,15 +40,14 @@ public class Course {
     @Column
     private Integer hours;
 
+    @Column
+    private Integer courseOrder;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules = new ArrayList<>();
 
     @ManyToMany
-    @JoinTable(
-            name = "course_tools",
-            joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "tool_id")
-    )
+    @JoinTable(name = "course_tools", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "tool_id"))
     private List<Tool> tools;
 
     @Column(length = 255)
@@ -54,9 +56,12 @@ public class Course {
     public Course() {
     }
 
-    public Course(int courseId, String title, String coverimage, String gift, String moduleimage, String urlkit, String videoUrl, Integer percentage, Double price, List<Module> modules, Integer hours, List<Tool> tools, String subtitle) {
+    public Course(int courseId, String title, String description, String coverimage, String gift, String moduleimage,
+            String urlkit, String videoUrl, Integer percentage, Double price, List<Module> modules, Integer hours,
+            List<Tool> tools, String subtitle, Integer courseOrder) {
         this.courseId = courseId;
         this.title = title;
+        this.description = description;
         this.coverimage = coverimage;
         this.gift = gift;
         this.moduleimage = moduleimage;
@@ -68,6 +73,15 @@ public class Course {
         this.hours = hours;
         this.tools = tools;
         this.subtitle = subtitle;
+        this.courseOrder = courseOrder;
+    }
+
+    public Integer getCourseOrder() {
+        return courseOrder;
+    }
+
+    public void setCourseOrder(Integer courseOrder) {
+        this.courseOrder = courseOrder;
     }
 
     public String getUrlkit() {
@@ -148,6 +162,14 @@ public class Course {
 
     public void setCourseId(int courseId) {
         this.courseId = courseId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getTitle() {

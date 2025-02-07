@@ -5,7 +5,9 @@ import java.util.List;
 public class CourseDTO {
     private int courseId;
     private String title;
+    private String description;
     private String coverimage;
+    private Integer courseOrder;
     private String gift;
     private String moduleimage;
     private String urlkit;
@@ -19,12 +21,28 @@ public class CourseDTO {
 
     private String subtitle;
 
+    public Integer getCourseOrder() {
+        return courseOrder;
+    }
+
+    public void setCourseOrder(Integer courseOrder) {
+        this.courseOrder = courseOrder;
+    }
+
     public String getUrlkit() {
         return urlkit;
     }
 
     public void setUrlkit(String urlkit) {
         this.urlkit = urlkit;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getSubtitle() {

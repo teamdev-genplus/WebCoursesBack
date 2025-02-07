@@ -1,4 +1,5 @@
 com\aecode\webcoursesback\services\IUserModuleService.class
+com\aecode\webcoursesback\servicesimplement\FreqQuestServiceImp.class
 com\aecode\webcoursesback\servicesimplement\UserCourseServiceImp.class
 com\aecode\webcoursesback\services\IUserProgressRwService.class
 com\aecode\webcoursesback\dtos\SecondCourseDTO.class
@@ -9,6 +10,7 @@ com\aecode\webcoursesback\dtos\LoginDTO.class
 com\aecode\webcoursesback\repositories\ISecondCourseRepo.class
 com\aecode\webcoursesback\services\ISessionAnswerService.class
 com\aecode\webcoursesback\servicesimplement\SessionTestImp.class
+com\aecode\webcoursesback\services\IFreqQuestService.class
 com\aecode\webcoursesback\repositories\IToolRepo.class
 com\aecode\webcoursesback\controllers\StudyPlanController.class
 com\aecode\webcoursesback\dtos\RelatedWorkDTO.class
@@ -34,8 +36,10 @@ com\aecode\webcoursesback\dtos\FreqQuestDTO.class
 com\aecode\webcoursesback\entities\SecondaryCourses.class
 com\aecode\webcoursesback\servicesimplement\UserProgressRwServiceImp.class
 com\aecode\webcoursesback\services\EmailSenderService.class
+com\aecode\webcoursesback\entities\SecondaryCourses$SecondaryCoursesBuilder.class
 com\aecode\webcoursesback\entities\Session.class
 com\aecode\webcoursesback\dtos\UserProfileDTO.class
+com\aecode\webcoursesback\dtos\SecondCourseDTO$Mode.class
 com\aecode\webcoursesback\dtos\ModuleDTO.class
 com\aecode\webcoursesback\servicesimplement\UserProfileServiceImplement.class
 com\aecode\webcoursesback\repositories\ICourseRepo.class
@@ -49,15 +53,16 @@ com\aecode\webcoursesback\servicesimplement\ToolServiceImp.class
 com\aecode\webcoursesback\dtos\SessionAnswerDTO.class
 com\aecode\webcoursesback\dtos\StudyPlanDTO.class
 com\aecode\webcoursesback\services\IUserDetailService.class
-com\aecode\webcoursesback\entities\SecondaryCourses$Level.class
 com\aecode\webcoursesback\services\ISessionTestService.class
 com\aecode\webcoursesback\servicesimplement\CourseServiceImp.class
 com\aecode\webcoursesback\entities\UserProfile.class
 com\aecode\webcoursesback\servicesimplement\ModuleServiceImp.class
 com\aecode\webcoursesback\controllers\UserModuleController.class
 com\aecode\webcoursesback\dtos\SessionDTO.class
+com\aecode\webcoursesback\dtos\SecondCourseDTO$SecondCourseDTOBuilder.class
 com\aecode\webcoursesback\services\IRelatedWorkService.class
 com\aecode\webcoursesback\controllers\SessionTestController.class
+com\aecode\webcoursesback\controllers\FreqQuestController.class
 com\aecode\webcoursesback\servicesimplement\SessionAnswerImp.class
 com\aecode\webcoursesback\controllers\SessionAnswerController.class
 com\aecode\webcoursesback\entities\UserCourseAccess.class
@@ -72,6 +77,7 @@ com\aecode\webcoursesback\repositories\IUserCourseRepo.class
 com\aecode\webcoursesback\servicesimplement\SecondCourseServImp.class
 com\aecode\webcoursesback\WebCoursesBackApplication.class
 com\aecode\webcoursesback\controllers\UserCourseController.class
+com\aecode\webcoursesback\repositories\IFreqQuestRepo.class
 com\aecode\webcoursesback\servicesimplement\RelatedWorkImp.class
 com\aecode\webcoursesback\repositories\IUserDetailRepo.class
 com\aecode\webcoursesback\servicesimplement\UserDetailServiceImp.class
