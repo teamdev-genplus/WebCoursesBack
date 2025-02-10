@@ -36,6 +36,7 @@ public class StudyPlanController {
         studyPlan.setSessions(dto.getSessions());
         studyPlan.setHours(dto.getHours());
         studyPlan.setUnit(dto.getUnit());
+        studyPlan.setOrderNumber(dto.getOrderNumber());
 
         spS.insert(studyPlan);
         return ResponseEntity.status(201).body("created successfully");
@@ -82,6 +83,9 @@ public class StudyPlanController {
             }
             if (studyPlanDTO.getHours() != 0) {
                 existingStudyPlan.setHours(studyPlanDTO.getHours());
+            }
+            if (studyPlanDTO.getOrderNumber() != 0) {
+                existingStudyPlan.setOrderNumber(studyPlanDTO.getOrderNumber());
             }
             if (studyPlanDTO.getSeccourseId() != 0) {
                 // Relacionar el módulo con otro curso si el curso ID es diferente
