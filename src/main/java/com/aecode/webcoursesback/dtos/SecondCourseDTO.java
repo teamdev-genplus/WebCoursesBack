@@ -20,6 +20,7 @@ public class SecondCourseDTO {
     private String description;
     private String module;
     private String brochureUrl;
+    private String whatsappGroupLink;
     private String startDate;
     private String certificateHours;
     private Double priceRegular;
