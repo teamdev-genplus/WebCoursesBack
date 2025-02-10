@@ -33,6 +33,9 @@ public class SecondaryCourses {
     @Column(length = 255)
     private String brochureUrl;
 
+    @Column(nullable = true, length = 255)
+    private String whatsappGroupLink;
+
     @Column(length = 255)
     private String startDate;
 
@@ -94,6 +97,7 @@ public class SecondaryCourses {
 
     @Builder.Default
     @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderNumber ASC")
     private List<StudyPlan> studyplans = new ArrayList<>();
 
     @Builder.Default
