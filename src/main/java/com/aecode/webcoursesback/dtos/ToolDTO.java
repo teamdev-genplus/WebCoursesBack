@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ToolDTO {
 
-    private int toolId;
+    private Integer toolId;
     private String name;
     private String picture;
 
