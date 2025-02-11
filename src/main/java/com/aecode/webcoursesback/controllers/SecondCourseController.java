@@ -136,6 +136,7 @@ public class SecondCourseController {
                     studyPlanDTO.setUnit(studyPlan.getUnit());
                     studyPlanDTO.setHours(studyPlan.getHours());
                     studyPlanDTO.setSessions(studyPlan.getSessions());
+                    studyPlanDTO.setOrderNumber(studyPlan.getOrderNumber());
                     // Asignar el ID del curso secundario al DTO
                     studyPlanDTO.setSeccourseId(course.getSeccourseId());
                     return studyPlanDTO;
@@ -207,6 +208,7 @@ public class SecondCourseController {
                 studyPlanDTO.setUnit(studyPlan.getUnit());
                 studyPlanDTO.setHours(studyPlan.getHours());
                 studyPlanDTO.setSessions(studyPlan.getSessions());
+                studyPlanDTO.setOrderNumber(studyPlan.getOrderNumber());
                 studyPlanDTO.setSeccourseId(course.getSeccourseId());
                 return studyPlanDTO;
             }).collect(Collectors.toList());
