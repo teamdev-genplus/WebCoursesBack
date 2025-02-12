@@ -24,10 +24,10 @@ public class SecondaryCourses {
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 255, name = "program_title")
     private String programTitle;
 
-    @Column(length = 50)
+    @Column(length = 50, name = "module")
     private String module;
 
     @Column(length = 255)

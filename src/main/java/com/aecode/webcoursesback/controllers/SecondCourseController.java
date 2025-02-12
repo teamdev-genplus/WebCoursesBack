@@ -316,4 +316,73 @@ public class SecondCourseController {
         }
     }
 
+    @GetMapping("/getByModulexProgram/{module}/{programTitle}")
+    public SecondCourseDTO getCourseByModulexProgram(@PathVariable String module, @PathVariable String programTitle) {
+        // Obtener el curso por módulo y programa
+        SecondaryCourses course = scS.listByModulexProgram(module, programTitle);
+
+        // Verificar si el curso es nulo
+        if (course == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado");
+        }
+
+        // Mapear la entidad a DTO
+        ModelMapper modelMapper = new ModelMapper();
+        SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
+
+        // Mapear herramientas
+        if (course.getTools() != null) {
+            List<ToolDTO> toolDTOs = course.getTools().stream().map(tool -> {
+                ToolDTO toolDTO = new ToolDTO();
+                toolDTO.setToolId(tool.getToolId());
+                toolDTO.setName(tool.getName());
+                toolDTO.setPicture(tool.getPicture());
+                return toolDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setTools(toolDTOs);
+        }
+
+        // Mapear preguntas frecuentes
+        if (course.getFreqquests() != null) {
+            List<FreqQuestDTO> freqQuestDTOs = course.getFreqquests().stream().map(freqQuest -> {
+                FreqQuestDTO freqQuestDTO = new FreqQuestDTO();
+                freqQuestDTO.setFreqquestId(freqQuest.getFreqquestId());
+                freqQuestDTO.setQuestionText(freqQuest.getQuestionText());
+                freqQuestDTO.setAnswerText(freqQuest.getAnswerText());
+                return freqQuestDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setFreqquests(freqQuestDTOs);
+        }
+
+        // Mapear planes de estudio
+        if (course.getStudyplans() != null) {
+            List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream().map(studyPlan -> {
+                StudyPlanDTO studyPlanDTO = new StudyPlanDTO();
+                studyPlanDTO.setStudyplanId(studyPlan.getStudyplanId());
+                studyPlanDTO.setUnit(studyPlan.getUnit());
+                studyPlanDTO.setHours(studyPlan.getHours());
+                studyPlanDTO.setSessions(studyPlan.getSessions());
+                studyPlanDTO.setOrderNumber(studyPlan.getOrderNumber());
+                studyPlanDTO.setSeccourseId(course.getSeccourseId());
+                return studyPlanDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setStudyplans(studyPlanDTOs);
+        }
+
+        // Mapear cupones
+        if (course.getCoupons() != null) {
+            List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
+                CouponDTO couponDTO = new CouponDTO();
+                couponDTO.setCouponId(coupon.getCouponId());
+                couponDTO.setName(coupon.getName());
+                couponDTO.setDiscount(coupon.getDiscount());
+                couponDTO.setSeccourseId(course.getSeccourseId());
+                return couponDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setCoupons(couponDTOs);
+        }
+
+        return courseDTO;
+    }
+
 }
