@@ -37,4 +37,9 @@ public class SecondCourseServImp implements ISecondCourseService {
     public SecondaryCourses listByModulexProgram(String moduleNumber, String programTitle) {
         return scR.findByModulexProgram(moduleNumber, programTitle);
     }
+
+    @Override
+    public List<SecondaryCourses> paginatedList(int limit, int offset) {
+        return scR.paginatedList(limit, offset);
+    }
 }
