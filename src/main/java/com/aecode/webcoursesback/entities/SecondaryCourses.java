@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +37,9 @@ public class SecondaryCourses {
     @Column(nullable = true, length = 255)
     private String whatsappGroupLink;
 
-    @Column(length = 255)
-    private String startDate;
+    @Temporal(TemporalType.DATE)
+    @Column(nullable = true)
+    private Date startDate;
 
     @Column(length = 255)
     private String certificateHours;
@@ -78,6 +80,9 @@ public class SecondaryCourses {
 
     @Column()
     private int numberOfUnits;
+
+    @Column(nullable = true)
+    private int orderNumber;
 
     @Column()
     private String[] schedules;

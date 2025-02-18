@@ -262,6 +262,7 @@ public class SecondCourseController {
                 Optional.ofNullable(courseDTO.getTotalHours()).ifPresent(existingCourse::setTotalHours);
                 Optional.ofNullable(courseDTO.getNumberOfSessions()).ifPresent(existingCourse::setNumberOfSessions);
                 Optional.ofNullable(courseDTO.getNumberOfUnits()).ifPresent(existingCourse::setNumberOfUnits);
+                Optional.ofNullable(courseDTO.getOrderNumber()).ifPresent(existingCourse::setOrderNumber);
                 Optional.ofNullable(courseDTO.getSchedules()).ifPresent(existingCourse::setSchedules);
                 Optional.ofNullable(courseDTO.getRequirements()).ifPresent(existingCourse::setRequirements);
 
