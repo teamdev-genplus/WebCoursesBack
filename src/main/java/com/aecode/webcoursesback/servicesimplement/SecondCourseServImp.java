@@ -20,7 +20,7 @@ public class SecondCourseServImp implements ISecondCourseService {
 
     @Override
     public List<SecondaryCourses> list() {
-        return scR.findAll();
+        return scR.listByOrderNumber();
     }
 
     @Override

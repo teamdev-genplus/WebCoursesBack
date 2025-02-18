@@ -13,6 +13,9 @@ public interface ISecondCourseRepo extends JpaRepository<SecondaryCourses, Integ
     @Query("SELECT s FROM SecondaryCourses  s WHERE s.programTitle = :programTitle AND s.module = :module")
     SecondaryCourses findByModulexProgram(@Param("module") String module, @Param("programTitle") String programTitle);
 
-    @Query(value = "SELECT * FROM secondary_courses WHERE seccourse_id > :offsetCourseId  ORDER BY seccourse_id ASC  LIMIT :limit;", nativeQuery = true)
+    @Query(value = "SELECT * FROM secondary_courses WHERE order_number > :offsetCourseId  ORDER BY order_number ASC  LIMIT :limit;", nativeQuery = true)
     List<SecondaryCourses> paginatedList(@Param("limit") int limit, @Param("offsetCourseId") int offsetCourseId);
+
+    @Query(value = "SELECT * FROM secondary_courses ORDER BY order_number ASC", nativeQuery = true)
+    List<SecondaryCourses> listByOrderNumber();
 }
