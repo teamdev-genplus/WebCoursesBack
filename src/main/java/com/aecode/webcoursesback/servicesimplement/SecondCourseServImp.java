@@ -20,7 +20,7 @@ public class SecondCourseServImp implements ISecondCourseService {
 
     @Override
     public List<SecondaryCourses> list() {
-        return scR.findAll();
+        return scR.listByOrderNumber();
     }
 
     @Override
@@ -31,5 +31,15 @@ public class SecondCourseServImp implements ISecondCourseService {
     @Override
     public SecondaryCourses listId(int secondcourseId) {
         return scR.findById(secondcourseId).orElse(new SecondaryCourses());
+    }
+
+    @Override
+    public SecondaryCourses listByModulexProgram(String moduleNumber, String programTitle) {
+        return scR.findByModulexProgram(moduleNumber, programTitle);
+    }
+
+    @Override
+    public List<SecondaryCourses> paginatedList(int limit, int offset) {
+        return scR.paginatedList(limit, offset);
     }
 }
