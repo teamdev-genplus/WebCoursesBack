@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class SecondCourseDTO {
     private String module;
     private String brochureUrl;
     private String whatsappGroupLink;
-    private String startDate;
+    private Date startDate;
     private String certificateHours;
     private Double priceRegular;
     private int discountPercentage;
@@ -33,6 +34,7 @@ public class SecondCourseDTO {
     private int totalHours;
     private int numberOfSessions;
     private int numberOfUnits;
+    private int orderNumber;
     private String[] schedules;
     private String[] requirements;
     @Builder.Default
