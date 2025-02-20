@@ -18,4 +18,7 @@ public interface ISecondCourseRepo extends JpaRepository<SecondaryCourses, Integ
 
     @Query(value = "SELECT * FROM secondary_courses ORDER BY order_number ASC", nativeQuery = true)
     List<SecondaryCourses> listByOrderNumber();
+
+    @Query(value = "SELECT * FROM secondary_courses WHERE mode = :mode ORDER BY order_number", nativeQuery = true)
+    List<SecondaryCourses> listByMode(@Param("mode") String mode);
 }

@@ -42,4 +42,9 @@ public class SecondCourseServImp implements ISecondCourseService {
     public List<SecondaryCourses> paginatedList(int limit, int offset) {
         return scR.paginatedList(limit, offset);
     }
+
+    @Override
+    public List<SecondaryCourses> paginateByMode(String mode) {
+        return scR.listByMode(mode);
+    }
 }
