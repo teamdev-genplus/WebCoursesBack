@@ -387,60 +387,62 @@ public class SecondCourseController {
     }
 
     @GetMapping("/paginatedList")
-    public List<SecondCourseDTO> paginatedList(@RequestParam int limit, @RequestParam int offsetCourseId) {
-        return scS.paginatedList(limit, offsetCourseId).stream().map(course -> {
-            ModelMapper modelMapper = new ModelMapper();
-            SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
+    public List<SecondCourseDTO> paginatedList(
+            @RequestParam int limit,
+            @RequestParam int offsetCourseId) {
 
-            if (course.getTools() != null) {
-                List<ToolDTO> toolDTOs = course.getTools().stream().map(tool -> {
-                    ToolDTO toolDTO = new ToolDTO();
-                    toolDTO.setToolId(tool.getToolId());
-                    toolDTO.setName(tool.getName());
-                    toolDTO.setPicture(tool.getPicture());
-                    return toolDTO;
-                }).collect(Collectors.toList());
-                courseDTO.setTools(toolDTOs);
-            }
+        return scS.paginatedList(limit, offsetCourseId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-            if (course.getFreqquests() != null) {
-                List<FreqQuestDTO> freqQuestDTOs = course.getFreqquests().stream().map(freqQuest -> {
-                    FreqQuestDTO freqQuestDTO = new FreqQuestDTO();
-                    freqQuestDTO.setFreqquestId(freqQuest.getFreqquestId());
-                    freqQuestDTO.setQuestionText(freqQuest.getQuestionText());
-                    freqQuestDTO.setAnswerText(freqQuest.getAnswerText());
-                    return freqQuestDTO;
-                }).collect(Collectors.toList());
-                courseDTO.setFreqquests(freqQuestDTOs);
-            }
+    @GetMapping("/paginateByMode")
+    public List<SecondCourseDTO> paginatedList(
+            @RequestParam(required = false) String mode) {
 
-            if (course.getStudyplans() != null) {
-                List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream().map(studyPlan -> {
-                    StudyPlanDTO studyPlanDTO = new StudyPlanDTO();
-                    studyPlanDTO.setStudyplanId(studyPlan.getStudyplanId());
-                    studyPlanDTO.setUnit(studyPlan.getUnit());
-                    studyPlanDTO.setHours(studyPlan.getHours());
-                    studyPlanDTO.setSessions(studyPlan.getSessions());
-                    studyPlanDTO.setOrderNumber(studyPlan.getOrderNumber());
-                    studyPlanDTO.setSeccourseId(course.getSeccourseId()); // Asignar el ID del curso secundario
-                    return studyPlanDTO;
-                }).collect(Collectors.toList());
-                courseDTO.setStudyplans(studyPlanDTOs);
-            }
+        return scS.paginateByMode(mode).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-            if (course.getCoupons() != null) {
-                List<CouponDTO> couponDTOs = course.getCoupons().stream().map(coupon -> {
-                    CouponDTO couponDTO = new CouponDTO();
-                    couponDTO.setCouponId(coupon.getCouponId());
-                    couponDTO.setName(coupon.getName());
-                    couponDTO.setDiscount(coupon.getDiscount());
-                    return couponDTO;
-                }).collect(Collectors.toList());
-                courseDTO.setCoupons(couponDTOs);
-            }
+    private SecondCourseDTO convertToDTO(SecondaryCourses course) {
+        ModelMapper modelMapper = new ModelMapper();
 
-            return courseDTO;
-        }).collect(Collectors.toList());
+        SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
+
+        if (course.getTools() != null) {
+            List<ToolDTO> toolDTOs = course.getTools().stream()
+                    .map(tool -> modelMapper.map(tool, ToolDTO.class))
+                    .collect(Collectors.toList());
+            courseDTO.setTools(toolDTOs);
+        }
+
+        if (course.getFreqquests() != null) {
+            List<FreqQuestDTO> freqQuestDTOs = course.getFreqquests().stream()
+                    .map(freqQuest -> modelMapper.map(freqQuest, FreqQuestDTO.class))
+                    .collect(Collectors.toList());
+            courseDTO.setFreqquests(freqQuestDTOs);
+        }
+
+        if (course.getStudyplans() != null) {
+            List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream()
+                    .map(studyPlan -> {
+                        StudyPlanDTO dto = modelMapper.map(studyPlan, StudyPlanDTO.class);
+                        dto.setSeccourseId(course.getSeccourseId()); // Asignar el ID del curso secundario
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+            courseDTO.setStudyplans(studyPlanDTOs);
+        }
+
+        if (course.getCoupons() != null) {
+            List<CouponDTO> couponDTOs = course.getCoupons().stream()
+                    .map(coupon -> modelMapper.map(coupon, CouponDTO.class))
+                    .collect(Collectors.toList());
+            courseDTO.setCoupons(couponDTOs);
+        }
+
+        return courseDTO;
     }
 
 }

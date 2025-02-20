@@ -17,4 +17,6 @@ public interface ISecondCourseService {
     public SecondaryCourses listByModulexProgram(String moduleNumber, String programTitle);
 
     public List<SecondaryCourses> paginatedList(int limit, int offset);
+
+    public List<SecondaryCourses> paginateByMode(String mode);
 }
