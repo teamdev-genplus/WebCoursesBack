@@ -23,5 +23,5 @@ public interface ISecondCourseRepo extends JpaRepository<SecondaryCourses, Long>
     Page<SecondaryCourses> findByOrderNumberGreaterThan(int offsetCourseId, Pageable pageable);
 
     // Spring genera la consulta automáticamente
-    Page<SecondaryCourses> findByMode(String mode, Pageable pageable);
+    Page<SecondaryCourses> findByMode(SecondaryCourses.Mode mode, Pageable pageable);
 }
