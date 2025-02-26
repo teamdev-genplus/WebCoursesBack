@@ -1,6 +1,12 @@
+# Etapa 1: Construcción del JAR
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Etapa 2: Construcción del Contenedor Final
 FROM openjdk:17
-VOLUME /tmp
+WORKDIR /app
+COPY --from=build /app/target/WebCoursesBack-0.0.1-SNAPSHOT.jar WebCoursesBack.jar
 EXPOSE 8080
-ARG JAR_FILE=target/WebCoursesBack-0.0.1-SNAPSHOT.jar
-ADD ${JAR_FILE} WebCoursesBack.jar
-ENTRYPOINT ["java","-jar","/WebCoursesBack.jar"]
+ENTRYPOINT ["java", "-jar", "/app/WebCoursesBack.jar"]
