@@ -62,7 +62,9 @@ public class SecondCourseServImp implements ISecondCourseService {
     }
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
-        Page<SecondaryCourses> courses = scR.findByMode(mode, pageable);
+        SecondaryCourses.Mode modeEnum = SecondaryCourses.Mode.valueOf(mode);
+
+        Page<SecondaryCourses> courses = scR.findByMode(modeEnum, pageable);
         return courses.map(course -> new SecondCourseSummaryDTO(
                 course.getSeccourseId(),
                 course.getTitle(),
