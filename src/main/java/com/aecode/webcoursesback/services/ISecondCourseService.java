@@ -1,8 +1,12 @@
 package com.aecode.webcoursesback.services;
 
+import com.aecode.webcoursesback.dtos.SecondCourseSummaryDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ISecondCourseService {
 
@@ -10,13 +14,13 @@ public interface ISecondCourseService {
 
     List<SecondaryCourses> list();
 
-    public void delete(int secondcourseId);
+    public void delete(Long secondcourseId);
 
-    public SecondaryCourses listId(int secondcourseId);
+    public SecondaryCourses listId(Long secondcourseId);
 
     public SecondaryCourses listByModulexProgram(String moduleNumber, String programTitle);
 
-    public List<SecondaryCourses> paginatedList(int limit, int offset);
+    public Page<SecondCourseSummaryDTO> paginatedList(int offsetCourseId, Pageable pageable);
 
-    public List<SecondaryCourses> paginateByMode(String mode);
+    public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable);
 }

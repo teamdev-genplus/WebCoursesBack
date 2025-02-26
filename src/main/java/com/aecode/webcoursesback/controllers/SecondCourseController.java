@@ -7,8 +7,12 @@ import com.aecode.webcoursesback.entities.Tool;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -159,12 +163,12 @@ public class SecondCourseController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Integer id) {
+    public void delete(@PathVariable("id") Long id) {
         scS.delete(id);
     }
 
     @GetMapping("/{id}")
-    public SecondCourseDTO listId(@PathVariable("id") Integer id) {
+    public SecondCourseDTO listId(@PathVariable("id") Long id) {
         // Obtener el curso por ID desde el servicio
         SecondaryCourses course = scS.listId(id);
 
@@ -231,10 +235,12 @@ public class SecondCourseController {
 
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") Long id,
             @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = false) String courseDTOJson) {
         try {
+            System.out.println("JSON recibido: " + courseDTOJson);
+
             // Obtener el curso existente por ID
             SecondaryCourses existingCourse = scS.listId(id);
             if (existingCourse == null || existingCourse.getSeccourseId() == 0) {
@@ -262,7 +268,8 @@ public class SecondCourseController {
                 Optional.ofNullable(courseDTO.getTotalHours()).ifPresent(existingCourse::setTotalHours);
                 Optional.ofNullable(courseDTO.getNumberOfSessions()).ifPresent(existingCourse::setNumberOfSessions);
                 Optional.ofNullable(courseDTO.getNumberOfUnits()).ifPresent(existingCourse::setNumberOfUnits);
-                Optional.ofNullable(courseDTO.getOrderNumber()).ifPresent(existingCourse::setOrderNumber);
+                Optional.ofNullable(courseDTO.getOrderNumber())
+                        .ifPresent(existingCourse::setOrderNumber);
                 Optional.ofNullable(courseDTO.getSchedules()).ifPresent(existingCourse::setSchedules);
                 Optional.ofNullable(courseDTO.getRequirements()).ifPresent(existingCourse::setRequirements);
 
@@ -287,6 +294,9 @@ public class SecondCourseController {
                             }).collect(Collectors.toList());
                     existingCourse.setFreqquests(freqquests);
                 }
+
+                System.out.println("DTO después de la conversión: " + objectMapper.writeValueAsString(courseDTO));
+
             }
 
             // Crear directorio para guardar imágenes basado en el ID del curso
@@ -387,62 +397,22 @@ public class SecondCourseController {
     }
 
     @GetMapping("/paginatedList")
-    public List<SecondCourseDTO> paginatedList(
-            @RequestParam int limit,
-            @RequestParam int offsetCourseId) {
-
-        return scS.paginatedList(limit, offsetCourseId).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity<Page<SecondCourseSummaryDTO>> paginatedList(
+            @RequestParam int offsetCourseId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderNumber").ascending());
+        Page<SecondCourseSummaryDTO> courses = scS.paginatedList(offsetCourseId, pageable);
+        return ResponseEntity.ok(courses);
     }
 
     @GetMapping("/paginateByMode")
-    public List<SecondCourseDTO> paginatedList(
-            @RequestParam(required = false) String mode) {
-
-        return scS.paginateByMode(mode).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private SecondCourseDTO convertToDTO(SecondaryCourses course) {
-        ModelMapper modelMapper = new ModelMapper();
-
-        SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
-
-        if (course.getTools() != null) {
-            List<ToolDTO> toolDTOs = course.getTools().stream()
-                    .map(tool -> modelMapper.map(tool, ToolDTO.class))
-                    .collect(Collectors.toList());
-            courseDTO.setTools(toolDTOs);
-        }
-
-        if (course.getFreqquests() != null) {
-            List<FreqQuestDTO> freqQuestDTOs = course.getFreqquests().stream()
-                    .map(freqQuest -> modelMapper.map(freqQuest, FreqQuestDTO.class))
-                    .collect(Collectors.toList());
-            courseDTO.setFreqquests(freqQuestDTOs);
-        }
-
-        if (course.getStudyplans() != null) {
-            List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream()
-                    .map(studyPlan -> {
-                        StudyPlanDTO dto = modelMapper.map(studyPlan, StudyPlanDTO.class);
-                        dto.setSeccourseId(course.getSeccourseId()); // Asignar el ID del curso secundario
-                        return dto;
-                    })
-                    .collect(Collectors.toList());
-            courseDTO.setStudyplans(studyPlanDTOs);
-        }
-
-        if (course.getCoupons() != null) {
-            List<CouponDTO> couponDTOs = course.getCoupons().stream()
-                    .map(coupon -> modelMapper.map(coupon, CouponDTO.class))
-                    .collect(Collectors.toList());
-            courseDTO.setCoupons(couponDTOs);
-        }
-
-        return courseDTO;
+    public ResponseEntity<Page<SecondCourseSummaryDTO>> paginateByMode(
+            @RequestParam String mode,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderNumber").ascending());
+        return ResponseEntity.ok(scS.paginateByMode(mode, pageable));
     }
 
 }
