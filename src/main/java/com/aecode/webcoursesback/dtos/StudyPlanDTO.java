@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class StudyPlanDTO {
 
     private int studyplanId;
-    private int seccourseId;
+    private Long seccourseId;
     private String unit;
     private int hours;
     private int orderNumber;

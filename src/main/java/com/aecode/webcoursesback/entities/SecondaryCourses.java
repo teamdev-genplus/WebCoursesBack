@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import java.util.List;
 public class SecondaryCourses {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "secondary_courses_seq")
-    private int seccourseId;
+    private Long seccourseId;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -39,7 +40,7 @@ public class SecondaryCourses {
 
     @Temporal(TemporalType.DATE)
     @Column(nullable = true)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(length = 255)
     private String certificateHours;
@@ -48,7 +49,7 @@ public class SecondaryCourses {
     private Double priceRegular;
 
     @Column()
-    private int discountPercentage;
+    private Double discountPercentage;
 
     @Column(length = 255)
     private Double promptPaymentPrice;
@@ -81,8 +82,8 @@ public class SecondaryCourses {
     @Column()
     private int numberOfUnits;
 
-    @Column(nullable = true)
-    private int orderNumber;
+    @Column()
+    private Integer orderNumber;
 
     @Column()
     private String[] schedules;
@@ -114,19 +115,10 @@ public class SecondaryCourses {
     private List<FreqQuest> freqquests;
 
     public enum Mode {
-        SINCRONO("Síncrono"),
-        ASINCRONO("Asíncrono"),
-        EN_VIVO("En Vivo");
-
-        private final String displayName;
-
-        Mode(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
+        SINCRONO,
+        ASINCRONO,
+        EN_VIVO,
+        HIBRIDO
     }
 
 }

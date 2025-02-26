@@ -1,9 +1,13 @@
 package com.aecode.webcoursesback.servicesimplement;
 
+import com.aecode.webcoursesback.dtos.SecondCourseSummaryDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.repositories.ISecondCourseRepo;
 import com.aecode.webcoursesback.services.ISecondCourseService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,12 +28,12 @@ public class SecondCourseServImp implements ISecondCourseService {
     }
 
     @Override
-    public void delete(int secondcourseId) {
+    public void delete(Long secondcourseId) {
         scR.deleteById(secondcourseId);
     }
 
     @Override
-    public SecondaryCourses listId(int secondcourseId) {
+    public SecondaryCourses listId(Long secondcourseId) {
         return scR.findById(secondcourseId).orElse(new SecondaryCourses());
     }
 
@@ -38,13 +42,41 @@ public class SecondCourseServImp implements ISecondCourseService {
         return scR.findByModulexProgram(moduleNumber, programTitle);
     }
 
-    @Override
-    public List<SecondaryCourses> paginatedList(int limit, int offset) {
-        return scR.paginatedList(limit, offset);
+    public Page<SecondCourseSummaryDTO> paginatedList(int offsetCourseId, Pageable pageable) {
+        Page<SecondaryCourses> courses = scR.findByOrderNumberGreaterThan(offsetCourseId, pageable);
+        return courses.map(course -> new SecondCourseSummaryDTO(
+                course.getSeccourseId(),
+                course.getTitle(),
+                course.getProgramTitle(),
+                course.getDescription(),
+                course.getModule(),
+                course.getStartDate(),
+                course.getCertificateHours(),
+                course.getPriceRegular(),
+                course.getDiscountPercentage(),
+                course.getPromptPaymentPrice(),
+                course.getIsOnSale(),
+                course.getPrincipalimage(),
+                course.getOrderNumber(),
+                course.getMode()));
     }
 
-    @Override
-    public List<SecondaryCourses> paginateByMode(String mode) {
-        return scR.listByMode(mode);
+    public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
+        Page<SecondaryCourses> courses = scR.findByMode(mode, pageable);
+        return courses.map(course -> new SecondCourseSummaryDTO(
+                course.getSeccourseId(),
+                course.getTitle(),
+                course.getProgramTitle(),
+                course.getDescription(),
+                course.getModule(),
+                course.getStartDate(),
+                course.getCertificateHours(),
+                course.getPriceRegular(),
+                course.getDiscountPercentage(),
+                course.getPromptPaymentPrice(),
+                course.getIsOnSale(),
+                course.getPrincipalimage(),
+                course.getOrderNumber(),
+                course.getMode()));
     }
 }

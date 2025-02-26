@@ -5,9 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.aecode.webcoursesback.entities.SecondaryCourses;
 
 @Data
 @NoArgsConstructor
@@ -15,17 +17,17 @@ import java.util.List;
 @Builder
 public class SecondCourseDTO {
 
-    private int seccourseId;
+    private Long seccourseId;
     private String title;
     private String programTitle;
     private String description;
     private String module;
     private String brochureUrl;
     private String whatsappGroupLink;
-    private Date startDate;
+    private LocalDate startDate;
     private String certificateHours;
     private Double priceRegular;
-    private int discountPercentage;
+    private Double discountPercentage;
     private Double promptPaymentPrice;
     private Boolean isOnSale;
     private String achievement;
@@ -34,7 +36,7 @@ public class SecondCourseDTO {
     private int totalHours;
     private int numberOfSessions;
     private int numberOfUnits;
-    private int orderNumber;
+    private Integer orderNumber;
     private String[] schedules;
     private String[] requirements;
     @Builder.Default
@@ -47,21 +49,6 @@ public class SecondCourseDTO {
     private List<CouponDTO> coupons = new ArrayList<>();
     @Builder.Default
     private List<FreqQuestDTO> freqquests = new ArrayList<>();
-    private Mode mode;
+    private SecondaryCourses.Mode mode;
 
-    public enum Mode {
-        SINCRONO("Síncrono"),
-        ASINCRONO("Asíncrono"),
-        EN_VIVO("En Vivo");
-
-        private final String displayName;
-
-        Mode(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-    }
 }

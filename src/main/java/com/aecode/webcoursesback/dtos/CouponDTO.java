@@ -1,9 +1,8 @@
 package com.aecode.webcoursesback.dtos;
 
-
 public class CouponDTO {
     private int couponId;
-    private int seccourseId;
+    private Long seccourseId;
     private String name;
     private int discount;
 
@@ -15,11 +14,11 @@ public class CouponDTO {
         this.couponId = couponId;
     }
 
-    public int getSeccourseId() {
+    public Long getSeccourseId() {
         return seccourseId;
     }
 
-    public void setSeccourseId(int seccourseId) {
+    public void setSeccourseId(Long seccourseId) {
         this.seccourseId = seccourseId;
     }
 
