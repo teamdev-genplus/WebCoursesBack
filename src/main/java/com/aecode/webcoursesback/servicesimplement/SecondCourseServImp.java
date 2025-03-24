@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SecondCourseServImp implements ISecondCourseService {
@@ -65,6 +66,30 @@ public class SecondCourseServImp implements ISecondCourseService {
         SecondaryCourses.Mode modeEnum = SecondaryCourses.Mode.valueOf(mode);
 
         Page<SecondaryCourses> courses = scR.findByMode(modeEnum, pageable);
+        return courses.map(course -> new SecondCourseSummaryDTO(
+                course.getSeccourseId(),
+                course.getTitle(),
+                course.getProgramTitle(),
+                course.getDescription(),
+                course.getModule(),
+                course.getStartDate(),
+                course.getCertificateHours(),
+                course.getPriceRegular(),
+                course.getDiscountPercentage(),
+                course.getPromptPaymentPrice(),
+                course.getIsOnSale(),
+                course.getPrincipalimage(),
+                course.getOrderNumber(),
+                course.getMode()));
+    }
+
+    public Page<SecondCourseSummaryDTO> listByCourseTags(List<Integer> tagIds, Pageable pageable) {
+        String tagIdsFormatted = "{" + tagIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(",")) + "}";
+
+        Page<SecondaryCourses> courses = scR.findByCourseTags(tagIdsFormatted, pageable);
+
         return courses.map(course -> new SecondCourseSummaryDTO(
                 course.getSeccourseId(),
                 course.getTitle(),

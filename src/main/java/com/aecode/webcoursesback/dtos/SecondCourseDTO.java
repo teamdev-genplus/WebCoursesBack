@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aecode.webcoursesback.entities.CourseTag;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +26,10 @@ public class SecondCourseDTO {
     private String module;
     private String brochureUrl;
     private String whatsappGroupLink;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+
     private String certificateHours;
     private Double priceRegular;
     private Double discountPercentage;
@@ -50,5 +55,6 @@ public class SecondCourseDTO {
     @Builder.Default
     private List<FreqQuestDTO> freqquests = new ArrayList<>();
     private SecondaryCourses.Mode mode;
-
+    @Builder.Default
+    private List<CourseTag> tags = new ArrayList<>();
 }

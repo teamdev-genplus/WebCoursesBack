@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.entities.CourseTag;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.Tool;
@@ -37,34 +38,21 @@ public class SecondCourseController {
     @Autowired
     private ISecondCourseService scS;
 
+    private final ObjectMapper objMapper;
+
+    public SecondCourseController(ObjectMapper objectMapper) {
+        this.objMapper = objectMapper;
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(
-            @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = true) String dtoJson) {
         try {
-            // Convertir el JSON recibido a un DTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            SecondCourseDTO dto = objectMapper.readValue(dtoJson, SecondCourseDTO.class);
+            SecondCourseDTO dto = objMapper.readValue(dtoJson, SecondCourseDTO.class);
 
             ModelMapper modelMapper = new ModelMapper();
             SecondaryCourses courses = modelMapper.map(dto, SecondaryCourses.class);
             scS.insert(courses);
-            // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + dto.getSeccourseId();
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
-
-            // Variables para guardar los nombres de archivo
-            String principalImageFilename = null;
-            // Manejo del archivo de imagen principal (principalImage)
-            if (principalImage != null && !principalImage.isEmpty()) {
-                principalImageFilename = principalImage.getOriginalFilename();
-                byte[] bytes = principalImage.getBytes();
-                Path path = userUploadPath.resolve(principalImageFilename);
-                Files.write(path, bytes);
-            }
 
             // Asociar herramientas al curso
             if (dto.getTools() != null) {
@@ -86,11 +74,6 @@ public class SecondCourseController {
                             return freqQuest;
                         }).collect(Collectors.toList());
                 courses.setFreqquests(freqquests);
-            }
-
-            if (principalImageFilename != null) {
-                courses.setPrincipalimage(
-                        "/uploads/secondcourse/" + courses.getSeccourseId() + "/" + principalImageFilename);
             }
 
             // Guardar el curso
@@ -236,12 +219,8 @@ public class SecondCourseController {
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> update(
             @PathVariable("id") Long id,
-            @RequestPart(value = "principalImage", required = false) MultipartFile principalImage,
             @RequestPart(value = "data", required = false) String courseDTOJson) {
         try {
-            System.out.println("JSON recibido: " + courseDTOJson);
-
-            // Obtener el curso existente por ID
             SecondaryCourses existingCourse = scS.listId(id);
             if (existingCourse == null || existingCourse.getSeccourseId() == 0) {
                 return ResponseEntity.status(404).body("Curso no encontrado");
@@ -249,8 +228,7 @@ public class SecondCourseController {
 
             // Procesar los datos JSON del DTO si están presentes
             if (courseDTOJson != null) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                SecondCourseDTO courseDTO = objectMapper.readValue(courseDTOJson, SecondCourseDTO.class);
+                SecondCourseDTO courseDTO = objMapper.readValue(courseDTOJson, SecondCourseDTO.class);
 
                 Optional.ofNullable(courseDTO.getTitle()).ifPresent(existingCourse::setTitle);
                 Optional.ofNullable(courseDTO.getDescription()).ifPresent(existingCourse::setDescription);
@@ -295,25 +273,18 @@ public class SecondCourseController {
                     existingCourse.setFreqquests(freqquests);
                 }
 
-                System.out.println("DTO después de la conversión: " + objectMapper.writeValueAsString(courseDTO));
+                if (courseDTO.getTags() != null) {
+                    List<CourseTag> tags = courseDTO.getTags().stream()
+                            .map(tagItem -> {
+                                CourseTag courseTag = new CourseTag();
+                                courseTag.setCourseTagId(tagItem.getCourseTagId());
+                                return courseTag;
+                            }).collect(Collectors.toList());
+                    existingCourse.setTags(tags);
+                }
 
-            }
+                System.out.println("DTO después de la conversión: " + objMapper.writeValueAsString(courseDTO));
 
-            // Crear directorio para guardar imágenes basado en el ID del curso
-            String userUploadDir = uploadDir + File.separator + "secondcourse" + File.separator + id;
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
-
-            // Actualizar la imagen principal (principalImage)
-            if (principalImage != null && !principalImage.isEmpty()) {
-                String principalImageFilename = principalImage.getOriginalFilename();
-                byte[] bytes = principalImage.getBytes();
-                Path path = userUploadPath.resolve(principalImageFilename);
-                Files.write(path, bytes);
-                // Establecer la nueva ruta en la entidad
-                existingCourse.setPrincipalimage("/uploads/secondcourse/" + id + "/" + principalImageFilename);
             }
 
             // Guardar los cambios
@@ -413,6 +384,28 @@ public class SecondCourseController {
             @RequestParam int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("orderNumber").ascending());
         return ResponseEntity.ok(scS.paginateByMode(mode, pageable));
+    }
+
+    @GetMapping("/paginateByDate")
+    public ResponseEntity<Page<SecondCourseSummaryDTO>> paginateByDate(
+            @RequestParam int offsetCourseId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").descending());
+        Page<SecondCourseSummaryDTO> courses = scS.paginatedList(offsetCourseId, pageable);
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/paginateByTags")
+    public ResponseEntity<Page<SecondCourseSummaryDTO>> getCoursesByTags(
+            @RequestParam List<Integer> tagIds,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<SecondCourseSummaryDTO> courses = scS.listByCourseTags(tagIds, pageable);
+
+        return ResponseEntity.ok(courses);
     }
 
 }

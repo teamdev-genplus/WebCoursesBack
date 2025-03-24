@@ -20,6 +20,8 @@ public interface ISecondCourseService {
 
     public SecondaryCourses listByModulexProgram(String moduleNumber, String programTitle);
 
+    public Page<SecondCourseSummaryDTO> listByCourseTags(List<Integer> tagIds, Pageable pageable);
+
     public Page<SecondCourseSummaryDTO> paginatedList(int offsetCourseId, Pageable pageable);
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable);

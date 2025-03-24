@@ -113,6 +113,11 @@ public class SecondaryCourses {
     @JoinTable(name = "secondcourse_freqquests", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
     private List<FreqQuest> freqquests;
 
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(name = "secondcourse_tags", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "course_tag_id"))
+    private List<CourseTag> tags = new ArrayList<>();
+
     public enum Mode {
         SINCRONO,
         ASINCRONO,
