@@ -391,7 +391,7 @@ public class SecondCourseController {
             @RequestParam int offsetCourseId,
             @RequestParam int page,
             @RequestParam int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startDate").ascending());
         Page<SecondCourseSummaryDTO> courses = scS.paginatedList(offsetCourseId, pageable);
         return ResponseEntity.ok(courses);
     }
