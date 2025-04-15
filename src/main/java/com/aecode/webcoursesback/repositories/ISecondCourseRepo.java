@@ -19,6 +19,9 @@ public interface ISecondCourseRepo extends JpaRepository<SecondaryCourses, Long>
     @Query("SELECT s FROM SecondaryCourses  s WHERE s.programTitle = :programTitle AND s.module = :module")
     SecondaryCourses findByModulexProgram(@Param("module") String module, @Param("programTitle") String programTitle);
 
+    @Query(value = "SELECT * FROM get_courses_by_tag(CAST(:tagIds AS INTEGER[])) AS t ORDER BY t.order_number ASC", nativeQuery = true)
+    Page<SecondaryCourses> findByCourseTags(@Param("tagIds") String tagIds, Pageable pageable);
+
     // Spring genera la consulta automáticamente
     Page<SecondaryCourses> findByOrderNumberGreaterThan(int offsetCourseId, Pageable pageable);
 
