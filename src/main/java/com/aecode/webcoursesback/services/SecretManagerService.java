@@ -2,7 +2,6 @@ package com.aecode.webcoursesback.services;
 
 import com.google.cloud.secretmanager.v1.*;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.protobuf.ByteString;
@@ -11,8 +10,7 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class SecretManagerService {
 
-    @Value("${google.cloud.project-id}") // El proyecto de Google Cloud
-    private String projectId;
+    private String projectId = "digitalproduct-6d2f8";
 
     public String getSecret(String secretId) {
         // Crea un cliente para Secret Manager

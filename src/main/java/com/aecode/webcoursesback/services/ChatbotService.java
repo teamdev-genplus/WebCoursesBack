@@ -30,7 +30,10 @@ public class ChatbotService {
     public void init() {
         this.apiKey = this.secretManagerService.getSecret("open-ai-key"); // Obtener la API Key al iniciar el servicio
         if (this.apiKey == null || this.apiKey.isEmpty()) {
+            System.out.println("API Key no configurada o vacía.");
             throw new IllegalStateException("API Key de OpenAI no configurada correctamente.");
+        } else {
+            System.out.println("API Key obtenida correctamente: " + this.apiKey);
         }
     }
 
