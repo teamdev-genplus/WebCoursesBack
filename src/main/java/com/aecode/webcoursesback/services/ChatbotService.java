@@ -1,50 +1,34 @@
 package com.aecode.webcoursesback.services;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import jakarta.annotation.PostConstruct;
 
 import org.springframework.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 
 @Service
 public class ChatbotService {
-    @Autowired
-    private SecretManagerService secretManagerService;
 
     private final WebClient webClient;
 
-    // Definir la apiKey como una variable de instancia
+    // Inyectamos la variable de entorno OPENAI_API_KEY directamente
+    @Value("${OPENAI_API_KEY}")
     private String apiKey;
 
     public ChatbotService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
     }
 
-    // Obtener la clave API después de que Spring haya inyectado todas las
-    // dependencias
-    @PostConstruct
-    public void init() {
-        try {
-            this.apiKey = this.secretManagerService.getSecret("open-ai-key"); // Obtener la API Key al iniciar el
-                                                                              // servicio
-            if (this.apiKey == null || this.apiKey.isEmpty()) {
-                System.out.println("API Key no configurada o vacía.");
-                throw new IllegalStateException("API Key de OpenAI no configurada correctamente.");
-            } else {
-                System.out.println("API Key obtenida correctamente.");
-            }
-        } catch (Exception e) {
-            System.out.println("Error en @PostConstruct: " + e.getMessage());
-            e.printStackTrace();
-            throw new IllegalStateException("Error al obtener la API Key de OpenAI.");
-        }
-    }
-
+    // Eliminamos el método @PostConstruct, ya que la variable de entorno se inyecta
+    // directamente
     public Mono<String> getResponse(String prompt) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.out.println("API Key no configurada o vacía.");
+            throw new IllegalStateException("API Key de OpenAI no configurada correctamente.");
+        }
+
         String body = "{"
                 + "\"model\": \"gpt-4\","
                 + "\"messages\": ["
