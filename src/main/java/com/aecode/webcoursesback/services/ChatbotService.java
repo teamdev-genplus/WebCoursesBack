@@ -28,12 +28,19 @@ public class ChatbotService {
     // dependencias
     @PostConstruct
     public void init() {
-        this.apiKey = this.secretManagerService.getSecret("open-ai-key"); // Obtener la API Key al iniciar el servicio
-        if (this.apiKey == null || this.apiKey.isEmpty()) {
-            System.out.println("API Key no configurada o vacía.");
-            throw new IllegalStateException("API Key de OpenAI no configurada correctamente.");
-        } else {
-            System.out.println("API Key obtenida correctamente: " + this.apiKey);
+        try {
+            this.apiKey = this.secretManagerService.getSecret("open-ai-key"); // Obtener la API Key al iniciar el
+                                                                              // servicio
+            if (this.apiKey == null || this.apiKey.isEmpty()) {
+                System.out.println("API Key no configurada o vacía.");
+                throw new IllegalStateException("API Key de OpenAI no configurada correctamente.");
+            } else {
+                System.out.println("API Key obtenida correctamente.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error en @PostConstruct: " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalStateException("Error al obtener la API Key de OpenAI.");
         }
     }
 

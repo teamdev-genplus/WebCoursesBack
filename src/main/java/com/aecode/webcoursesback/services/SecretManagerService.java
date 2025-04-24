@@ -13,20 +13,25 @@ public class SecretManagerService {
     private String projectId = "digitalproduct-6d2f8";
 
     public String getSecret(String secretId) {
-        // Crea un cliente para Secret Manager
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+            System.out.println("Obteniendo secreto: " + secretId + " para el proyecto: " + projectId);
 
-            // Construye el nombre del secreto
+            // Construir el nombre del secreto
             SecretVersionName secretVersionName = SecretVersionName.of(projectId, secretId, "latest");
 
-            // Obtén el secreto
+            // Obtener el secreto
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
 
-            // Lee el contenido del secreto
+            // Leer el contenido del secreto
             ByteString payload = response.getPayload().getData();
-            return payload.toString(StandardCharsets.UTF_8);
+            String secretValue = payload.toString(StandardCharsets.UTF_8);
+
+            System.out.println("Secreto obtenido: " + secretValue); // Imprimir el valor del secreto
+
+            return secretValue;
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error al obtener el secreto: " + e.getMessage());
             return null;
         }
     }
