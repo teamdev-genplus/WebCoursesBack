@@ -44,25 +44,15 @@ public class ChatbotService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(response -> {
-                    // Procesar la respuesta para extraer solo el contenido del mensaje
-                    String message = extractMessage(response);
-                    return message; // Retornar solo el mensaje del asistente
+                    // Verifica si la respuesta es un JSON válido
+                    try {
+                        // Parsear la respuesta para asegurar que es válida
+                        new JSONObject(response);
+                        return response;
+                    } catch (Exception e) {
+                        return "Error en la respuesta del servidor: " + e.getMessage();
+                    }
                 });
     }
 
-    private String extractMessage(String response) {
-        try {
-            // Parsear el JSON de la respuesta
-            JSONObject jsonResponse = new JSONObject(response);
-            // Extraer el contenido del mensaje
-            String message = jsonResponse.getJSONArray("choices")
-                    .getJSONObject(0)
-                    .getJSONObject("message")
-                    .getString("content");
-            return message;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error al procesar la respuesta de OpenAI.";
-        }
-    }
 }
