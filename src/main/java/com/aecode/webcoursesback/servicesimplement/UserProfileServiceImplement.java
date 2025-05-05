@@ -23,7 +23,12 @@ public class UserProfileServiceImplement implements IUserProfileService {
         userProfile.setFullname(userdto.getFullname());
         userProfile.setEmail(userdto.getEmail());
         userProfile.setPasswordHash(userdto.getPasswordHash());
-        userProfile.setRol(userdto.getRol());
+        userProfile.setBirthdate(userdto.getBirthdate());
+        userProfile.setPhoneNumber(userdto.getPhoneNumber());
+        userProfile.setGender(userdto.getGender());
+        userProfile.setExperience(userdto.getExperience());
+        userProfile.setRol(userdto.getRol() != null ? userdto.getRol() : "user");
+        userProfile.setStatus(userdto.getStatus() != null ? userdto.getStatus() : "Activo");
         upR.save(userProfile);
     }
 
