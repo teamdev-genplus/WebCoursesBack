@@ -30,3 +30,5 @@ build/
 
 target/
 .env
+# Firebase config - prevent secrets from being committed
+src/main/resources/firebase-config.json
