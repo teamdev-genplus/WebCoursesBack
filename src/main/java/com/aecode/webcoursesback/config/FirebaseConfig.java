@@ -14,19 +14,12 @@ import java.nio.charset.StandardCharsets;
 public class FirebaseConfig {
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        InputStream serviceAccount =
-                getClass().getClassLoader().getResourceAsStream("firebase-config.json");
 
-        if (serviceAccount == null) {
-            throw new IOException("Archivo firebase-config.json no encontrado en resources");
+        String firebaseConfigJson = System.getenv("FIREBASE_CONFIG_JSON");
+        if (firebaseConfigJson == null) {
+            throw new IOException("Variable de entorno FIREBASE_CONFIG_JSON no encontrada");
         }
-
-
-//        String firebaseConfigJson = System.getenv("FIREBASE_CONFIG_JSON");
-//        if (firebaseConfigJson == null) {
-//            throw new IOException("Variable de entorno FIREBASE_CONFIG_JSON no encontrada");
-//        }
-//        InputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
+        InputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
 
 
         FirebaseOptions options = new FirebaseOptions.Builder()
