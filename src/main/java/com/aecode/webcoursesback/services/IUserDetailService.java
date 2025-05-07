@@ -8,7 +8,7 @@ public interface IUserDetailService {
     List<UserDetail> list();
     public void delete(int userD);
     public UserDetail listId(int userD);
-
+    public UserDetail update(UserDetail userDetail);
     UserDetail findByUserId(int userId);
 
 }

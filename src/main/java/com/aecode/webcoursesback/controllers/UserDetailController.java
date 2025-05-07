@@ -3,6 +3,7 @@ import com.aecode.webcoursesback.dtos.UserDetailDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.services.IUserDetailService;
 import com.aecode.webcoursesback.services.IUserProfileService;
+import com.aecode.webcoursesback.servicesimplement.FirebaseStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
@@ -31,6 +32,8 @@ public class UserDetailController {
     private IUserProfileService upS;
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> insert(@RequestPart(value = "file", required = false) MultipartFile imagen,
@@ -52,19 +55,9 @@ public class UserDetailController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID de usuario no proporcionado");
             }
 
-            // Crear directorio único para el usuario si no existe
-            String userUploadDir = uploadDir + File.separator + "userdetail" + File.separator + userProfile.getUserId();
-            Path userUploadPath = Paths.get(userUploadDir);
-            if (!Files.exists(userUploadPath)) {
-                Files.createDirectories(userUploadPath);
-            }
-
-            // Manejo del archivo de imagen
+            String imageUrl = null;
             if (imagen != null && !imagen.isEmpty()) {
-                originalFilename = imagen.getOriginalFilename();
-                byte[] bytes = imagen.getBytes();
-                Path path = userUploadPath.resolve(originalFilename);
-                Files.write(path, bytes);
+                imageUrl = firebaseStorageService.uploadImage(imagen,dto.getUserId());
             }
 
             // Convertir DTO a entidad
@@ -73,7 +66,7 @@ public class UserDetailController {
 
             // Asignar el UserProfile y la ruta de la imagen
             userDetail.setUserProfile(userProfile);
-            userDetail.setProfilepicture("/uploads/userdetail/" + userProfile.getUserId() + "/" + originalFilename);
+            userDetail.setProfilepicture(imageUrl);
 
             // Guardar los detalles del usuario
             udS.insert(userDetail);
@@ -152,52 +145,53 @@ public class UserDetailController {
         try {
             // Obtener el UserDetail existente por ID
             UserDetail existingUDetail = udS.listId(id);
-            if (existingUDetail == null) {
+            if (existingUDetail == null || existingUDetail.getDetailsId() == 0) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Información del usuario no encontrada");
             }
 
             UserProfile userProfile = existingUDetail.getUserProfile();
 
-            // Procesar datos enviados en JSON
+            // Procesar datos enviados en JSON para actualizar campos parciales
             if (dtoJson != null && !dtoJson.isEmpty()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 UserDetailDTO dto = objectMapper.readValue(dtoJson, UserDetailDTO.class);
 
-                // Actualizar campos del DTO
-                if (dto.getUserId() != 0 && dto.getUserId() != userProfile.getUserId()) {
+                // Actualizar UserProfile solo si viene y es diferente
+                if (dto.getUserId() != 0 && (userProfile == null || dto.getUserId() != userProfile.getUserId())) {
                     UserProfile newUserProfile = upS.listId(dto.getUserId());
                     if (newUserProfile == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario asociado no encontrado");
                     }
                     existingUDetail.setUserProfile(newUserProfile);
-                    userProfile = newUserProfile; // Actualizar el perfil para usarlo en la ruta de la imagen
+                    userProfile = newUserProfile;
                 }
 
+                // Actualizar otros campos que quieras, por ejemplo profilepicture si viene
                 if (dto.getProfilepicture() != null) {
                     existingUDetail.setProfilepicture(dto.getProfilepicture());
                 }
+
+            }
+
+            // Validar que UserProfile esté asignado antes de subir imagen
+            if (userProfile == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El detalle de usuario no tiene perfil asociado");
             }
 
             // Procesar archivo de imagen opcional
             if (picture != null && !picture.isEmpty()) {
-                String userUploadDir = uploadDir + File.separator + "userdetail" + File.separator + userProfile.getUserId();
-                Path userUploadPath = Paths.get(userUploadDir);
-
-                if (!Files.exists(userUploadPath)) {
-                    Files.createDirectories(userUploadPath);
+                // Eliminar imagen anterior en Firebase si existe
+                if (existingUDetail.getProfilepicture() != null && !existingUDetail.getProfilepicture().isEmpty()) {
+                    System.out.println("URL a eliminar: " + existingUDetail.getProfilepicture());
+                    firebaseStorageService.deleteImage(existingUDetail.getProfilepicture());
                 }
-
-                String originalFilename = picture.getOriginalFilename();
-                byte[] bytes = picture.getBytes();
-                Path path = userUploadPath.resolve(originalFilename);
-                Files.write(path, bytes);
-
-                // Actualizar la ruta de la imagen
-                existingUDetail.setProfilepicture("/uploads/userdetail/" + userProfile.getUserId() + "/" + originalFilename);
+                // Subir nueva imagen a Firebase con carpeta por userId
+                String imageUrl = firebaseStorageService.uploadImage(picture, userProfile.getUserId());
+                existingUDetail.setProfilepicture(imageUrl);
             }
 
             // Guardar la información actualizada en la base de datos
-            udS.insert(existingUDetail);
+            udS.update(existingUDetail); // save() detectará que es update por el ID presente
 
             return ResponseEntity.ok("Información del usuario actualizada correctamente");
         } catch (IOException e) {

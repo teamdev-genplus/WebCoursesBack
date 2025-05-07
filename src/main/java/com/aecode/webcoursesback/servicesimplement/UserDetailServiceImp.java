@@ -33,6 +33,11 @@ public class UserDetailServiceImp implements IUserDetailService {
     }
 
     @Override
+    public UserDetail update(UserDetail userDetail) {
+        return udR.save(userDetail);
+    }
+
+    @Override
     public UserDetail findByUserId(int userId) {
         return udR.findByUserId(userId);
     }
