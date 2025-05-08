@@ -12,15 +12,16 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDetailDTO {
-    private int detailsId;
+public class UserUpdateDTO {
     private int userId;
+    private String fullname;
+    private String email;
+    private String password;
     private String profilepicture;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthdate;
     private String phoneNumber;
     private String gender;
-
     private String country;
     private String profession;
     private String education;

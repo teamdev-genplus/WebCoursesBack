@@ -23,10 +23,10 @@ public class FirebaseStorageService {
         return StorageClient.getInstance(firebaseApp).bucket();
     }
 
-    public String uploadImage(MultipartFile file, Integer userId) throws IOException {
+    public String uploadImage(MultipartFile file, String path) throws IOException {
         Bucket bucket = getBucket();
 
-        String fileName = userId + "/image/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        String fileName = path + System.currentTimeMillis() + "_" + file.getOriginalFilename();
         bucket.create(fileName, file.getBytes(), file.getContentType());
 
         String bucketName = bucket.getName();

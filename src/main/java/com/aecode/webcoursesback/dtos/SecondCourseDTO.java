@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @AllArgsConstructor
 @Builder
 public class SecondCourseDTO {
-
     private Long seccourseId;
     private String title;
     private String programTitle;

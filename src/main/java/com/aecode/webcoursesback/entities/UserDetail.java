@@ -1,6 +1,18 @@
 package com.aecode.webcoursesback.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 
 @Entity
 @Table(name = "userdetail")
@@ -12,43 +24,30 @@ public class UserDetail {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userdetail_seq")
     private int detailsId;
 
-    @OneToOne(fetch = FetchType.EAGER) // Cambiar a EAGER para cargar siempre el UserProfile
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private UserProfile userProfile;
 
     @Column(length = 255)
     private String profilepicture;
 
-    public UserDetail() {
-    }
+    @Column
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate birthdate;
 
-    public UserDetail(int detailsId, UserProfile userProfile, String profilepicture) {
-        this.detailsId = detailsId;
-        this.userProfile = userProfile;
-        this.profilepicture = profilepicture;
-    }
+    @Column( length = 255)
+    private String phoneNumber;
 
-    public int getDetailsId() {
-        return detailsId;
-    }
+    @Column(length = 100)
+    private String gender;
 
-    public void setDetailsId(int detailsId) {
-        this.detailsId = detailsId;
-    }
+    @Column(length = 100)
+    private String country;
+    @Column(length = 100)
+    private String profession;
+    @Column(length = 100)
+    private String education;
+    @Column(length = 100)
+    private String linkedin;
 
-    public UserProfile getUserProfile() {
-        return userProfile;
-    }
-
-    public void setUserProfile(UserProfile userProfile) {
-        this.userProfile = userProfile;
-    }
-
-    public String getProfilepicture() {
-        return profilepicture;
-    }
-
-    public void setProfilepicture(String profilepicture) {
-        this.profilepicture = profilepicture;
-    }
 }

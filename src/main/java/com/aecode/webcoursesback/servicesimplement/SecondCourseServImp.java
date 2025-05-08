@@ -8,6 +8,7 @@ import com.aecode.webcoursesback.services.ISecondCourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -81,6 +82,12 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
                 course.getMode()));
+    }
+
+    @Override
+    public List<SecondaryCourses> searchByAttribute(String attribute, String value) {
+        Specification<SecondaryCourses> spec = SecondaryCoursesSpecifications.hasAttribute(attribute, value);
+        return scR.findAll(spec);
     }
 
     public Page<SecondCourseSummaryDTO> listByCourseTags(List<Integer> tagIds, Pageable pageable) {
