@@ -250,6 +250,7 @@ public class SecondCourseController {
                         .ifPresent(existingCourse::setOrderNumber);
                 Optional.ofNullable(courseDTO.getSchedules()).ifPresent(existingCourse::setSchedules);
                 Optional.ofNullable(courseDTO.getRequirements()).ifPresent(existingCourse::setRequirements);
+                Optional.ofNullable(courseDTO.getUrlname()).ifPresent(existingCourse::setUrlname);
 
                 // Actualizar las herramientas asociadas al curso
                 if (courseDTO.getTools() != null) {

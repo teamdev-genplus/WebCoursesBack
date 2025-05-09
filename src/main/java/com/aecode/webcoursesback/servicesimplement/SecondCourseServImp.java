@@ -60,7 +60,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
     }
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
@@ -81,7 +82,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
     }
 
     @Override
@@ -111,7 +113,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
 
     }
 }

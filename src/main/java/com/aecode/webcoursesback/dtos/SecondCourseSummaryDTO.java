@@ -26,5 +26,6 @@ public class SecondCourseSummaryDTO {
     private String principalimage;
     private Integer orderNumber;
     private SecondaryCourses.Mode mode;
+    private String urlname;
 
 }
