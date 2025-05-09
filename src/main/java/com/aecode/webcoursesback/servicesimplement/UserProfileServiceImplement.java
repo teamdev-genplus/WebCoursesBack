@@ -101,6 +101,8 @@ public class UserProfileServiceImplement implements IUserProfileService {
                     .profession(detail != null ? detail.getProfession() : null)
                     .education(detail != null ? detail.getEducation() : null)
                     .linkedin(detail != null ? detail.getLinkedin() : null)
+                    .rol(user.getRol())
+                    .status(user.getStatus())
                     .build();
         }).toList();
     }

@@ -26,4 +26,6 @@ public class UserUpdateDTO {
     private String profession;
     private String education;
     private String linkedin;
+    private String rol;
+    private String status;
 }
