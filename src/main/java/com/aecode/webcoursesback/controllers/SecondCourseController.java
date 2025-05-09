@@ -411,31 +411,22 @@ public class SecondCourseController {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
     @GetMapping("/search")
-    public ResponseEntity<List<SecondCourseSummaryDTO>> searchByAttribute(
+    public ResponseEntity<SecondCourseDTO> searchByAttribute(
             @RequestParam String attribute,
             @RequestParam String value) {
 
         List<SecondaryCourses> courses = scS.searchByAttribute(attribute, value);
 
-        List<SecondCourseSummaryDTO> dtoList = courses.stream()
-                .map(course -> new SecondCourseSummaryDTO(
-                        course.getSeccourseId(),
-                        course.getTitle(),
-                        course.getProgramTitle(),
-                        course.getDescription(),
-                        course.getModule(),
-                        course.getStartDate(),
-                        course.getCertificateHours(),
-                        course.getPriceRegular(),
-                        course.getDiscountPercentage(),
-                        course.getPromptPaymentPrice(),
-                        course.getIsOnSale(),
-                        course.getPrincipalimage(),
-                        course.getOrderNumber(),
-                        course.getMode()))
-                .collect(Collectors.toList());
+        if (courses.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-        return ResponseEntity.ok(dtoList);
+        SecondaryCourses course = courses.get(0);
+
+        ModelMapper modelMapper = new ModelMapper();
+        SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
+
+        return ResponseEntity.ok(courseDTO);
     }
 
 }
