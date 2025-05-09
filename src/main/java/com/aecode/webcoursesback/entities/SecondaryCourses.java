@@ -41,6 +41,9 @@ public class SecondaryCourses {
     @Column(nullable = true)
     private LocalDate startDate;
 
+    @Column(length = 100)
+    private String urlname;
+
     @Column(length = 255)
     private String certificateHours;
 

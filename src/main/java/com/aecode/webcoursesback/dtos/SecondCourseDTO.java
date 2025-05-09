@@ -40,6 +40,7 @@ public class SecondCourseDTO {
     private int totalHours;
     private int numberOfSessions;
     private int numberOfUnits;
+    private String urlname;
     private Integer orderNumber;
     private String[] schedules;
     private String[] requirements;
