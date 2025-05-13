@@ -42,7 +42,7 @@ public class SecondaryCourses {
     private LocalDate startDate;
 
     @Column(length = 100)
-    private String urlname;
+        private String urlname;
 
     @Column(length = 255)
     private String certificateHours;
@@ -127,5 +127,18 @@ public class SecondaryCourses {
         EN_VIVO,
         HIBRIDO
     }
+
+    //nuevos atributos - vista mis cursos
+
+    @Column(length = 255)
+    private String urlmaterialaccess;
+
+    @Column(length = 255)
+    private String urljoinclass;
+
+    @ElementCollection
+    @CollectionTable(name = "secondary_course_certificates", joinColumns = @JoinColumn(name = "seccourse_id"))
+    @Column(name = "certificate_url")
+    private List<String> certificateUrls = new ArrayList<>();
 
 }

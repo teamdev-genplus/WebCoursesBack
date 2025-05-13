@@ -27,4 +27,6 @@ public interface ISecondCourseService {
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable);
 
     List<SecondaryCourses> searchByAttribute(String attribute, String value);
+
+    List<SecondaryCourses> findCoursesByUserId(int userId);
 }

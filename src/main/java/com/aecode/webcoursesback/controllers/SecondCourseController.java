@@ -5,6 +5,7 @@ import com.aecode.webcoursesback.entities.CourseTag;
 import com.aecode.webcoursesback.entities.FreqQuest;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.Tool;
+import com.aecode.webcoursesback.repositories.IUserSecCourseRepo;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
@@ -426,6 +427,65 @@ public class SecondCourseController {
 
         ModelMapper modelMapper = new ModelMapper();
         SecondCourseDTO courseDTO = modelMapper.map(course, SecondCourseDTO.class);
+
+        return ResponseEntity.ok(courseDTO);
+    }
+
+    //NEW
+
+    @Autowired
+    private IUserSecCourseRepo uscR;
+    @GetMapping("/mycourses/{userId}")
+    public ResponseEntity<List<SecondCourseDTO>> getMyCourses(@PathVariable int userId) {
+        List<SecondaryCourses> courses = scS.findCoursesByUserId(userId);
+
+        if (courses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<SecondCourseDTO> courseDTOs = courses.stream()
+                .map(course -> modelMapper.map(course, SecondCourseDTO.class))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(courseDTOs);
+    }
+
+    @GetMapping("/mycourses/{userId}/{courseId}")
+    public ResponseEntity<SCMyCourseDTO> listIdmycourses(
+            @PathVariable("userId") int userId,
+            @PathVariable("courseId") Long courseId) {
+
+        // Verificar que el usuario tiene acceso a ese curso
+        boolean hasAccess = uscR.existsByUserProfileUserIdAndSeccourseSeccourseId(userId, courseId);
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        SecondaryCourses course = scS.listId(courseId);
+        if (course == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ModelMapper modelMapper = new ModelMapper();
+        SCMyCourseDTO courseDTO = modelMapper.map(course, SCMyCourseDTO.class);
+
+        if (course.getStudyplans() != null) {
+            List<StudyPlanDTO> studyPlanDTOs = course.getStudyplans().stream().map(studyPlan -> {
+                StudyPlanDTO studyPlanDTO = new StudyPlanDTO();
+                studyPlanDTO.setStudyplanId(studyPlan.getStudyplanId());
+                studyPlanDTO.setUnit(studyPlan.getUnit());
+                studyPlanDTO.setHours(studyPlan.getHours());
+                studyPlanDTO.setSessions(studyPlan.getSessions());
+                studyPlanDTO.setOrderNumber(studyPlan.getOrderNumber());
+                studyPlanDTO.setSeccourseId(course.getSeccourseId());
+                studyPlanDTO.setUrlrecording(studyPlan.getUrlrecording());
+                studyPlanDTO.setDmaterial(studyPlan.getDmaterial());
+                studyPlanDTO.setViewpresentation(studyPlan.getViewpresentation());
+                return studyPlanDTO;
+            }).collect(Collectors.toList());
+            courseDTO.setStudyplans(studyPlanDTOs);
+        }
 
         return ResponseEntity.ok(courseDTO);
     }

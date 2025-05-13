@@ -57,4 +57,9 @@ public class SecondCourseDTO {
     private SecondaryCourses.Mode mode;
     @Builder.Default
     private List<CourseTag> tags = new ArrayList<>();
+    //
+    private String urlmaterialaccess;
+    private String urljoinclass;
+    @Builder.Default
+    private List<String> certificateUrls = new ArrayList<>();
 }

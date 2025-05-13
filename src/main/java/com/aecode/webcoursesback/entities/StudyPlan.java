@@ -38,4 +38,14 @@ public class StudyPlan {
     @Column(name = "session")
     private List<String> sessions = new ArrayList<>();
 
+    //newbottons
+    @Column(length = 255)
+    private String urlrecording;
+
+    @Column(length = 255)
+    private String dmaterial;
+
+    @Column(length = 255)
+    private String viewpresentation;
+
 }
