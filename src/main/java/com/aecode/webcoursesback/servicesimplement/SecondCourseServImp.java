@@ -2,12 +2,15 @@ package com.aecode.webcoursesback.servicesimplement;
 
 import com.aecode.webcoursesback.dtos.SecondCourseSummaryDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
+import com.aecode.webcoursesback.entities.UserSecCourseAccess;
 import com.aecode.webcoursesback.repositories.ISecondCourseRepo;
+import com.aecode.webcoursesback.repositories.IUserSecCourseRepo;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -59,7 +62,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
     }
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
@@ -80,7 +84,25 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
+    }
+
+    @Override
+    public List<SecondaryCourses> searchByAttribute(String attribute, String value) {
+        Specification<SecondaryCourses> spec = SecondaryCoursesSpecifications.hasAttribute(attribute, value);
+        return scR.findAll(spec);
+    }
+
+
+    @Autowired
+    private IUserSecCourseRepo userSecCourseAccessRepo;
+    @Override
+    public List<SecondaryCourses> findCoursesByUserId(int userId) {
+        List<UserSecCourseAccess> accesses = userSecCourseAccessRepo.findByUserProfileUserId(userId);
+        return accesses.stream()
+                .map(UserSecCourseAccess::getSeccourse)
+                .collect(Collectors.toList());
     }
 
     public Page<SecondCourseSummaryDTO> listByCourseTags(List<Integer> tagIds, Pageable pageable) {
@@ -104,6 +126,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getIsOnSale(),
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
-                course.getMode()));
+                course.getMode(),
+                course.getUrlname()));
+
     }
 }

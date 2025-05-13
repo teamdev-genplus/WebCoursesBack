@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @AllArgsConstructor
 @Builder
 public class SecondCourseDTO {
-
     private Long seccourseId;
     private String title;
     private String programTitle;
@@ -41,6 +40,7 @@ public class SecondCourseDTO {
     private int totalHours;
     private int numberOfSessions;
     private int numberOfUnits;
+    private String urlname;
     private Integer orderNumber;
     private String[] schedules;
     private String[] requirements;
@@ -57,4 +57,9 @@ public class SecondCourseDTO {
     private SecondaryCourses.Mode mode;
     @Builder.Default
     private List<CourseTag> tags = new ArrayList<>();
+    //
+    private String urlmaterialaccess;
+    private String urljoinclass;
+    @Builder.Default
+    private List<String> certificateUrls = new ArrayList<>();
 }
