@@ -20,12 +20,17 @@ public class StudyPlan {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "studyplan_seq")
     private int studyplanId;
 
-    @Column(length = 255)
-    private String unit;
-
     @ManyToOne
     @JoinColumn(name = "seccourse_id", nullable = false)
     private SecondaryCourses secondary_course;
+
+    //New
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    @Column(length = 255)
+    private String unit;
 
     @Column(length = 255)
     private int hours;
@@ -35,7 +40,7 @@ public class StudyPlan {
 
     @ElementCollection
     @CollectionTable(name = "studyplan_session", joinColumns = @JoinColumn(name = "studyplan_id"))
-    @Column(name = "session")
+    @Column(name = "session",columnDefinition = "TEXT")
     private List<String> sessions = new ArrayList<>();
 
     //newbottons

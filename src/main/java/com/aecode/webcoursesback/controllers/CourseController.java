@@ -1,239 +1,245 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.CourseDTO;
-import com.aecode.webcoursesback.dtos.ToolDTO;
+import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.Course;
-import com.aecode.webcoursesback.entities.Tool;
 import com.aecode.webcoursesback.services.ICourseService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.aecode.webcoursesback.servicesimplement.FirebaseStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/course")
+@RequestMapping("/courses")
 public class CourseController  {
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
     @Autowired
-    private ICourseService cS;
+    private ICourseService courseService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> insert(
-            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
-            @RequestPart(value = "giftImage", required = false) MultipartFile giftImage,
-            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
-            @RequestPart(value = "data", required = true) String dtoJson) {
+    @Autowired
+    private FirebaseStorageService firebaseStorageService;
+
+    private final ModelMapper modelMapper = new ModelMapper();
+
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    // ------------------- POST -------------------
+
+    // Crear un nuevo curso con datos y subir imagen principal a Firebase
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> createCourse(
+            @RequestPart("course") String courseJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
-            // Convertir el JSON recibido a un DTO
-            ObjectMapper objectMapper = new ObjectMapper();
-            CourseDTO dto = objectMapper.readValue(dtoJson, CourseDTO.class);
+            CourseDetailDTO courseDTO = objectMapper.readValue(courseJson, CourseDetailDTO.class);
+            Course course = modelMapper.map(courseDTO, Course.class);
 
-            // Convertir DTO a entidad
-            ModelMapper modelMapper = new ModelMapper();
-            Course courses = modelMapper.map(dto, Course.class);
-            cS.insert(courses);
+            // Guardar curso para obtener ID generado
+            courseService.insert(course);
 
-            // Crear directorio para guardar imágenes basado en el ID del curso
-            String courseUploadDir = uploadDir + File.separator + "course" + File.separator + courses.getCourseId();
-            Path courseUploadPath = Paths.get(courseUploadDir);
-            if (!Files.exists(courseUploadPath)) {
-                Files.createDirectories(courseUploadPath);
+            // Subir imagen si existe
+            if (image != null && !image.isEmpty()) {
+                String safeUrlName = course.getUrlName() != null ? course.getUrlName().replaceAll("[^a-zA-Z0-9_-]", "_") : "course";
+                String path = "Course/" + safeUrlName + "_" + course.getCourseId() + "/images/";
+                String imageUrl = firebaseStorageService.uploadImage(image, path);
+                course.setPrincipalImage(imageUrl);
+                courseService.insert(course); // actualizar con url imagen
             }
 
-            // Manejo del archivo de portada (coverImage)
-            if (coverImage != null && !coverImage.isEmpty()) {
-                String coverImageFilename = "cover_" + coverImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(coverImageFilename);
-                Files.write(path, coverImage.getBytes());
-                courses.setCoverimage("/uploads/course/" + courses.getCourseId() + "/" + coverImageFilename);
-            }
-
-            // Manejo del archivo de regalo (giftImage)
-            if (giftImage != null && !giftImage.isEmpty()) {
-                String giftImageFilename = "gift_" + giftImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(giftImageFilename);
-                Files.write(path, giftImage.getBytes());
-                courses.setGift("/uploads/course/" + courses.getCourseId() + "/" + giftImageFilename);
-            }
-
-            // Manejo del archivo de imagen de módulo (moduleImage)
-            if (moduleImage != null && !moduleImage.isEmpty()) {
-                String moduleImageFilename = "module_" + moduleImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(moduleImageFilename);
-                Files.write(path, moduleImage.getBytes());
-                courses.setModuleimage("/uploads/course/" + courses.getCourseId() + "/" + moduleImageFilename);
-            }
-
-            // Asociar herramientas al curso
-            if (dto.getToolIds() != null) {
-                List<Tool> tools = dto.getToolIds().stream()
-                        .map(toolId -> {
-                            Tool tool = new Tool();
-                            tool.setToolId(toolId);
-                            return tool;
-                        }).collect(Collectors.toList());
-                courses.setTools(tools);
-            }
-
-            // Guardar el curso con imágenes y relaciones
-            cS.insert(courses);
-
-            return ResponseEntity.ok("Curso guardado correctamente con imágenes.");
-        } catch (JsonMappingException e) {
-            return ResponseEntity.badRequest().body("Error en el formato del JSON: " + e.getMessage());
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.badRequest().body("Error procesando el JSON: " + e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar los archivos: " + e.getMessage());
-        }
-    }
-
-
-
-
-    @GetMapping
-    public List<CourseDTO> list() {
-        return cS.list().stream().map(x -> {
-            ModelMapper modelMapper = new ModelMapper();
-            CourseDTO courseDTO = modelMapper.map(x, CourseDTO.class);
-
-            if (x.getTools() != null) {
-                List<ToolDTO> toolDTOs = x.getTools().stream().map(tool -> {
-                    ToolDTO toolDTO = new ToolDTO();
-                    toolDTO.setToolId(tool.getToolId());
-                    toolDTO.setName(tool.getName());
-                    toolDTO.setPicture(tool.getPicture());
-                    return toolDTO;
-                }).collect(Collectors.toList());
-                courseDTO.setTools(toolDTOs);
-            }
-
-
-            return modelMapper.map(x, CourseDTO.class);
-        }).collect(Collectors.toList());
-    }
-
-
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){cS.delete(id);}
-
-    @GetMapping("/{id}")
-    public CourseDTO listId(@PathVariable("id") Integer id) {
-        ModelMapper m=new ModelMapper();
-        CourseDTO dto=m.map(cS.listId(id),CourseDTO.class);
-        return dto;
-    }
-
-    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> update(
-            @PathVariable("id") Integer id,
-            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
-            @RequestPart(value = "giftImage", required = false) MultipartFile giftImage,
-            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
-            @RequestPart(value = "data", required = false) String courseDTOJson) {
-        try {
-            // Obtener el curso existente por ID
-            Course existingCourse = cS.listId(id);
-            if (existingCourse == null || existingCourse.getCourseId() == 0) {
-                return ResponseEntity.status(404).body("Curso no encontrado");
-            }
-
-            // Procesar los datos JSON del DTO si están presentes
-            if (courseDTOJson != null) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                CourseDTO courseDTO = objectMapper.readValue(courseDTOJson, CourseDTO.class);
-
-                if (courseDTO.getTitle() != null) {
-                    existingCourse.setTitle(courseDTO.getTitle());
-                }
-                if(courseDTO.getVideoUrl()!=null){
-                    existingCourse.setVideoUrl(courseDTO.getVideoUrl());
-                }
-                // Actualizar las herramientas del curso
-                if (courseDTO.getToolIds() != null) {
-                    List<Tool> tools = courseDTO.getToolIds().stream()
-                            .map(toolId -> {
-                                Tool tool = new Tool();
-                                tool.setToolId(toolId);
-                                return tool;
-                            }).collect(Collectors.toList());
-                    existingCourse.setTools(tools);
-                }
-                if(courseDTO.getHours()!=0){
-                    existingCourse.setHours(courseDTO.getHours());
-                }
-                if(courseDTO.getPrice()!=0) {
-                    existingCourse.setPrice(courseDTO.getPrice());
-                }
-                if(courseDTO.getPercentage()!=0) {
-                    existingCourse.setPercentage(courseDTO.getPercentage());
-                }
-                if(courseDTO.getSubtitle()!=null) {
-                    existingCourse.setSubtitle(courseDTO.getSubtitle());
-                }
-                if(courseDTO.getUrlkit()!=null) {
-                    existingCourse.setUrlkit(courseDTO.getUrlkit());
-                }
-            }
-
-            // Crear directorio para guardar imágenes basado en el ID del curso
-            String courseUploadDir = uploadDir + File.separator + "course" + File.separator + id;
-            Path courseUploadPath = Paths.get(courseUploadDir);
-            if (!Files.exists(courseUploadPath)) {
-                Files.createDirectories(courseUploadPath);
-            }
-
-            // Manejo de imágenes
-            if (coverImage != null && !coverImage.isEmpty()) {
-                String coverImageFilename = "cover_" + coverImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(coverImageFilename);
-                Files.write(path, coverImage.getBytes());
-                existingCourse.setCoverimage("/uploads/course/" + id + "/" + coverImageFilename);
-            }
-
-            if (giftImage != null && !giftImage.isEmpty()) {
-                String giftImageFilename = "gift_" + giftImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(giftImageFilename);
-                Files.write(path, giftImage.getBytes());
-                existingCourse.setGift("/uploads/course/" + id + "/" + giftImageFilename);
-            }
-
-            if (moduleImage != null && !moduleImage.isEmpty()) {
-                String moduleImageFilename = "module_" + moduleImage.getOriginalFilename();
-                Path path = courseUploadPath.resolve(moduleImageFilename);
-                Files.write(path, moduleImage.getBytes());
-                existingCourse.setModuleimage("/uploads/course/" + id + "/" + moduleImageFilename);
-            }
-
-
-
-            // Guardar los cambios
-            cS.insert(existingCourse);
-
-            return ResponseEntity.ok("Curso actualizado correctamente con imágenes");
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error al guardar las imágenes: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Curso creado con ID: " + course.getCourseId());
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar el curso: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear curso: " + e.getMessage());
         }
     }
 
+    // ------------------- PATCH -------------------
 
+    // Actualizar parcialmente un curso y/o imagen principal
+    @PatchMapping(value = "/{courseId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> updateCourse(
+            @PathVariable int courseId,
+            @RequestPart(value = "course", required = false) String courseJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        try {
+            Course existingCourse = courseService.getById(courseId);
+            if (existingCourse == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Curso no encontrado");
+            }
+
+            if (courseJson != null && !courseJson.isEmpty()) {
+                CourseDetailDTO courseDTO = objectMapper.readValue(courseJson, CourseDetailDTO.class);
+                // Actualizar solo campos no nulos
+                if (courseDTO.getTitle() != null) existingCourse.setTitle(courseDTO.getTitle());
+                if (courseDTO.getDescription() != null) existingCourse.setDescription(courseDTO.getDescription());
+                if (courseDTO.getProgramTitle() != null) existingCourse.setProgramTitle(courseDTO.getProgramTitle());
+                if (courseDTO.getModule() != null) existingCourse.setModule(courseDTO.getModule());
+                if (courseDTO.getBrochureUrl() != null) existingCourse.setBrochureUrl(courseDTO.getBrochureUrl());
+                if (courseDTO.getWhatsappGroupLink() != null) existingCourse.setWhatsappGroupLink(courseDTO.getWhatsappGroupLink());
+                if (courseDTO.getStartDate() != null) existingCourse.setStartDate(courseDTO.getStartDate());
+                if (courseDTO.getCertificateHours() != null) existingCourse.setCertificateHours(courseDTO.getCertificateHours());
+                if (courseDTO.getPriceRegular() != null) existingCourse.setPriceRegular(courseDTO.getPriceRegular());
+                if (courseDTO.getDiscountPercentage() != null) existingCourse.setDiscountPercentage(courseDTO.getDiscountPercentage());
+                if (courseDTO.getPromptPaymentPrice() != null) existingCourse.setPromptPaymentPrice(courseDTO.getPromptPaymentPrice());
+                if (courseDTO.getIsOnSale() != null) existingCourse.setIsOnSale(courseDTO.getIsOnSale());
+                if (courseDTO.getAchievement() != null) existingCourse.setAchievement(courseDTO.getAchievement());
+                if (courseDTO.getOrderNumber() != null) existingCourse.setOrderNumber(courseDTO.getOrderNumber());
+                if (courseDTO.getMode() != null) existingCourse.setMode(courseDTO.getMode());
+                if (courseDTO.getUrlName() != null) existingCourse.setUrlName(courseDTO.getUrlName());
+                if (courseDTO.getUrlMaterialAccess() != null) existingCourse.setUrlMaterialAccess(courseDTO.getUrlMaterialAccess());
+                if (courseDTO.getUrlJoinClass() != null) existingCourse.setUrlJoinClass(courseDTO.getUrlJoinClass());
+                // Nota: para listas y relaciones complejas, considera actualizar aparte o con lógica específica
+            }
+
+            if (image != null && !image.isEmpty()) {
+                String path = "Course/" + existingCourse.getUrlName() + "_" + existingCourse.getCourseId() + "/images/";
+                String imageUrl = firebaseStorageService.uploadImage(image, path);
+                existingCourse.setPrincipalImage(imageUrl);
+            }
+
+            courseService.insert(existingCourse);
+
+            return ResponseEntity.ok("Curso actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar curso: " + e.getMessage());
+        }
+    }
+
+    // ------------------- GET -------------------
+
+    // Listar todos los cursos para vista cards
+    @GetMapping("/list")
+    public ResponseEntity<List<CourseSummaryDTO>> listAll() {
+        List<Course> courses = courseService.listAll();
+        List<CourseSummaryDTO> dtos = courses.stream()
+                .map(course -> modelMapper.map(course, CourseSummaryDTO.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    // Listar cursos paginados con offset
+    @GetMapping("/paginated")
+    public ResponseEntity<Page<CourseSummaryDTO>> paginatedList(
+            @RequestParam int offset,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderNumber").ascending());
+        Page<CourseSummaryDTO> pageDTO = courseService.paginatedList(offset, pageable);
+        return ResponseEntity.ok(pageDTO);
+    }
+
+    // Listar cursos paginados filtrando por modo
+    @GetMapping("/mode")
+    public ResponseEntity<Page<CourseSummaryDTO>> paginateByMode(
+            @RequestParam String mode,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("orderNumber").ascending());
+        Page<CourseSummaryDTO> pageDTO = courseService.paginateByMode(mode, pageable);
+        return ResponseEntity.ok(pageDTO);
+    }
+
+    // Listar cursos filtrados por tags
+    @GetMapping("/tags")
+    public ResponseEntity<Page<CourseSummaryDTO>> listByTags(
+            @RequestParam List<Integer> tagIds,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CourseSummaryDTO> pageDTO = courseService.listByTags(tagIds, pageable);
+        return ResponseEntity.ok(pageDTO);
+    }
+
+    // Obtener detalle completo de un curso por id
+    @GetMapping("/{id}")
+    public ResponseEntity<CourseDetailDTO> getCourseDetail(@PathVariable int id) {
+        CourseDetailDTO dto = courseService.getCourseDetail(id);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
+    }
+
+    // Listar cursos adquiridos por usuario
+    @GetMapping("/mycourses/{userId}")
+    public ResponseEntity<List<MyCourseDTO>> getMyCourses(@PathVariable int userId) {
+        List<Course> courses = courseService.findCoursesByUserId(userId);
+        if (courses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        List<MyCourseDTO> dtos = courses.stream()
+                .map(this::convertToMyCourseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    // Obtener curso específico adquirido por usuario
+    @GetMapping("/mycourses/{userId}/{courseId}")
+    public ResponseEntity<MyCourseDTO> getMyCourseById(
+            @PathVariable int userId,
+            @PathVariable int courseId) {
+        MyCourseDTO dto = courseService.getMyCourse(userId, courseId);
+        if (dto == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(dto);
+    }
+
+    // ------------------- DELETE -------------------
+
+    // Eliminar curso por id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCourse(@PathVariable int id) {
+        Course course = courseService.getById(id);
+        if (course == null) {
+            return ResponseEntity.notFound().build();
+        }
+        courseService.delete(id);
+        return ResponseEntity.ok("Curso eliminado correctamente");
+    }
+
+    // ------------------- Conversores auxiliares -------------------
+
+    private MyCourseDTO convertToMyCourseDTO(Course course) {
+        return MyCourseDTO.builder()
+                .courseId(course.getCourseId())
+                .title(course.getTitle())
+                .programTitle(course.getProgramTitle())
+                .description(course.getDescription())
+                .module(course.getModule())
+                .whatsappGroupLink(course.getWhatsappGroupLink())
+                .studyPlans(course.getStudyPlans().stream()
+                        .map(sp -> StudyPlanDTO.builder()
+                                .studyplanId(sp.getStudyplanId())
+                                .unit(sp.getUnit())
+                                .hours(sp.getHours())
+                                .sessions(sp.getSessions())
+                                .orderNumber(sp.getOrderNumber())
+                                .urlrecording(sp.getUrlrecording())
+                                .dmaterial(sp.getDmaterial())
+                                .viewpresentation(sp.getViewpresentation())
+                                .build())
+                        .collect(Collectors.toList()))
+                .urlMaterialAccess(course.getUrlMaterialAccess())
+                .urlJoinClass(course.getUrlJoinClass())
+                .certificates(course.getCertificates().stream()
+                        .map(cert -> CertificateDTO.builder()
+                                .id(cert.getId())
+                                .name(cert.getName())
+                                .description(cert.getDescription())
+                                .url(cert.getUrl())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+    }
 }
