@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+/*
 @RestController
 @RequestMapping("/usercourse")
 public class UserCourseController {
@@ -83,3 +83,4 @@ public class UserCourseController {
         ucS.insert(uca);
     }
 }
+*/
