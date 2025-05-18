@@ -18,10 +18,10 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_seq")
     private int courseId;
 
-    @Column(nullable = false, length = 255)
+    @Column( length = 255)
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String programTitle;
 
     @Column(length = 50)

@@ -92,7 +92,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
                     .userId(user.getUserId())
                     .fullname(user.getFullname())
                     .email(user.getEmail())
-                    .password("")
+                    .password(user.getPasswordHash())
                     .profilepicture(detail != null ? detail.getProfilepicture() : null)
                     .birthdate(detail != null ? detail.getBirthdate() : null)
                     .phoneNumber(detail != null ? detail.getPhoneNumber() : null)
@@ -120,7 +120,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 .userId(user.getUserId())
                 .fullname(user.getFullname())
                 .email(user.getEmail())
-                .password("") // Nunca se debe retornar la contraseña
+                .password(user.getPasswordHash()) // Nunca se debe retornar la contraseña
                 .profilepicture(detail != null ? detail.getProfilepicture() : null)
                 .birthdate(detail != null ? detail.getBirthdate() : null)
                 .phoneNumber(detail != null ? detail.getPhoneNumber() : null)
