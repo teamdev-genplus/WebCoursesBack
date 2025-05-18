@@ -1,10 +1,15 @@
 package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
-
+import lombok.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "courses")
 @SequenceGenerator(name = "course_seq", sequenceName = "course_sequence", allocationSize = 1)
@@ -13,186 +18,105 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_seq")
     private int courseId;
 
-    @Column(nullable = false, length = 255)
+    @Column( length = 255)
     private String title;
 
-    @Column(nullable = true, length = 255)
+    @Column(length = 255)
+    private String programTitle;
+
+    @Column(length = 50)
+    private String module;
+
+    @Column(length = 255)
+    private String brochureUrl;
+
+    @Column(length = 255)
+    private String whatsappGroupLink;
+
+    @Column
+    private LocalDate startDate;
+
+    @Column(length = 100)
+    private String urlName;
+
+    @Column(length = 255)
+    private String certificateHours;
+
+    @Column
+    private Double priceRegular;
+
+    @Column
+    private Double discountPercentage;
+
+    @Column
+    private Double promptPaymentPrice;
+
+    @Column
+    private Boolean isOnSale;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Mode mode;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 255)
-    private String coverimage;
+    @Column(columnDefinition = "TEXT")
+    private String achievement;
 
     @Column(length = 255)
-    private String gift;
-
-    @Column(length = 255)
-    private String moduleimage;
-
-    @Column(length = 255)
-    private String urlkit;
-
-    @Column(length = 255)
-    private String videoUrl;
-    @Column
-    private Integer percentage;
-    @Column
-    private Double price;
-    @Column
-    private Integer hours;
+    private String principalImage;
 
     @Column
-    private Integer courseOrder;
+    private Integer orderNumber;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Module> modules = new ArrayList<>();
+    // URLs comunes para todos los usuarios
+    @Column(length = 255)
+    private String urlMaterialAccess;
+
+    @Column(length = 255)
+    private String urlJoinClass;
+
+
+    // Relaciones
+
+    @ElementCollection
+    @CollectionTable(name = "benefits", joinColumns = @JoinColumn(name = "course_id"))
+    @Column(name = "benefit")
+    private List<String> benefits;
 
     @ManyToMany
-    @JoinTable(name = "course_tools", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "tool_id"))
+    @JoinTable(name = "course_tools",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id"))
     private List<Tool> tools;
 
-    @Column(length = 255)
-    private String subtitle;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderNumber ASC")
+    private List<StudyPlan> studyPlans;
 
-    public Course() {
-    }
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coupon> coupons;
 
-    public Course(int courseId, String title, String description, String coverimage, String gift, String moduleimage,
-            String urlkit, String videoUrl, Integer percentage, Double price, List<Module> modules, Integer hours,
-            List<Tool> tools, String subtitle, Integer courseOrder) {
-        this.courseId = courseId;
-        this.title = title;
-        this.description = description;
-        this.coverimage = coverimage;
-        this.gift = gift;
-        this.moduleimage = moduleimage;
-        this.urlkit = urlkit;
-        this.videoUrl = videoUrl;
-        this.percentage = percentage;
-        this.price = price;
-        this.modules = modules;
-        this.hours = hours;
-        this.tools = tools;
-        this.subtitle = subtitle;
-        this.courseOrder = courseOrder;
-    }
+    @ManyToMany
+    @JoinTable(name = "course_freqquests",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
+    private List<FreqQuest> freqquests;
 
-    public Integer getCourseOrder() {
-        return courseOrder;
-    }
+    @ManyToMany
+    @JoinTable(name = "course_tags",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<CourseTag> tags;
 
-    public void setCourseOrder(Integer courseOrder) {
-        this.courseOrder = courseOrder;
-    }
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certificate> certificates;
 
-    public String getUrlkit() {
-        return urlkit;
-    }
-
-    public void setUrlkit(String urlkit) {
-        this.urlkit = urlkit;
-    }
-
-    public String getGift() {
-        return gift;
-    }
-
-    public void setGift(String gift) {
-        this.gift = gift;
-    }
-
-    public String getModuleimage() {
-        return moduleimage;
-    }
-
-    public void setModuleimage(String moduleimage) {
-        this.moduleimage = moduleimage;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public void setSubtitle(String subtitle) {
-        this.subtitle = subtitle;
-    }
-
-    public Integer getPercentage() {
-        return percentage;
-    }
-
-    public void setPercentage(Integer percentage) {
-        this.percentage = percentage;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Integer getHours() {
-        return hours;
-    }
-
-    public void setHours(Integer hours) {
-        this.hours = hours;
-    }
-
-    public List<Tool> getTools() {
-        return tools;
-    }
-
-    public void setTools(List<Tool> tools) {
-        this.tools = tools;
-    }
-
-    public List<Module> getModules() {
-        return modules;
-    }
-
-    public void setModules(List<Module> modules) {
-        this.modules = modules;
-    }
-
-    public int getCourseId() {
-        return courseId;
-    }
-
-    public void setCourseId(int courseId) {
-        this.courseId = courseId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCoverimage() {
-        return coverimage;
-    }
-
-    public void setCoverimage(String coverimage) {
-        this.coverimage = coverimage;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
+    public enum Mode {
+        SINCRONO,
+        ASINCRONO,
+        EN_VIVO,
+        HIBRIDO
     }
 }

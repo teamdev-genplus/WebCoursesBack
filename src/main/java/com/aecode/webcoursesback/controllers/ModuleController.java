@@ -96,78 +96,78 @@ public class ModuleController {
         ModuleDTO dto=m.map(mS.listId(id),ModuleDTO.class);
         return dto;
     }
-    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> update(
-            @PathVariable("id") Integer id,
-            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
-            @RequestPart(value = "data", required = false) String moduleDTOJson) {
-        try {
-            // Obtener el módulo existente por ID
-            Module existingModule = mS.listId(id);
-            if (existingModule == null || existingModule.getModuleId() == 0) {
-                return ResponseEntity.status(404).body("Módulo no encontrado");
-            }
-
-            // Procesar los datos JSON del DTO si está presente
-            if (moduleDTOJson != null) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                ModuleDTO moduleDTO = objectMapper.readValue(moduleDTOJson, ModuleDTO.class);
-
-                if (moduleDTO.getTitle() != null) {
-                    existingModule.setTitle(moduleDTO.getTitle());
-                }
-                if (moduleDTO.getVideoUrl() != null) {
-                    existingModule.setVideoUrl(moduleDTO.getVideoUrl());
-                }
-                if (moduleDTO.getOrderNumber() != 0) {
-                    existingModule.setOrderNumber(moduleDTO.getOrderNumber());
-                }
-                if (moduleDTO.getCourseId() != 0) {
-                    Course course = cS.listId(moduleDTO.getCourseId());
-                    if (course == null || course.getCourseId() == 0) {
-                        return ResponseEntity.status(404).body("Curso asociado no encontrado");
-                    }
-                    existingModule.setCourse(course);
-                }
-                if (moduleDTO.getPrice() != 0) {
-                    existingModule.setPrice(moduleDTO.getPrice());
-                }
-                if (moduleDTO.getPercentage() != 0) {
-                    existingModule.setPercentage(moduleDTO.getPercentage());
-                }
-                if (moduleDTO.getHours() != 0) {
-                    existingModule.setHours(moduleDTO.getHours());
-                }
-            }
-
-            // Crear directorio para guardar la imagen basado en el ID del curso asociado si es necesario
-            if (moduleImage != null && !moduleImage.isEmpty()) {
-                String uploadPath = uploadDir + File.separator + "module" + File.separator + id;
-                Path moduleUploadPath = Paths.get(uploadPath);
-                if (!Files.exists(moduleUploadPath)) {
-                    Files.createDirectories(moduleUploadPath);
-                }
-
-                // Guardar la nueva imagen
-                String moduleImageFilename = moduleImage.getOriginalFilename();
-                byte[] bytes = moduleImage.getBytes();
-                Path path = moduleUploadPath.resolve(moduleImageFilename);
-                Files.write(path, bytes);
-
-                // Actualizar la ruta de la imagen en la entidad
-                existingModule.setModuleimage("/uploads/module/" + id + "/" + moduleImageFilename);
-            }
-
-            // Guardar los cambios
-            mS.insert(existingModule);
-
-            return ResponseEntity.ok("Módulo actualizado correctamente");
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error al guardar la imagen del módulo: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar el módulo: " + e.getMessage());
-        }
-    }
+//    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<String> update(
+//            @PathVariable("id") Integer id,
+//            @RequestPart(value = "moduleImage", required = false) MultipartFile moduleImage,
+//            @RequestPart(value = "data", required = false) String moduleDTOJson) {
+//        try {
+//            // Obtener el módulo existente por ID
+//            Module existingModule = mS.listId(id);
+//            if (existingModule == null || existingModule.getModuleId() == 0) {
+//                return ResponseEntity.status(404).body("Módulo no encontrado");
+//            }
+//
+//            // Procesar los datos JSON del DTO si está presente
+//            if (moduleDTOJson != null) {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                ModuleDTO moduleDTO = objectMapper.readValue(moduleDTOJson, ModuleDTO.class);
+//
+//                if (moduleDTO.getTitle() != null) {
+//                    existingModule.setTitle(moduleDTO.getTitle());
+//                }
+//                if (moduleDTO.getVideoUrl() != null) {
+//                    existingModule.setVideoUrl(moduleDTO.getVideoUrl());
+//                }
+//                if (moduleDTO.getOrderNumber() != 0) {
+//                    existingModule.setOrderNumber(moduleDTO.getOrderNumber());
+//                }
+//                if (moduleDTO.getCourseId() != 0) {
+//                    Course course = cS.listId(moduleDTO.getCourseId());
+//                    if (course == null || course.getCourseId() == 0) {
+//                        return ResponseEntity.status(404).body("Curso asociado no encontrado");
+//                    }
+//                    existingModule.setCourse(course);
+//                }
+//                if (moduleDTO.getPrice() != 0) {
+//                    existingModule.setPrice(moduleDTO.getPrice());
+//                }
+//                if (moduleDTO.getPercentage() != 0) {
+//                    existingModule.setPercentage(moduleDTO.getPercentage());
+//                }
+//                if (moduleDTO.getHours() != 0) {
+//                    existingModule.setHours(moduleDTO.getHours());
+//                }
+//            }
+//
+//            // Crear directorio para guardar la imagen basado en el ID del curso asociado si es necesario
+//            if (moduleImage != null && !moduleImage.isEmpty()) {
+//                String uploadPath = uploadDir + File.separator + "module" + File.separator + id;
+//                Path moduleUploadPath = Paths.get(uploadPath);
+//                if (!Files.exists(moduleUploadPath)) {
+//                    Files.createDirectories(moduleUploadPath);
+//                }
+//
+//                // Guardar la nueva imagen
+//                String moduleImageFilename = moduleImage.getOriginalFilename();
+//                byte[] bytes = moduleImage.getBytes();
+//                Path path = moduleUploadPath.resolve(moduleImageFilename);
+//                Files.write(path, bytes);
+//
+//                // Actualizar la ruta de la imagen en la entidad
+//                existingModule.setModuleimage("/uploads/module/" + id + "/" + moduleImageFilename);
+//            }
+//
+//            // Guardar los cambios
+//            mS.insert(existingModule);
+//
+//            return ResponseEntity.ok("Módulo actualizado correctamente");
+//        } catch (IOException e) {
+//            return ResponseEntity.status(500).body("Error al guardar la imagen del módulo: " + e.getMessage());
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body("Error al actualizar el módulo: " + e.getMessage());
+//        }
+//    }
 
     @GetMapping("/by-course")
     public List<ModuleDTO> getModulesByCourseTitle(@RequestParam("title") String courseTitle) {

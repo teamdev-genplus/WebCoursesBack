@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseTagDTO {
-
-    private int courseTagId;
-    private String courseTagName;
-
+public class CertificateDTO {
+    private Long id;
+    private String name;
+    private String description;
+    private String url;
 }
