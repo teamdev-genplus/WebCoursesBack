@@ -38,6 +38,7 @@ public class SecondCourseDTO {
     private String videoUrl;
     private String principalimage;
     private int totalHours;
+    private String type;
     private int numberOfSessions;
     private int numberOfUnits;
     private String urlname;

@@ -63,7 +63,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
                 course.getMode(),
-                course.getUrlname()));
+                course.getUrlname(),
+                course.getType()));
     }
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
@@ -85,7 +86,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
                 course.getMode(),
-                course.getUrlname()));
+                course.getUrlname(),
+                course.getType()));
     }
 
     @Override
@@ -130,7 +132,32 @@ public class SecondCourseServImp implements ISecondCourseService {
                         course.getPrincipalimage(),
                         course.getOrderNumber(),
                         course.getMode(),
-                        course.getUrlname()))
+                        course.getUrlname(),
+                        course.getType()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SecondCourseSummaryDTO> listByType(String type) {
+        List<SecondaryCourses> courses = scR.findByTypeOrderByOrderNumberAsc(type);
+        return courses.stream()
+                .map(course -> new SecondCourseSummaryDTO(
+                        course.getSeccourseId(),
+                        course.getTitle(),
+                        course.getProgramTitle(),
+                        course.getDescription(),
+                        course.getModule(),
+                        course.getStartDate(),
+                        course.getCertificateHours(),
+                        course.getPriceRegular(),
+                        course.getDiscountPercentage(),
+                        course.getPromptPaymentPrice(),
+                        course.getIsOnSale(),
+                        course.getPrincipalimage(),
+                        course.getOrderNumber(),
+                        course.getMode(),
+                        course.getUrlname(),
+                        course.getType()))
                 .collect(Collectors.toList());
     }
 
@@ -158,7 +185,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getPrincipalimage(),
                 course.getOrderNumber(),
                 course.getMode(),
-                course.getUrlname()));
+                course.getUrlname(),
+                course.getType()));
 
     }
 }

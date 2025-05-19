@@ -31,4 +31,7 @@ public interface ISecondCourseService {
     List<SecondaryCourses> findCoursesByUserId(int userId);
 
     List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(int userId);
+
+    //LISTAR PARA CURSOS PRIMARIOS
+    List<SecondCourseSummaryDTO> listByType(String type);
 }

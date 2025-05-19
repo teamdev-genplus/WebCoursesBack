@@ -27,5 +27,7 @@ public class SecondCourseSummaryDTO {
     private Integer orderNumber;
     private SecondaryCourses.Mode mode;
     private String urlname;
+    private String type;
+
 
 }

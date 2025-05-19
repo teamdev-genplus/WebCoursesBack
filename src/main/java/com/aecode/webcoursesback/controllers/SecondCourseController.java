@@ -374,6 +374,16 @@ public class SecondCourseController {
         return ResponseEntity.ok(courses);
     }
 
+    //LISTAR PARA CURSOS PRIMARIOS
+    @GetMapping("/listByType")
+    public ResponseEntity<List<SecondCourseSummaryDTO>> listByType(@RequestParam String type) {
+        List<SecondCourseSummaryDTO> courses = scS.listByType(type);
+        if (courses.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(courses);
+    }
+
     @GetMapping("/paginateByMode")
     public ResponseEntity<Page<SecondCourseSummaryDTO>> paginateByMode(
             @RequestParam String mode,
