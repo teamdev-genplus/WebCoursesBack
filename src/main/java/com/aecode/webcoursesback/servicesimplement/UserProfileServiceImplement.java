@@ -28,7 +28,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
         UserProfile userProfile = new UserProfile();
         userProfile.setEmail(dto.getEmail());
         userProfile.setPasswordHash(dto.getPasswordHash());
-        userProfile.setRandomNameIfEmpty();
+        userProfile.setFullname(dto.getFullname());
         upR.save(userProfile);
 
         UserDetail userDetail = new UserDetail();

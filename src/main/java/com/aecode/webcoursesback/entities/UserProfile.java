@@ -37,12 +37,6 @@ public class UserProfile {
     @Column(length = 100)
     private String status = "Activo";
 
-    public void setRandomNameIfEmpty() {
-        if (this.fullname == null || this.fullname.isBlank()) {
-            this.fullname = "user" + UUID.randomUUID().toString().substring(0, 8);
-        }
-    }
-
     @OneToOne(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
 

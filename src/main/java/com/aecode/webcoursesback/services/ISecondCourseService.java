@@ -29,4 +29,6 @@ public interface ISecondCourseService {
     List<SecondaryCourses> searchByAttribute(String attribute, String value);
 
     List<SecondaryCourses> findCoursesByUserId(int userId);
+
+    List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(int userId);
 }

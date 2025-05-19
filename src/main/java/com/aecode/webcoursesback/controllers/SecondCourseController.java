@@ -431,17 +431,12 @@ public class SecondCourseController {
     @Autowired
     private IUserSecCourseRepo uscR;
     @GetMapping("/mycourses/{userId}")
-    public ResponseEntity<List<SecondCourseDTO>> getMyCourses(@PathVariable int userId) {
-        List<SecondaryCourses> courses = scS.findCoursesByUserId(userId);
+    public ResponseEntity<List<SecondCourseSummaryDTO>> getMyCourses(@PathVariable int userId) {
+        List<SecondCourseSummaryDTO> courseDTOs = scS.findSummaryCoursesByUserId(userId);
 
-        if (courses.isEmpty()) {
+        if (courseDTOs.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
-        ModelMapper modelMapper = new ModelMapper();
-        List<SecondCourseDTO> courseDTOs = courses.stream()
-                .map(course -> modelMapper.map(course, SecondCourseDTO.class))
-                .collect(Collectors.toList());
 
         return ResponseEntity.ok(courseDTOs);
     }

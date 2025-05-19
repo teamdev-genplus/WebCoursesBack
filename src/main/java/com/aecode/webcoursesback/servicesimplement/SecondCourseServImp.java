@@ -95,6 +95,8 @@ public class SecondCourseServImp implements ISecondCourseService {
     }
 
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //GET PARA MIS CURSOS DE USUARIOS
     @Autowired
     private IUserSecCourseRepo userSecCourseAccessRepo;
     @Override
@@ -104,6 +106,35 @@ public class SecondCourseServImp implements ISecondCourseService {
                 .map(UserSecCourseAccess::getSeccourse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(int userId) {
+        List<UserSecCourseAccess> accesses = userSecCourseAccessRepo.findByUserProfileUserId(userId);
+        List<SecondaryCourses> courses = accesses.stream()
+                .map(UserSecCourseAccess::getSeccourse)
+                .collect(Collectors.toList());
+
+        return courses.stream()
+                .map(course -> new SecondCourseSummaryDTO(
+                        course.getSeccourseId(),
+                        course.getTitle(),
+                        course.getProgramTitle(),
+                        course.getDescription(),
+                        course.getModule(),
+                        course.getStartDate(),
+                        course.getCertificateHours(),
+                        course.getPriceRegular(),
+                        course.getDiscountPercentage(),
+                        course.getPromptPaymentPrice(),
+                        course.getIsOnSale(),
+                        course.getPrincipalimage(),
+                        course.getOrderNumber(),
+                        course.getMode(),
+                        course.getUrlname()))
+                .collect(Collectors.toList());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public Page<SecondCourseSummaryDTO> listByCourseTags(List<Integer> tagIds, Pageable pageable) {
         String tagIdsFormatted = "{" + tagIds.stream()
