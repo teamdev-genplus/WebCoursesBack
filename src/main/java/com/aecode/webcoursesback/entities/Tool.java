@@ -22,7 +22,7 @@ public class Tool {
     private List<SecondaryCourses> secondary_courses;
 
     @ManyToMany(mappedBy = "tools")
-    private List<Course> courses;
+    private List<Module> module_id;
 
     @Column(length = 255)
     private String name;

@@ -15,8 +15,8 @@ public class Certificate {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
+    @JoinColumn(name = "module_id")
+    private Module module;
 
     @Column(length = 255, nullable = false)
     private String name;

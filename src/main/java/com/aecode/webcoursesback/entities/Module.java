@@ -1,8 +1,14 @@
 package com.aecode.webcoursesback.entities;
 import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "modules")
 @SequenceGenerator(name = "module_seq", sequenceName = "module_sequence", allocationSize = 1)
@@ -12,136 +18,107 @@ public class Module {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "module_seq")
     private int moduleId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @Column( length = 255)
-    private String moduleimage;
+    @Column(length = 255)
+    private String programTitle;
 
-    @Column(nullable = false, length = 255)
-    private String title;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column( length = 255)
-    private String videoUrl;
+    @Column(length = 255)
+    private String brochureUrl;
 
-    @Column()
-    private int hours;
-    @Column()
-    private int percentage;
-    @Column()
-    private double price;
-    @Column()
-    private int orderNumber;
+    @Column(length = 255)
+    private String whatsappGroupLink;
+
+    @Column
+    private LocalDate startDate;
+
+    @Column(length = 100)
+    private String urlName;
+
+    @Column(length = 255)
+    private String certificateHours;
+
+    @Column
+    private Double priceRegular;
+
+    @Column
+    private Double discountPercentage;
+
+    @Column
+    private Double promptPaymentPrice;
+
+    @Column
+    private Boolean isOnSale;
+
+    @Column(columnDefinition = "TEXT")
+    private String achievement;
+
+    @Column(length = 255)
+    private String principalImage;
+
+    @Column
+    private Integer orderNumber;
+
+    @Column(length = 255)
+    private String urlMaterialAccess;
+
+    @Column(length = 255)
+    private String urlJoinClass;
+
+    @Column
+    private String type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Mode mode;
+
+    //Relaciones
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModuleBenefits> benefits = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "module_tools",
+            joinColumns = @JoinColumn(name = "module_id"),
+            inverseJoinColumns = @JoinColumn(name = "tool_id"))
+    private List<Tool> tools;
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Unit> units =  new ArrayList<>();
+    @OrderBy("orderNumber ASC")
+    private List<StudyPlan> studyPlans;
 
-    @OneToOne(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private RelatedWork relatedworks;
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Coupon> coupons;
 
-    public Module() {
-    }
+    @ManyToMany
+    @JoinTable(name = "module_freqquests",
+            joinColumns = @JoinColumn(name = "module_id"),
+            inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
+    private List<FreqQuest> freqquests;
 
-    public Module(int moduleId, Course course, String moduleimage, String title, String videoUrl, int hours, int percentage, double price, int orderNumber, List<Unit> units, RelatedWork relatedworks) {
-        this.moduleId = moduleId;
-        this.course = course;
-        this.moduleimage = moduleimage;
-        this.title = title;
-        this.videoUrl = videoUrl;
-        this.hours = hours;
-        this.percentage = percentage;
-        this.price = price;
-        this.orderNumber = orderNumber;
-        this.units = units;
-        this.relatedworks = relatedworks;
-    }
+    @ManyToMany
+    @JoinTable(name = "module_tags",
+            joinColumns = @JoinColumn(name = "module_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<CourseTag> tags;
 
-    public String getModuleimage() {
-        return moduleimage;
-    }
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certificate> certificates;
 
-    public void setModuleimage(String moduleimage) {
-        this.moduleimage = moduleimage;
-    }
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModuleSchedule> schedules = new ArrayList<>();
 
-    public int getHours() {
-        return hours;
-    }
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModuleRequirements> requirements = new ArrayList<>();
 
-    public void setHours(int hours) {
-        this.hours = hours;
-    }
-
-    public int getPercentage() {
-        return percentage;
-    }
-
-    public void setPercentage(int percentage) {
-        this.percentage = percentage;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public int getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(int moduleId) {
-        this.moduleId = moduleId;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
-
-    public int getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(int orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
-    public List<Unit> getUnits() {
-        return units;
-    }
-
-    public void setUnits(List<Unit> units) {
-        this.units = units;
-    }
-
-    public RelatedWork getRelatedworks() {
-        return relatedworks;
-    }
-
-    public void setRelatedworks(RelatedWork relatedworks) {
-        this.relatedworks = relatedworks;
+    public enum Mode {
+        SINCRONO,
+        ASINCRONO,
+        EN_VIVO,
+        HIBRIDO
     }
 }

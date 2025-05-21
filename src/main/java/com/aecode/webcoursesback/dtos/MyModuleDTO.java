@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.dtos;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 
-public class MyCourseDTO {
+public class MyModuleDTO {
 
-    private int courseId;
+    private int moduleId;
     private String title;
     private String programTitle;
     private String description;
@@ -23,5 +24,6 @@ public class MyCourseDTO {
     private String urlMaterialAccess;
     private String urlJoinClass;
     private List<CertificateDTO> certificates;
-
+    private String courseTitle;  // Desde Course
+    private String type;
 }

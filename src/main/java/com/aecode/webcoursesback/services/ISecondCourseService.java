@@ -32,6 +32,9 @@ public interface ISecondCourseService {
 
     List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(int userId);
 
+    //Listar summarycoursess por id usuario del carrito de compras
+    List<SecondCourseSummaryDTO> findSummaryCoursesByShoppingCartId(int shoppingCartId);
+
     //LISTAR PARA CURSOS PRIMARIOS
     List<SecondCourseSummaryDTO> listByType(String type);
 }

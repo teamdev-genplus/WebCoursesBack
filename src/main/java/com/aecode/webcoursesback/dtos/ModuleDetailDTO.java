@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.dtos;
-import com.aecode.webcoursesback.entities.Course.Mode;
+
+import com.aecode.webcoursesback.entities.Module;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,12 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseDetailDTO {
-    private int courseId;
+
+public class ModuleDetailDTO {
+
+    private int moduleId;
+    private String courseTitle;  // Desde Course
     private String title;
     private String programTitle;
     private String description;
-    private String module;
     private String brochureUrl;
     private String whatsappGroupLink;
     private LocalDate startDate;
@@ -29,10 +32,11 @@ public class CourseDetailDTO {
     private String achievement;
     private String principalImage;
     private Integer orderNumber;
-    private Mode mode;
+    private Module.Mode mode;
     private String urlName;
+    private String type;
 
-    private List<String> benefits;
+    private List<moduleBenefitsDTO> benefits;
     private List<ToolDTO> tools;
     private List<StudyPlanDTO> studyPlans;
     private List<CouponDTO> coupons;

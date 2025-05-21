@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.dtos;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserCourseDTO {
-    private int accessId;
+public class ShoppingCartDTO {
+    private int cartId;
     private int userId;
-    private int courseId;
+    private Long seccourseId;
+    private int moduleId;
 }

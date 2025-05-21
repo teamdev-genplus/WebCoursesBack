@@ -15,6 +15,7 @@ public class StudyPlanDTO {
 
     private int studyplanId;
     private Long seccourseId;
+    private int moduleId;
     private String unit;
     private int hours;
     private int orderNumber;

@@ -4,6 +4,7 @@ import com.aecode.webcoursesback.dtos.SecondCourseSummaryDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.UserSecCourseAccess;
 import com.aecode.webcoursesback.repositories.ISecondCourseRepo;
+import com.aecode.webcoursesback.repositories.IShoppingCartRepo;
 import com.aecode.webcoursesback.repositories.IUserSecCourseRepo;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 
@@ -114,6 +115,36 @@ public class SecondCourseServImp implements ISecondCourseService {
         List<UserSecCourseAccess> accesses = userSecCourseAccessRepo.findByUserProfileUserId(userId);
         List<SecondaryCourses> courses = accesses.stream()
                 .map(UserSecCourseAccess::getSeccourse)
+                .collect(Collectors.toList());
+
+        return courses.stream()
+                .map(course -> new SecondCourseSummaryDTO(
+                        course.getSeccourseId(),
+                        course.getTitle(),
+                        course.getProgramTitle(),
+                        course.getDescription(),
+                        course.getModule(),
+                        course.getStartDate(),
+                        course.getCertificateHours(),
+                        course.getPriceRegular(),
+                        course.getDiscountPercentage(),
+                        course.getPromptPaymentPrice(),
+                        course.getIsOnSale(),
+                        course.getPrincipalimage(),
+                        course.getOrderNumber(),
+                        course.getMode(),
+                        course.getUrlname(),
+                        course.getType()))
+                .collect(Collectors.toList());
+    }
+
+    @Autowired
+    private IShoppingCartRepo shoppingCartRepo;
+    @Override
+    public List<SecondCourseSummaryDTO> findSummaryCoursesByShoppingCartId(int shoppingCartId) {
+        List<ShoppingCart> accesses = shoppingCartRepo.findByUserProfileUserId(shoppingCartId);
+        List<SecondaryCourses> courses = accesses.stream()
+                .map(ShoppingCart::getSecondaryCourse)
                 .collect(Collectors.toList());
 
         return courses.stream()

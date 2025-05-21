@@ -490,4 +490,16 @@ public class SecondCourseController {
         return ResponseEntity.ok(courseDTO);
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Listar Cursos si estan en el carrito de compras del usuario
+    @GetMapping("/mycart/{userId}")
+    public ResponseEntity<List<SecondCourseSummaryDTO>> getmycart(@PathVariable int userId) {
+        List<SecondCourseSummaryDTO> courseDTOs = scS.findSummaryCoursesByShoppingCartId(userId);
+
+        if (courseDTOs.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(courseDTOs);
+    }
 }
