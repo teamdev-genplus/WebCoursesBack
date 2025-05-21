@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.servicesimplement;
 
 import com.aecode.webcoursesback.dtos.SecondCourseSummaryDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
+import com.aecode.webcoursesback.entities.ShoppingCart;
 import com.aecode.webcoursesback.entities.UserSecCourseAccess;
 import com.aecode.webcoursesback.repositories.ISecondCourseRepo;
 import com.aecode.webcoursesback.repositories.IShoppingCartRepo;
