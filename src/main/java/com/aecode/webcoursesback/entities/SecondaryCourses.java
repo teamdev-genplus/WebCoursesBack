@@ -87,6 +87,9 @@ public class SecondaryCourses {
     @Column()
     private Integer orderNumber;
 
+    @Column
+    private String type;
+
     @Column()
     private String[] schedules;
 

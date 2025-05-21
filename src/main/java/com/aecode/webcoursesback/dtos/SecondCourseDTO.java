@@ -25,6 +25,7 @@ public class SecondCourseDTO {
     private String module;
     private String brochureUrl;
     private String whatsappGroupLink;
+    private String type;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;

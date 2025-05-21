@@ -20,6 +20,7 @@ public class SCMyCourseDTO {
     private String module;
     private String whatsappGroupLink;
     private String[] schedules;
+    private String type;
     @Builder.Default
     private List<StudyPlanDTO> studyplans = new ArrayList<>();
     private String urlmaterialaccess;
