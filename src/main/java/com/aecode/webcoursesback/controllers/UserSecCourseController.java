@@ -3,6 +3,7 @@ import com.aecode.webcoursesback.dtos.UserSecCourseDTO;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.entities.UserSecCourseAccess;
+import com.aecode.webcoursesback.services.EmailSenderService;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import com.aecode.webcoursesback.services.IUserSecCourseService;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,9 @@ public class UserSecCourseController {
     private IUserProfileService pS;
     @Autowired
     private ISecondCourseService scS;
+
+    @Autowired
+    private EmailSenderService emailSenderService;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody UserSecCourseDTO dto) {
@@ -48,6 +53,19 @@ public class UserSecCourseController {
 
         // Guardar en la base de datos
         uscS.insert(userseccourse);
+
+        //ENVIO DE CORREOS
+        // Preparar contenido email usuario
+        String userBody = String.format("Hola %s,\n\nGracias por comprar el curso: %s.\nFecha: %s\n\nSaludos,\nEquipo Aecode",
+                user.getFullname(), seccourse.getTitle(), LocalDateTime.now());
+
+        emailSenderService.sendEmail(user.getEmail(), "Confirmación de compra", userBody);
+
+        // Preparar contenido email empresa
+        String companyBody = String.format("El usuario %s (%s) ha comprado el curso: %s.\nFecha: %s",
+                user.getFullname(), user.getEmail(), seccourse.getTitle(), LocalDateTime.now());
+
+        emailSenderService.sendEmail("manuel.wrk.10@gmail.com\n", "Nueva compra de curso", companyBody);
 
         return ResponseEntity.ok("Curso Secundario del usuario guardado correctamente");
     }

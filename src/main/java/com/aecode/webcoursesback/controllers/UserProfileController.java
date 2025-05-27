@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.entities.UserDetail;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IUserDetailService;
 import com.aecode.webcoursesback.services.IUserProfileService;
@@ -139,7 +140,6 @@ public class UserProfileController {
             if (dto.getEmail() != null) existingUser.setEmail(dto.getEmail());
             if (dto.getPassword() != null) existingUser.setPasswordHash(dto.getPassword());
 
-
             upS.update(existingUser);
 
             // Actualizar UserDetail si hay campos presentes
@@ -152,17 +152,24 @@ public class UserProfileController {
                     dto.getBirthdate() != null;
 
             if (hasUserDetailData) {
-                UserUpdateDTO detailDTO = new UserUpdateDTO();
-                detailDTO.setUserId(id); // el ID del UserProfile
-                detailDTO.setPhoneNumber(dto.getPhoneNumber());
-                detailDTO.setGender(dto.getGender());
-                detailDTO.setCountry(dto.getCountry());
-                detailDTO.setProfession(dto.getProfession());
-                detailDTO.setEducation(dto.getEducation());
-                detailDTO.setLinkedin(dto.getLinkedin());
-                detailDTO.setBirthdate(dto.getBirthdate());
+                // Cargar UserDetail existente
+                UserDetail existingDetail = udS.findByUserId(id);
+                if (existingDetail == null) {
+                    // Si no existe detalle, crear uno nuevo
+                    existingDetail = new UserDetail();
+                    existingDetail.setUserProfile(existingUser);
+                }
 
-                udS.updateUserDetail(detailDTO);
+                // Actualizar solo campos no nulos
+                if (dto.getPhoneNumber() != null) existingDetail.setPhoneNumber(dto.getPhoneNumber());
+                if (dto.getGender() != null) existingDetail.setGender(dto.getGender());
+                if (dto.getCountry() != null) existingDetail.setCountry(dto.getCountry());
+                if (dto.getProfession() != null) existingDetail.setProfession(dto.getProfession());
+                if (dto.getEducation() != null) existingDetail.setEducation(dto.getEducation());
+                if (dto.getLinkedin() != null) existingDetail.setLinkedin(dto.getLinkedin());
+                if (dto.getBirthdate() != null) existingDetail.setBirthdate(dto.getBirthdate());
+
+                udS.update(existingDetail);
             }
 
             return ResponseEntity.ok("Usuario actualizado correctamente");

@@ -66,7 +66,9 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getOrderNumber(),
                 course.getMode(),
                 course.getUrlname(),
-                course.getType()));
+                course.getType(),
+                course.getBrochureUrl()));
+
     }
 
     public Page<SecondCourseSummaryDTO> paginateByMode(String mode, Pageable pageable) {
@@ -89,7 +91,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getOrderNumber(),
                 course.getMode(),
                 course.getUrlname(),
-                course.getType()));
+                course.getType(),
+                course.getBrochureUrl()));
     }
 
     @Override
@@ -135,7 +138,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                         course.getOrderNumber(),
                         course.getMode(),
                         course.getUrlname(),
-                        course.getType()))
+                        course.getType(),
+                        course.getBrochureUrl()))
                 .collect(Collectors.toList());
     }
 
@@ -165,7 +169,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                         course.getOrderNumber(),
                         course.getMode(),
                         course.getUrlname(),
-                        course.getType()))
+                        course.getType(),
+                        course.getBrochureUrl()))
                 .collect(Collectors.toList());
     }
 
@@ -189,7 +194,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                         course.getOrderNumber(),
                         course.getMode(),
                         course.getUrlname(),
-                        course.getType()))
+                        course.getType(),
+                        course.getBrochureUrl()))
                 .collect(Collectors.toList());
     }
 
@@ -218,7 +224,8 @@ public class SecondCourseServImp implements ISecondCourseService {
                 course.getOrderNumber(),
                 course.getMode(),
                 course.getUrlname(),
-                course.getType()));
+                course.getType(),
+                course.getBrochureUrl()));
 
     }
 }

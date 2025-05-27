@@ -28,6 +28,7 @@ public class SecondCourseSummaryDTO {
     private SecondaryCourses.Mode mode;
     private String urlname;
     private String type;
+    private String brochureUrl;
 
 
 }
