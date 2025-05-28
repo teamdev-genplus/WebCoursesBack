@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserSecCourseServiceImp implements IUserSecCourseService {
@@ -30,5 +31,17 @@ public class UserSecCourseServiceImp implements IUserSecCourseService {
     @Override
     public UserSecCourseAccess listId(int accessId) {
         return uscR.findById(accessId).orElse(new UserSecCourseAccess());
+    }
+
+    @Override
+    public void markCompleted(int accessId, boolean completed) {
+        Optional<UserSecCourseAccess> opt = uscR.findById(accessId);
+        if (opt.isPresent()) {
+            UserSecCourseAccess access = opt.get();
+            access.setCompleted(completed);
+            uscR.save(access);
+        } else {
+            throw new RuntimeException("Acceso al curso no encontrado con id: " + accessId);
+        }
     }
 }

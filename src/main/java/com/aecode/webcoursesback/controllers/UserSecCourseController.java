@@ -104,4 +104,15 @@ public class UserSecCourseController {
         uscS.insert(usca);
     }
 
+    // Nuevo endpoint PATCH para marcar completado
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<String> markCourseCompleted(@PathVariable("id") int id, @RequestParam boolean completed) {
+        try {
+            uscS.markCompleted(id, completed);
+            return ResponseEntity.ok("Estado de completado actualizado correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 }

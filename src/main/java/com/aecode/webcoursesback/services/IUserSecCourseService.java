@@ -10,4 +10,6 @@ public interface IUserSecCourseService {
     List<UserSecCourseAccess> list();
     public void delete(int accessId);
     public UserSecCourseAccess listId(int accessId);
+    // Nuevo método para actualizar completado
+    void markCompleted(int accessId, boolean completed);
 }

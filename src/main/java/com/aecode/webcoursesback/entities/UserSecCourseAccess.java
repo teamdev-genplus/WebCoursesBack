@@ -1,7 +1,15 @@
 package com.aecode.webcoursesback.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "userseccourseaccess")
 @SequenceGenerator(name = "secaccess_seq", sequenceName = "secaccess_sequence", allocationSize = 1)
@@ -19,36 +27,7 @@ public class UserSecCourseAccess {
     @JoinColumn(name = "course_id", nullable = false)
     private SecondaryCourses seccourse;
 
-    public UserSecCourseAccess() {
-    }
+    @Column(name = "completed")
+    private boolean completed = false;
 
-    public UserSecCourseAccess(int accessId, UserProfile userProfile, SecondaryCourses seccourse) {
-        this.accessId = accessId;
-        this.userProfile = userProfile;
-        this.seccourse = seccourse;
-    }
-
-    public int getAccessId() {
-        return accessId;
-    }
-
-    public void setAccessId(int accessId) {
-        this.accessId = accessId;
-    }
-
-    public UserProfile getUserProfile() {
-        return userProfile;
-    }
-
-    public void setUserProfile(UserProfile userProfile) {
-        this.userProfile = userProfile;
-    }
-
-    public SecondaryCourses getSeccourse() {
-        return seccourse;
-    }
-
-    public void setSeccourse(SecondaryCourses seccourse) {
-        this.seccourse = seccourse;
-    }
 }
