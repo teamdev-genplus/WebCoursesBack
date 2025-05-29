@@ -27,7 +27,7 @@ public class UserSecCourseAccess {
     @JoinColumn(name = "course_id", nullable = false)
     private SecondaryCourses seccourse;
 
-    @Column(name = "completed")
+    @Column(name = "completed", nullable = false)
     private boolean completed = false;
 
 }

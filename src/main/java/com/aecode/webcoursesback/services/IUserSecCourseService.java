@@ -12,4 +12,6 @@ public interface IUserSecCourseService {
     public UserSecCourseAccess listId(int accessId);
     // Nuevo método para actualizar completado
     void markCompleted(int accessId, boolean completed);
+
+    boolean existsByUserProfileUserIdAndSeccourseSeccourseId(int userId, Long courseId);
 }

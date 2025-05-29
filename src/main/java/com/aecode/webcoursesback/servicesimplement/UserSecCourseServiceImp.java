@@ -44,4 +44,9 @@ public class UserSecCourseServiceImp implements IUserSecCourseService {
             throw new RuntimeException("Acceso al curso no encontrado con id: " + accessId);
         }
     }
+
+    @Override
+    public boolean existsByUserProfileUserIdAndSeccourseSeccourseId(int userId, Long courseId) {
+        return uscR.existsByUserProfileUserIdAndSeccourseSeccourseId(userId, courseId);
+    }
 }
