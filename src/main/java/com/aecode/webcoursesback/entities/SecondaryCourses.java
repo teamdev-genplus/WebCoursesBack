@@ -106,15 +106,6 @@ public class SecondaryCourses {
     @JoinTable(name = "secondcourse_tools", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "tool_id"))
     private List<Tool> tools;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("orderNumber ASC")
-    private List<StudyPlan> studyplans = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "secondary_course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Coupon> coupons = new ArrayList<>();
-
     @ManyToMany
     @JoinTable(name = "secondcourse_freqquests", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
     private List<FreqQuest> freqquests;

@@ -34,11 +34,6 @@ public class Coupon {
     @Column
     private LocalDate expirationDate;
 
-
-    @ManyToOne
-    @JoinColumn(name = "seccourse_id", nullable = false)
-    private SecondaryCourses secondary_course;
-
     @ManyToMany
     @JoinTable(name = "module_coupons",
             joinColumns = @JoinColumn(name = "coupon_id"),

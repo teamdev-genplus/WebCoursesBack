@@ -50,8 +50,6 @@ public class SecondCourseDTO {
     @Builder.Default
     private List<ToolDTO> tools = new ArrayList<>();
     @Builder.Default
-    private List<StudyPlanDTO> studyplans = new ArrayList<>();
-    @Builder.Default
     private List<FreqQuestDTO> freqquests = new ArrayList<>();
     private SecondaryCourses.Mode mode;
     @Builder.Default
