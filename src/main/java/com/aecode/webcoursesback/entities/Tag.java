@@ -19,7 +19,7 @@ public class CourseTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int courseTagId;
-
+    //abcd
     @Column(nullable = false, length = 255)
     private String courseTagName;
 

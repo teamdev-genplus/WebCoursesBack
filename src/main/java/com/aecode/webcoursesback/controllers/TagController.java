@@ -3,6 +3,7 @@ package com.aecode.webcoursesback.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.aecode.webcoursesback.entities.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aecode.webcoursesback.dtos.CourseTagDTO;
-import com.aecode.webcoursesback.entities.CourseTag;
+import com.aecode.webcoursesback.dtos.TagDTO;
 import com.aecode.webcoursesback.services.ICourseTagService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,25 +31,25 @@ public class CourseTagController {
     private ICourseTagService courseTagService;
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody CourseTagDTO dto) {
+    public ResponseEntity<String> insert(@RequestBody TagDTO dto) {
         System.out.println("Recibido DTO: " + dto);
-        System.out.println("DTO courseTagId: " + dto.getCourseTagId());
-        System.out.println("DTO courseTagName: " + dto.getCourseTagName());
+        System.out.println("DTO tagId: " + dto.getTagId());
+        System.out.println("DTO tagName: " + dto.getTagName());
 
-        if (dto.getCourseTagName() == null || dto.getCourseTagName().trim().isEmpty()) {
+        if (dto.getTagName() == null || dto.getTagName().trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error: courseTagName no puede ser nulo o vacío.");
         }
 
         try {
-            // Mapear el DTO a la entidad CourseTag
+            // Mapear el DTO a la entidad Tag
             ModelMapper modelMapper = new ModelMapper();
-            CourseTag courseTag = modelMapper.map(dto, CourseTag.class);
+            Tag tag = modelMapper.map(dto, Tag.class);
 
-            System.out.println("Entidad CourseTag mapeada: " + courseTag);
+            System.out.println("Entidad Tag mapeada: " + tag);
 
             // Insertar en la base de datos
-            courseTagService.insert(courseTag);
+            courseTagService.insert(tag);
 
             return ResponseEntity.status(HttpStatus.CREATED).body("Tag creado correctamente");
         } catch (Exception e) {
@@ -61,12 +61,12 @@ public class CourseTagController {
     }
 
     @GetMapping
-    public List<CourseTagDTO> list() {
+    public List<TagDTO> list() {
         ModelMapper modelMapper = new ModelMapper();
-        List<CourseTag> courseTags = courseTagService.list();
-        return courseTags.stream().map(courseTag -> {
+        List<Tag> tags = courseTagService.list();
+        return tags.stream().map(courseTag -> {
             // Mapear la entidad FreqQuest a FreqQuestDTO
-            CourseTagDTO dto = modelMapper.map(courseTag, CourseTagDTO.class);
+            TagDTO dto = modelMapper.map(courseTag, TagDTO.class);
             return dto;
         }).collect(Collectors.toList());
     }
@@ -83,11 +83,11 @@ public class CourseTagController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseTagDTO> listId(@PathVariable("id") Integer id) {
+    public ResponseEntity<TagDTO> listId(@PathVariable("id") Integer id) {
         ModelMapper modelMapper = new ModelMapper();
-        CourseTag courseTag = courseTagService.listById(id);
-        if (courseTag != null) {
-            CourseTagDTO dto = modelMapper.map(courseTag, CourseTagDTO.class);
+        Tag tag = courseTagService.listById(id);
+        if (tag != null) {
+            TagDTO dto = modelMapper.map(tag, TagDTO.class);
             return ResponseEntity.ok(dto);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -95,20 +95,20 @@ public class CourseTagController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody CourseTagDTO dto) {
+    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody TagDTO dto) {
         try {
             // Obtener la entidad existente por ID
-            CourseTag existingCourseTag = courseTagService.listById(id);
-            if (existingCourseTag == null) {
+            Tag existingTag = courseTagService.listById(id);
+            if (existingTag == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tag no encontrado");
             }
 
-            if (dto.getCourseTagName() != null) {
-                existingCourseTag.setCourseTagName(dto.getCourseTagName());
+            if (dto.getTagName() != null) {
+                existingTag.setName(dto.getTagName());
             }
 
             // Guardar los cambios
-            courseTagService.insert(existingCourseTag);
+            courseTagService.insert(existingTag);
 
             return ResponseEntity.ok("Tag actualizado correctamente");
         } catch (Exception e) {

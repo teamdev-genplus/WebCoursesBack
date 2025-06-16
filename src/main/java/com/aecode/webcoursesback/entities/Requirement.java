@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "module_requirements")
-public class ModuleRequirements {
+public class Requirement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
