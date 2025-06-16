@@ -90,49 +90,49 @@ public class SecondaryCourses {
     @Column
     private String type;
 
-    @Column()
-    private String[] schedules;
-
-    @Column()
-    private String[] requirements;
-
-    @Builder.Default
-    @ElementCollection
-    @CollectionTable(name = "secondcourse_benefits", joinColumns = @JoinColumn(name = "seccourse_id"))
-    @Column(name = "benefit")
-    private List<String> benefits = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable(name = "secondcourse_tools", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "tool_id"))
-    private List<Tool> tools;
-
-    @ManyToMany
-    @JoinTable(name = "secondcourse_freqquests", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
-    private List<FreqQuest> freqquests;
-
-    @Builder.Default
-    @ManyToMany
-    @JoinTable(name = "secondcourse_tags", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "course_tag_id"))
-    private List<Tag> tags = new ArrayList<>();
-
+//    @Column()
+//    private String[] schedules;
+//
+//    @Column()
+//    private String[] requirements;
+//
+//    @Builder.Default
+//    @ElementCollection
+//    @CollectionTable(name = "secondcourse_benefits", joinColumns = @JoinColumn(name = "seccourse_id"))
+//    @Column(name = "benefit")
+//    private List<String> benefits = new ArrayList<>();
+//
+//    @ManyToMany
+//    @JoinTable(name = "secondcourse_tools", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "tool_id"))
+//    private List<Tool> tools;
+//
+//    @ManyToMany
+//    @JoinTable(name = "secondcourse_freqquests", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
+//    private List<FreqQuest> freqquests;
+//
+//    @Builder.Default
+//    @ManyToMany
+//    @JoinTable(name = "secondcourse_tags", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "course_tag_id"))
+//    private List<Tag> tags = new ArrayList<>();
+//
     public enum Mode {
         SINCRONO,
         ASINCRONO,
         EN_VIVO,
         HIBRIDO
     }
-
-    //nuevos atributos - vista mis cursos
-
-    @Column(length = 255)
-    private String urlmaterialaccess;
-
-    @Column(length = 255)
-    private String urljoinclass;
-
-    @ElementCollection
-    @CollectionTable(name = "secondary_course_certificates", joinColumns = @JoinColumn(name = "seccourse_id"))
-    @Column(name = "certificate_url")
-    private List<String> certificateUrls = new ArrayList<>();
+//
+//    //nuevos atributos - vista mis cursos
+//
+//    @Column(length = 255)
+//    private String urlmaterialaccess;
+//
+//    @Column(length = 255)
+//    private String urljoinclass;
+//
+//    @ElementCollection
+//    @CollectionTable(name = "secondary_course_certificates", joinColumns = @JoinColumn(name = "seccourse_id"))
+//    @Column(name = "certificate_url")
+//    private List<String> certificateUrls = new ArrayList<>();
 
 }

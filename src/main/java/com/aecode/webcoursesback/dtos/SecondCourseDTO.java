@@ -43,20 +43,20 @@ public class SecondCourseDTO {
     private int numberOfUnits;
     private String urlname;
     private Integer orderNumber;
-    private String[] schedules;
-    private String[] requirements;
-    @Builder.Default
-    private List<String> benefits = new ArrayList<>();
-    @Builder.Default
-    private List<ToolDTO> tools = new ArrayList<>();
-    @Builder.Default
-    private List<FreqQuestDTO> freqquests = new ArrayList<>();
-    private SecondaryCourses.Mode mode;
-    @Builder.Default
-    private List<Tag> tags = new ArrayList<>();
-    //
-    private String urlmaterialaccess;
-    private String urljoinclass;
-    @Builder.Default
-    private List<String> certificateUrls = new ArrayList<>();
+//    private String[] schedules;
+//    private String[] requirements;
+//    @Builder.Default
+//    private List<String> benefits = new ArrayList<>();
+//    @Builder.Default
+//    private List<ToolDTO> tools = new ArrayList<>();
+//    @Builder.Default
+//    private List<FreqQuestDTO> freqquests = new ArrayList<>();
+//    private SecondaryCourses.Mode mode;
+//    @Builder.Default
+//    private List<Tag> tags = new ArrayList<>();
+//    //
+//    private String urlmaterialaccess;
+//    private String urljoinclass;
+//    @Builder.Default
+//    private List<String> certificateUrls = new ArrayList<>();
 }
