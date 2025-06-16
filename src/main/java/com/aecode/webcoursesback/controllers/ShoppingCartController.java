@@ -1,8 +1,10 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.ShoppingCartDTO;
+import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.ShoppingCart;
 import com.aecode.webcoursesback.entities.UserProfile;
+import com.aecode.webcoursesback.services.IModuleService;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IShoppingCartService;
 import com.aecode.webcoursesback.services.IUserProfileService;
@@ -25,6 +27,8 @@ public class ShoppingCartController {
     private IUserProfileService pS;
     @Autowired
     private ISecondCourseService sS;
+    @Autowired
+    private IModuleService mS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody ShoppingCartDTO dto) {
@@ -32,6 +36,7 @@ public class ShoppingCartController {
         // Cargar manualmente las entidades UserProfile y Session
         UserProfile user = pS.listId(dto.getUserId());
         SecondaryCourses secondaryCourses = sS.listId(dto.getSeccourseId());
+        Module modules = mS.listId(dto.getModuleId());
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no encontrado");
@@ -39,11 +44,15 @@ public class ShoppingCartController {
         if (secondaryCourses == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Curso secundario no encontrado");
         }
+        if (modules == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Modulo no encontrado");
+        }
 
         // Mapear el DTO a la entidad
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUserProfile(user); // Asignar el UserProfile
         shoppingCart.setSecondaryCourse(secondaryCourses); // Asignar el SecondaryCourse
+        shoppingCart.setModule(modules);
 
         // Guardar en la base de datos
         scS.insert(shoppingCart);

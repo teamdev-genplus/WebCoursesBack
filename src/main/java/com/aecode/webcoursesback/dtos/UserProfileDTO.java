@@ -14,15 +14,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserProfileDTO {
-    private int userId;
+    private Long userId;
     private String fullname;
     private String email;
     private String passwordHash;
     private String rol;
     private String status;
 
-    private List<UserProgressSessionDTO> userprogresssessions;
-    private List<UserProgressRwDTO> userprogressrw;
     private List<UserCourseDTO> usercourseaccess;
     private List<UserModuleDTO> usermoduleaccess;
 

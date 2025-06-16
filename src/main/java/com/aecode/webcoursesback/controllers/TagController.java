@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/coursetag")
 @RequiredArgsConstructor
-public class CourseTagController {
+public class TagController {
 
     @Autowired
     private ICourseTagService courseTagService;

@@ -48,7 +48,7 @@ public class FreqQuestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         try {
             fqS.delete(id);
             return ResponseEntity.ok("Pregunta frecuente eliminada correctamente");
@@ -59,7 +59,7 @@ public class FreqQuestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FreqQuestDTO> listId(@PathVariable("id") Integer id) {
+    public ResponseEntity<FreqQuestDTO> listId(@PathVariable("id") Long id) {
         ModelMapper modelMapper = new ModelMapper();
         FreqQuest freqQuest = fqS.listId(id);
         if (freqQuest != null) {
@@ -71,7 +71,7 @@ public class FreqQuestController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody FreqQuestDTO dto) {
+    public ResponseEntity<String> update(@PathVariable("id") Long id, @RequestBody FreqQuestDTO dto) {
         try {
             // Obtener la entidad existente por ID
             FreqQuest existingFreqQuest = fqS.listId(id);

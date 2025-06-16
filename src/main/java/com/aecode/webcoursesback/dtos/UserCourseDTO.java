@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserCourseDTO {
     private int accessId;
-    private int userId;
-    private int courseId;
+    private Long userId;
+    private Long courseId;
 }

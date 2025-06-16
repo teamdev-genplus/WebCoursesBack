@@ -46,7 +46,7 @@ public class UserDetailController {
                 dto.setUserId(userdetail.getUserProfile().getUserId());
             } else {
                 // Manejar casos donde userProfile es null (opcional)
-                dto.setUserId(0); // O asignar un valor por defecto
+                dto.setUserId(Long.valueOf(0)); // O asignar un valor por defecto
             }
             return dto;
         }).collect(Collectors.toList());
@@ -66,14 +66,14 @@ public class UserDetailController {
             dto.setUserId(userDetail.getUserProfile().getUserId());
         } else {
             // Asignar un valor por defecto si userProfile es null
-            dto.setUserId(0); // O asignar el valor que desees
+            dto.setUserId(Long.valueOf(0)); // O asignar el valor que desees
         }
 
         return dto;
     }
 
     @GetMapping("/by-user/{userId}") // Nuevo endpoint para buscar por userId
-    public UserDetailDTO findByUserId(@PathVariable int userId) {
+    public UserDetailDTO findByUserId(@PathVariable Long userId) {
         UserDetail userDetail = udS.findByUserId(userId);
         if (userDetail == null) {
             return null;
@@ -86,7 +86,7 @@ public class UserDetailController {
     }
 
     @PatchMapping(value = "/{userId}/update-profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> updateProfilePicture(@PathVariable("userId") int userId,
+    public ResponseEntity<String> updateProfilePicture(@PathVariable("userId") Long userId,
                                                        @RequestParam("image") MultipartFile imagen) {
         try {
             // Verificar que el perfil de usuario existe

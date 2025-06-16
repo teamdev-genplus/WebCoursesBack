@@ -8,7 +8,7 @@ public interface IUserDetailService {
     List<UserDetail> list();
     public UserDetail listId(int userD);
     public UserDetail update(UserDetail userDetail);
-    UserDetail findByUserId(int userId);
+    UserDetail findByUserId(Long userId);
 
 
     public void updateUserDetail(UserUpdateDTO userProfileDTO);

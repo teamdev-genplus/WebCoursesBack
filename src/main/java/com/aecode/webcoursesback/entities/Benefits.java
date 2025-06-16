@@ -14,11 +14,14 @@ public class Benefits {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long benefitId;
-
+    //abcd
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "module_id", nullable = false)
+    private Module module;
 
     @Column(nullable = false, length = 255)
     private String benefit;
+
+    @Column
+    private String urlCourses;
 }

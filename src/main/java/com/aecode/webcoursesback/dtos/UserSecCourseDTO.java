@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserSecCourseDTO {
     private int accessId;
-    private int userId;
+    private Long userId;
     private Long seccourseId;
     private boolean completed;
 }

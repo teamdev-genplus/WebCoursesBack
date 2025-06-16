@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface IUserDetailRepo extends JpaRepository<UserDetail, Integer> {
     //buscar user por userId de UserProfile
     @Query("SELECT u FROM UserDetail u WHERE u.userProfile.userId = ?1")
-    UserDetail findByUserId(int userId);
+    UserDetail findByUserId(Long userId);
 
 
 }

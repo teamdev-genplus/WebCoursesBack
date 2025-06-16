@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface IUserProfileRepository extends JpaRepository<UserProfile, Integer> {
+public interface IUserProfileRepository extends JpaRepository<UserProfile, Long> {
 
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM UserProfile u WHERE u.email = :email")
     boolean existsByProfile_email(@Param("email") String email);
@@ -23,6 +23,6 @@ public interface IUserProfileRepository extends JpaRepository<UserProfile, Integ
     // Verificar si la contraseña actual es correcta
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END " +
             "FROM UserProfile u WHERE u.userId = :userId AND u.passwordHash = :currentPassword")
-    boolean validateCurrentPassword(@Param("userId") int userId, @Param("currentPassword") String currentPassword);
+    boolean validateCurrentPassword(@Param("userId") Long userId, @Param("currentPassword") String currentPassword);
 
 }

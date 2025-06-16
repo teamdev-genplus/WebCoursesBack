@@ -107,7 +107,7 @@ public class SecondCourseServImp implements ISecondCourseService {
     @Autowired
     private IUserSecCourseRepo userSecCourseAccessRepo;
     @Override
-    public List<SecondaryCourses> findCoursesByUserId(int userId) {
+    public List<SecondaryCourses> findCoursesByUserId(Long userId) {
         List<UserSecCourseAccess> accesses = userSecCourseAccessRepo.findByUserProfileUserId(userId);
         return accesses.stream()
                 .map(UserSecCourseAccess::getSeccourse)
@@ -115,7 +115,7 @@ public class SecondCourseServImp implements ISecondCourseService {
     }
 
     @Override
-    public List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(int userId) {
+    public List<SecondCourseSummaryDTO> findSummaryCoursesByUserId(Long userId) {
         List<UserSecCourseAccess> accesses = userSecCourseAccessRepo.findByUserProfileUserId(userId);
         List<SecondaryCourses> courses = accesses.stream()
                 .map(UserSecCourseAccess::getSeccourse)

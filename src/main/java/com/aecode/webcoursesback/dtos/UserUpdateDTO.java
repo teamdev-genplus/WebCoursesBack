@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class UserUpdateDTO {
-    private int userId;
+    private Long userId;
     private String fullname;
     private String email;
     private String password;

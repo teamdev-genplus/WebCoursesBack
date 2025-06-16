@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface IUserSecCourseRepo extends JpaRepository<UserSecCourseAccess, Integer> {
 
-    List<UserSecCourseAccess> findByUserProfileUserId(int userId);
+    List<UserSecCourseAccess> findByUserProfileUserId(Long userId);
 
-    boolean existsByUserProfileUserIdAndSeccourseSeccourseId(int userId, Long courseId);
+    boolean existsByUserProfileUserIdAndSeccourseSeccourseId(Long userId, Long courseId);
 }

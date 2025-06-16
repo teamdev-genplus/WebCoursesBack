@@ -2,10 +2,10 @@ package com.aecode.webcoursesback.servicesimplement;
 
 import java.util.List;
 
+import com.aecode.webcoursesback.entities.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.aecode.webcoursesback.entities.CourseTag;
 import com.aecode.webcoursesback.repositories.ICourseTagRepo;
 import com.aecode.webcoursesback.services.ICourseTagService;
 
@@ -15,22 +15,22 @@ public class CourseTagImp implements ICourseTagService {
     private ICourseTagRepo courseTagRepo;
 
     @Override
-    public void insert(CourseTag courseTag) {
-        courseTagRepo.save(courseTag);
+    public void insert(Tag tag) {
+        courseTagRepo.save(tag);
     }
 
     @Override
-    public List<CourseTag> list() {
+    public List<Tag> list() {
         return courseTagRepo.findAll();
     }
 
     @Override
-    public CourseTag listById(int courseTagId) {
-        return courseTagRepo.findById(courseTagId).get();
+    public Tag listById(int tagId) {
+        return courseTagRepo.findById(tagId).get();
     }
 
     @Override
-    public void delete(int courseTagId) {
-        courseTagRepo.deleteById(courseTagId);
+    public void delete(int tagId) {
+        courseTagRepo.deleteById(tagId);
     }
 }

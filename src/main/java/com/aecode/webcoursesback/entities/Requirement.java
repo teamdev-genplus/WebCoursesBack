@@ -7,16 +7,20 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "module_requirements")
+@Table(name = "requirements")
 public class Requirement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long requirementId;
 
     @Column(nullable = false)
-    private String requirement;
+    private String requirementName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "module_id")
     private Module module;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
 }

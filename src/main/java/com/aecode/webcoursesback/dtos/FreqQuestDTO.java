@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class FreqQuestDTO {
-    private int freqquestId;
+    private Long freqquestId;
     private String questionText;
     private String answerText;
 }

@@ -53,74 +53,13 @@ public class UserProfileController {
         }
     }
 
-    // Listado de todos los usuarios
-//    @GetMapping("/list")
-//    public List<UserProfileDTO> listUsers() {
-//        ModelMapper modelMapper = new ModelMapper();
-//
-//        return upS.list().stream().map(user -> {
-//            // Convertir el usuario al DTO de perfil
-//            UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
-//
-//            // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
-//            List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
-//                    .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
-//                    .map(progress -> {
-//                        // Aquí mapeamos el UserProgressRW a UserProgressRwDTO
-//                        UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
-//                        progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignamos el workId
-//
-//                        return progressDTO;
-//                    })
-//                    .collect(Collectors.toList());
-//
-//            // Actualizamos el DTO de UserProfile con solo los elementos válidos de UserProgressRwDTO
-//            userProfileDTO.setUserprogressrw(filteredUserProgressRw);
-//
-//            return userProfileDTO;
-//        }).collect(Collectors.toList());
-//    }
-//
-//    // Obtener un usuario por ID
-//    @GetMapping("/{id}")
-//    public UserProfileDTO listId(@PathVariable("id") Integer id) {
-//        ModelMapper modelMapper = new ModelMapper();
-//
-//        // Buscar el usuario por ID
-//        UserProfile user = upS.listId(id);
-//        if (user == null) {
-//            throw new RuntimeException("Usuario no encontrado"); // Manejo de error, opcional
-//        }
-//
-//        // Convertir el usuario a UserProfileDTO
-//        UserProfileDTO userProfileDTO = modelMapper.map(user, UserProfileDTO.class);
-//
-//        // Filtrar solo los UserProgressRwDTO con un workId válido (mayor a 0)
-//        List<UserProgressRwDTO> filteredUserProgressRw = user.getUserprogressrw().stream()
-//                .filter(progress -> progress.getRw() != null && progress.getRw().getWorkId() > 0)
-//                .map(progress -> {
-//                    // Mapear el UserProgressRW a UserProgressRwDTO
-//                    UserProgressRwDTO progressDTO = modelMapper.map(progress, UserProgressRwDTO.class);
-//                    progressDTO.setWorkId(progress.getRw().getWorkId()); // Asignar el workId
-//
-//                    return progressDTO;
-//                })
-//                .collect(Collectors.toList());
-//
-//        // Actualizar el UserProfileDTO con los elementos filtrados
-//        userProfileDTO.setUserprogressrw(filteredUserProgressRw);
-//
-//        return userProfileDTO;
-//    }
-
-
     // Eliminar un usuario por ID
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id")Integer id){upS.delete(id);}
+    public void delete(@PathVariable("id")Long id){upS.delete(id);}
 
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<String> update(@PathVariable("id") Integer id, @RequestBody String jsonPayload) {
+    public ResponseEntity<String> update(@PathVariable("id") Long id, @RequestBody String jsonPayload) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
@@ -189,7 +128,7 @@ public class UserProfileController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserUpdateDTO> getProfileById(@PathVariable int id) {
+    public ResponseEntity<UserUpdateDTO> getProfileById(@PathVariable Long id) {
         try {
             UserUpdateDTO profile = upS.listusersId(id);
             return ResponseEntity.ok(profile);
@@ -204,7 +143,7 @@ public class UserProfileController {
 
     @PatchMapping("/{id}/change-password")
     public ResponseEntity<String> changePassword(
-            @PathVariable("id") int userId,
+            @PathVariable("id") Long userId,
             @RequestParam String currentPassword,
             @RequestParam String newPassword) {
         try {

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseTagDTO {
+public class TagDTO {
 
-    private int courseTagId;
-    private String courseTagName;
+    private int tagId;
+    private String tagName;
 
 }

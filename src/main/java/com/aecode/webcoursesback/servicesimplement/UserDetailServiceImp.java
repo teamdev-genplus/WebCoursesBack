@@ -36,7 +36,7 @@ public class UserDetailServiceImp implements IUserDetailService {
     }
 
     @Override
-    public UserDetail findByUserId(int userId) {
+    public UserDetail findByUserId(Long userId) {
         return udR.findByUserId(userId);
     }
 

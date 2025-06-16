@@ -20,11 +20,6 @@ public class StudyPlan {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "studyplan_seq")
     private int studyplanId;
 
-    @ManyToOne
-    @JoinColumn(name = "seccourse_id", nullable = false)
-    private SecondaryCourses secondary_course;
-
-    //New
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")
     private Module module;
@@ -43,14 +38,5 @@ public class StudyPlan {
     @Column(name = "session",columnDefinition = "TEXT")
     private List<String> sessions = new ArrayList<>();
 
-    //newbottons
-    @Column(length = 255)
-    private String urlrecording;
-
-    @Column(length = 255)
-    private String dmaterial;
-
-    @Column(length = 255)
-    private String viewpresentation;
 
 }

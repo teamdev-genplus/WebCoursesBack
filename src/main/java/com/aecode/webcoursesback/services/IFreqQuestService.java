@@ -10,7 +10,7 @@ public interface IFreqQuestService {
 
     List<FreqQuest> list();
 
-    public void delete(int freqQuestId);
+    public void delete(Long freqQuestId);
 
-    public FreqQuest listId(int freqQuestId);
+    public FreqQuest listId(Long freqQuestId);
 }

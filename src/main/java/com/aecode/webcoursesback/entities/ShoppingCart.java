@@ -13,7 +13,7 @@ public class ShoppingCart {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_seq")
     private int cartId;
-
+    //abcd
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserProfile userProfile;

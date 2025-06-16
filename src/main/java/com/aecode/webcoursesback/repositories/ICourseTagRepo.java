@@ -1,9 +1,8 @@
 package com.aecode.webcoursesback.repositories;
 
+import com.aecode.webcoursesback.entities.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.aecode.webcoursesback.entities.CourseTag;
-
-public interface ICourseTagRepo extends JpaRepository<CourseTag, Integer> {
+public interface ICourseTagRepo extends JpaRepository<Tag, Integer> {
 
 }

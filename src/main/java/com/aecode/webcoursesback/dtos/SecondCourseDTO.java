@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.dtos;
 
+import com.aecode.webcoursesback.entities.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.aecode.webcoursesback.entities.CourseTag;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -52,12 +52,10 @@ public class SecondCourseDTO {
     @Builder.Default
     private List<StudyPlanDTO> studyplans = new ArrayList<>();
     @Builder.Default
-    private List<CouponDTO> coupons = new ArrayList<>();
-    @Builder.Default
     private List<FreqQuestDTO> freqquests = new ArrayList<>();
     private SecondaryCourses.Mode mode;
     @Builder.Default
-    private List<CourseTag> tags = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
     //
     private String urlmaterialaccess;
     private String urljoinclass;

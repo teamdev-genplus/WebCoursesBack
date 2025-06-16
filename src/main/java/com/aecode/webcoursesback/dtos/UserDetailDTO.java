@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Builder
 public class UserDetailDTO {
     private int detailsId;
-    private int userId;
+    private Long userId;
     private String profilepicture;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthdate;

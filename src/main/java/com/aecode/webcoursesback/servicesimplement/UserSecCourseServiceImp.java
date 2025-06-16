@@ -46,7 +46,7 @@ public class UserSecCourseServiceImp implements IUserSecCourseService {
     }
 
     @Override
-    public boolean existsByUserProfileUserIdAndSeccourseSeccourseId(int userId, Long courseId) {
+    public boolean existsByUserProfileUserIdAndSeccourseSeccourseId(Long userId, Long courseId) {
         return uscR.existsByUserProfileUserIdAndSeccourseSeccourseId(userId, courseId);
     }
 }

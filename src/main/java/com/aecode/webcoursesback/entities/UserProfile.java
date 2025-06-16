@@ -20,11 +20,11 @@ import java.util.UUID;
 public class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    private int userId;
+    private Long userId;
 
     @Column(length = 50)
     private String fullname;
-
+    //abcd
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
@@ -39,12 +39,6 @@ public class UserProfile {
 
     @OneToOne(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
-
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserProgressSession> userprogresssessions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserProgressRW> userprogressrw = new ArrayList<>();
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourseAccess> usercourseaccess = new ArrayList<>();

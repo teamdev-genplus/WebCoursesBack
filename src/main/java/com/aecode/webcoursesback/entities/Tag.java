@@ -1,11 +1,6 @@
 package com.aecode.webcoursesback.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,13 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "course_tag")
-public class CourseTag {
+@Table(name = "tags")
+@SequenceGenerator(name = "tag_seq", sequenceName = "tag_sequence", allocationSize = 1)
+public class Tag {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int courseTagId;
-    //abcd
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_seq")
+    private int tagId;
+
     @Column(nullable = false, length = 255)
-    private String courseTagName;
+    private String name;
 
 }

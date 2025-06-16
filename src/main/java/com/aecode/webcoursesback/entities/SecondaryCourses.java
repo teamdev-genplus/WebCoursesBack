@@ -122,7 +122,7 @@ public class SecondaryCourses {
     @Builder.Default
     @ManyToMany
     @JoinTable(name = "secondcourse_tags", joinColumns = @JoinColumn(name = "seccourse_id"), inverseJoinColumns = @JoinColumn(name = "course_tag_id"))
-    private List<CourseTag> tags = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
 
     public enum Mode {
         SINCRONO,

@@ -5,13 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSecCoursePurchaseDTO {
-    private Long userId;
-    private List<Long> seccourseIds;  // lista de ids de cursos comprados
+public class ScheduleDTO {
+    private Long scheduleId;
+    private String scheduleName;
+
 }

@@ -15,7 +15,6 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
 
-
         String firebaseConfigJson = System.getenv("FIREBASE_CONFIG_JSON");
         if (firebaseConfigJson == null) {
             throw new IOException("Variable de entorno FIREBASE_CONFIG_JSON no encontrada");

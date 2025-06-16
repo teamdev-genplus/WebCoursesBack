@@ -13,10 +13,14 @@ public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "certificates_seq")
     private Long id;
-
+    //abcd
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")
     private Module module;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Column(length = 255, nullable = false)
     private String name;

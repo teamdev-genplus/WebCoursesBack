@@ -2,14 +2,14 @@ package com.aecode.webcoursesback.services;
 
 import java.util.List;
 
-import com.aecode.webcoursesback.entities.CourseTag;
+import com.aecode.webcoursesback.entities.Tag;
 
 public interface ICourseTagService {
-    public void insert(CourseTag courseTag);
+    public void insert(Tag tag);
 
-    List<CourseTag> list();
+    List<Tag> list();
 
-    public void delete(int courseTagId);
+    public void delete(int tagId);
 
-    public CourseTag listById(int courseTagId);
+    public Tag listById(int tagId);
 }

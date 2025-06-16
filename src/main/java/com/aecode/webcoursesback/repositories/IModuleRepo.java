@@ -12,19 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface IModuleRepo extends JpaRepository<Module,Integer> {
-    @Query("SELECT m FROM Module m ORDER BY m.orderNumber ASC")
-    List<Module> listByOrderNumber();
-
-    @Query("SELECT m FROM Module m WHERE m.programTitle = :programTitle AND m.urlName = :urlName")
-    Module findByProgramTitleAndUrlName(@Param("programTitle") String programTitle, @Param("urlName") String urlName);
-
-    @Query("SELECT m FROM Module m JOIN m.tags t WHERE t.courseTagId IN :tagIds ORDER BY m.orderNumber ASC")
-    Page<Module> findByTags(@Param("tagIds") List<Integer> tagIds, Pageable pageable);
-
-    Page<Module> findByOrderNumberGreaterThan(int offsetOrderNumber, Pageable pageable);
-
-    Page<Module> findByMode(Module.Mode mode, Pageable pageable);
-
-    List<Module> findByTypeOrderByOrderNumberAsc(String type);
+public interface IModuleRepo extends JpaRepository<Module,Long> {
+    List<Module> findByCourse_CourseIdOrderByOrderNumberAsc(Long courseId);
 }

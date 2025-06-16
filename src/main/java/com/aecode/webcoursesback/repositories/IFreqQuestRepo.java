@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.aecode.webcoursesback.entities.FreqQuest;
 
 @Repository
-public interface IFreqQuestRepo extends JpaRepository<FreqQuest, Integer> {
+public interface IFreqQuestRepo extends JpaRepository<FreqQuest, Long> {
 
 }

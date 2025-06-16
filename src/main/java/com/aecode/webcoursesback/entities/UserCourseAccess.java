@@ -8,11 +8,11 @@ import jakarta.persistence.*;
 @Builder
 @Entity
 @Table(name = "usercourseaccess")
-@SequenceGenerator(name = "access_seq", sequenceName = "access_sequence", allocationSize = 1)
+@SequenceGenerator(name = "ucaccess_seq", sequenceName = "ucaccess_sequence", allocationSize = 1)
 
 public class UserCourseAccess {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "access_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ucaccess_seq")
     private int accessId;
 
     @ManyToOne
@@ -23,5 +23,6 @@ public class UserCourseAccess {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-
+    @Column(name = "completed", nullable = false)
+    private boolean completed = false;
 }

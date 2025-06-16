@@ -16,13 +16,10 @@ import java.util.List;
 public class FreqQuest {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "freqquest_seq")
-    private int freqquestId;
+    private Long freqquestId;
 
     @Column(length = 255)
     private String questionText;
-
-    @ManyToMany(mappedBy = "freqquests")
-    private List<SecondaryCourses> secondary_courses;
 
     @Column(length = 255)
     private String answerText;

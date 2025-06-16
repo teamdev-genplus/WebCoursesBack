@@ -26,12 +26,12 @@ public class FreqQuestServiceImp implements IFreqQuestService {
     }
 
     @Override
-    public void delete(int freqQuestId) {
+    public void delete(Long freqQuestId) {
         fqRepo.deleteById(freqQuestId);
     }
 
     @Override
-    public FreqQuest listId(int freqQuestId) {
+    public FreqQuest listId(Long freqQuestId) {
         return fqRepo.findById(freqQuestId).orElse(new FreqQuest());
     }
 

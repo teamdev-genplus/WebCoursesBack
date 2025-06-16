@@ -42,13 +42,13 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
-    public void delete(int userId) {
+    public void delete(Long userId) {
         UserProfile user = upR.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         upR.delete(user);
     }
 
     @Override
-    public UserProfile listId(int userId) {
+    public UserProfile listId(Long userId) {
         return upR.findById(userId).orElse(new UserProfile());
     }
 
@@ -67,7 +67,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
-    public void changePassword(int userId, String currentPassword, String newPassword) {
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
         // Validar que la contraseña actual es correcta
         boolean isCurrentPasswordValid = upR.validateCurrentPassword(userId, currentPassword);
         if (!isCurrentPasswordValid) {
@@ -108,7 +108,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
-    public UserUpdateDTO listusersId(int userId) {
+    public UserUpdateDTO listusersId(Long userId) {
         UserProfile user = upR.findById(userId).orElse(null);
         if (user == null) {
             throw new RuntimeException("Usuario no encontrado con ID: " + userId);

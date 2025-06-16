@@ -11,16 +11,16 @@ import java.util.List;
 public interface IUserProfileService {
     public void insert(RegistrationDTO dto);
     List<UserProfile> list();
-    public void delete(int userId);
-    public UserProfile listId(int userId);
+    public void delete(Long userId);
+    public UserProfile listId(Long userId);
     public void update(UserProfile userprofile);
     public UserProfile authenticateUser(LoginDTO logindto);
 
-    void changePassword(int userId, String currentPassword, String newPassword);
+    void changePassword(Long userId, String currentPassword, String newPassword);
 
 
     public List<UserUpdateDTO> listusers();
-    public UserUpdateDTO listusersId(int userId);
+    public UserUpdateDTO listusersId(Long userId);
 
 
 }

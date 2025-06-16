@@ -1,7 +1,7 @@
 package com.aecode.webcoursesback.entities;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +12,14 @@ import java.util.List;
 @Entity
 @Table(name = "modules")
 @SequenceGenerator(name = "module_seq", sequenceName = "module_sequence", allocationSize = 1)
-public class Module {
-
+public class Module extends BaseProduct{
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "module_seq")
-    private int moduleId;
+    private Long moduleId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "course_id", nullable = true)
+    @JsonBackReference
     private Course course;
 
     @Column(length = 255)
@@ -28,97 +28,77 @@ public class Module {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 255)
-    private String brochureUrl;
-
-    @Column(length = 255)
-    private String whatsappGroupLink;
-
-    @Column
-    private LocalDate startDate;
-
-    @Column(length = 100)
-    private String urlName;
-
-    @Column(length = 255)
-    private String certificateHours;
-
-    @Column
-    private Double priceRegular;
-
-    @Column
-    private Double discountPercentage;
-
-    @Column
-    private Double promptPaymentPrice;
-
-    @Column
-    private Boolean isOnSale;
-
-    @Column(columnDefinition = "TEXT")
-    private String achievement;
-
-    @Column(length = 255)
-    private String principalImage;
-
     @Column
     private Integer orderNumber;
 
-    @Column(length = 255)
-    private String urlMaterialAccess;
-
-    @Column(length = 255)
-    private String urlJoinClass;
+    //nuevos atributos de plan de estudio.
+    @Column
+    private Integer cantMods;
 
     @Column
-    private String type;
+    private Integer cantHours;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private Mode mode;
+    @Column
+    private String titleStudyplan;
+
+    @Column
+    private String descriptionStudyplan;
+
+    //newbottons que veran los usuarios en mis cursos
+    @Column(length = 255)
+    private String urlrecording;
+
+    @Column(length = 255)
+    private String dmaterial;
+
+    @Column(length = 255)
+    private String viewpresentation;
+
+    //Newbotton para instructores
+    @Column
+    private String urlInstructors;
 
     //Relaciones
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ModuleBenefits> benefits = new ArrayList<>();
-
+    @Builder.Default
     @ManyToMany
     @JoinTable(name = "module_tools",
             joinColumns = @JoinColumn(name = "module_id"),
             inverseJoinColumns = @JoinColumn(name = "tool_id"))
-    private List<Tool> tools;
+    private List<Tool> tools= new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderNumber ASC")
-    private List<StudyPlan> studyPlans;
+    private List<StudyPlan> studyPlans= new ArrayList<>();
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Coupon> coupons;
+    @Builder.Default
+    @ManyToMany(mappedBy = "module")
+    private List<Coupon> coupons = new ArrayList<>();
 
+    @Builder.Default
     @ManyToMany
     @JoinTable(name = "module_freqquests",
             joinColumns = @JoinColumn(name = "module_id"),
             inverseJoinColumns = @JoinColumn(name = "freqquest_id"))
-    private List<FreqQuest> freqquests;
+    private List<FreqQuest> freqquests= new ArrayList<>();
 
+    @Builder.Default
     @ManyToMany
     @JoinTable(name = "module_tags",
             joinColumns = @JoinColumn(name = "module_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    private List<CourseTag> tags;
+    private List<Tag> tags= new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Certificate> certificates;
+    private List<Certificate> certificates= new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ModuleSchedule> schedules = new ArrayList<>();
+    private List<Schedule> schedules = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ModuleRequirements> requirements = new ArrayList<>();
+    private List<Requirement> requirements = new ArrayList<>();
 
-    public enum Mode {
-        SINCRONO,
-        ASINCRONO,
-        EN_VIVO,
-        HIBRIDO
-    }
 }

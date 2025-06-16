@@ -23,7 +23,6 @@ public class UserDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userdetail_seq")
     private int detailsId;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "userId")
     private UserProfile userProfile;
@@ -37,10 +36,8 @@ public class UserDetail {
 
     @Column( length = 255)
     private String phoneNumber;
-
     @Column(length = 100)
     private String gender;
-
     @Column(length = 100)
     private String country;
     @Column(length = 100)

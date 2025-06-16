@@ -18,12 +18,6 @@ public class Tool {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tool_seq")
     private int toolId;
 
-    @ManyToMany(mappedBy = "tools")
-    private List<SecondaryCourses> secondary_courses;
-
-    @ManyToMany(mappedBy = "tools")
-    private List<Module> module_id;
-
     @Column(length = 255)
     private String name;
 

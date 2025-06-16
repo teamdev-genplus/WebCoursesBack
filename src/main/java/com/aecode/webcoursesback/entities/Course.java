@@ -1,8 +1,8 @@
 package com.aecode.webcoursesback.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +13,10 @@ import java.util.List;
 @Entity
 @Table(name = "courses")
 @SequenceGenerator(name = "course_seq", sequenceName = "course_sequence", allocationSize = 1)
-public class Course {
+public class Course{
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_seq")
-    private int courseId;
+    private Long courseId;
 
     @Column( length = 255)
     private String title;
@@ -28,12 +28,38 @@ public class Course {
     private String principalImage;
 
     @Column
+    private String type;
+
+    @Column
     private Integer orderNumber;
 
+    @Column
+    private Integer cantModOrHours;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Mode mode;
+
+
+    public enum Mode {
+        ASINCRONO,
+        ENVIVO,
+        GRATUITO,
+        MIXTO
+    }
 
     // Relaciones
+    @Builder.Default
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Module> modules = new ArrayList<>();
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(name = "course_tags",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private List<Tag> tags= new ArrayList<>();
 
 
 }
