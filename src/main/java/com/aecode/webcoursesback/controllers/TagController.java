@@ -23,7 +23,7 @@ import com.aecode.webcoursesback.services.ICourseTagService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/coursetag")
+@RequestMapping("/tag")
 @RequiredArgsConstructor
 public class TagController {
 

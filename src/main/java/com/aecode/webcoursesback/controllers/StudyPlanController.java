@@ -1,8 +1,10 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.StudyPlanDTO;
+import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.StudyPlan;
+import com.aecode.webcoursesback.services.IModuleService;
 import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IStudyPlanService;
 import org.modelmapper.ModelMapper;
@@ -20,19 +22,18 @@ public class StudyPlanController {
     @Autowired
     private IStudyPlanService spS;
     @Autowired
-    private ISecondCourseService scS;
+    private IModuleService mS;
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody StudyPlanDTO dto) {
 
-        SecondaryCourses seccourse = scS.listId(dto.getSeccourseId());
+        Module module = mS.listId(dto.getModuleId());
 
-        if (seccourse == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Test no encontrado");
+        if (module == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Modulo no encontrado");
         }
         // Mapear el DTO a la entidad
         StudyPlan studyPlan = new StudyPlan();
-        studyPlan.setSecondary_course(seccourse);
         studyPlan.setSessions(dto.getSessions());
         studyPlan.setHours(dto.getHours());
         studyPlan.setUnit(dto.getUnit());
@@ -46,10 +47,10 @@ public class StudyPlanController {
     public List<StudyPlanDTO> list() {
         ModelMapper m = new ModelMapper();
         List<StudyPlan> a = spS.list();
-        return a.stream().map(seccourse -> {
+        return a.stream().map(module -> {
 
-            StudyPlanDTO dto = m.map(seccourse, StudyPlanDTO.class);
-            dto.setSeccourseId(seccourse.getSecondary_course().getSeccourseId());
+            StudyPlanDTO dto = m.map(module, StudyPlanDTO.class);
+            dto.setModuleId(module.getModule().getModuleId());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -62,10 +63,10 @@ public class StudyPlanController {
     @GetMapping("/{id}")
     public StudyPlanDTO listId(@PathVariable("id") Integer id) {
         ModelMapper m = new ModelMapper();
-        StudyPlan seccourse = spS.listId(id);
+        StudyPlan module = spS.listId(id);
 
-        StudyPlanDTO dto = m.map(seccourse, StudyPlanDTO.class);
-        dto.setSeccourseId(seccourse.getSecondary_course().getSeccourseId());
+        StudyPlanDTO dto = m.map(module, StudyPlanDTO.class);
+        dto.setModuleId(module.getModule().getModuleId());
 
         return dto;
     }
@@ -87,13 +88,13 @@ public class StudyPlanController {
             if (studyPlanDTO.getOrderNumber() != 0) {
                 existingStudyPlan.setOrderNumber(studyPlanDTO.getOrderNumber());
             }
-            if (studyPlanDTO.getSeccourseId() != 0) {
+            if (studyPlanDTO.getModuleId() != 0) {
                 // Relacionar el módulo con otro curso si el curso ID es diferente
-                SecondaryCourses seccourse = scS.listId(studyPlanDTO.getSeccourseId());
-                if (seccourse == null || seccourse.getSeccourseId() == 0) {
+                Module module = mS.listId(studyPlanDTO.getModuleId());
+                if (module == null || module.getModuleId() == 0) {
                     return ResponseEntity.status(404).body("MicroCurso asociado no encontrado");
                 }
-                existingStudyPlan.setSecondary_course(seccourse);
+                existingStudyPlan.setModule(module);
             }
 
             // Guardar los cambios

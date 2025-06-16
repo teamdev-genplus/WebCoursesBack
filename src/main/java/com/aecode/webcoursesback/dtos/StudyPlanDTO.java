@@ -14,14 +14,9 @@ import lombok.NoArgsConstructor;
 public class StudyPlanDTO {
 
     private int studyplanId;
-    private Long seccourseId;
-    private int moduleId;
+    private Long moduleId;
     private String unit;
     private int hours;
     private int orderNumber;
     private List<String> sessions;
-    private String urlrecording;
-    private String dmaterial;
-    private String viewpresentation;
-
 }
