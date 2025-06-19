@@ -8,9 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
+
 @Repository
 public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificationExecutor<Course> {
 
     //Encontrar curso por tipo y paginarlo
     Page<Course> findByType(String type, Pageable pageable);
+
+    //Obtener los cursos destacados
+    List<Course> findByHighlightedTrueOrderByOrderNumberAsc();
 }

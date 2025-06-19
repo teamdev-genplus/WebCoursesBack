@@ -31,12 +31,14 @@ public class Module extends BaseProduct{
     @Column
     private Integer orderNumber;
 
-    //nuevos atributos de plan de estudio.
+    //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     @Column
     private Integer cantMods;
 
     @Column
     private Integer cantHours;
+
+    //nuevos atributos de plan de estudio cuando es MODULAR.
 
     @Column
     private String titleStudyplan;
@@ -44,7 +46,7 @@ public class Module extends BaseProduct{
     @Column
     private String descriptionStudyplan;
 
-    //newbottons que veran los usuarios en mis cursos
+    //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULO
     @Column(length = 255)
     private String urlrecording;
 
@@ -53,6 +55,9 @@ public class Module extends BaseProduct{
 
     @Column(length = 255)
     private String viewpresentation;
+
+    @Column(length = 255)
+    private String urlJoinClass;
 
     //Newbotton para instructores
     @Column

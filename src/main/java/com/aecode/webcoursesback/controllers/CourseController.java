@@ -37,7 +37,7 @@ public class CourseController  {
         return new ResponseEntity<>(coursescardDTO, HttpStatus.OK);
     }
 
-    // Obtener cards paginados y filtrados por tipo (principal o modular)
+    // Obtener cards paginados y filtrados por tipo
     @GetMapping("/cards")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCards(
             @RequestParam(required = false) String type,
@@ -57,6 +57,13 @@ public class CourseController  {
         }
 
         return new ResponseEntity<>(cardsPage, HttpStatus.OK);
+    }
+
+    //OBTENER LOS CURSOS DESTACADOS
+    @GetMapping("/courses/highlighted")
+    public ResponseEntity<List<HighlightedCourseDTO>> getAllHighlightedCourses() {
+        List<HighlightedCourseDTO> highlightedCourses = cS.getAllHighlightedCourses();
+        return ResponseEntity.ok(highlightedCourses);
     }
 
 

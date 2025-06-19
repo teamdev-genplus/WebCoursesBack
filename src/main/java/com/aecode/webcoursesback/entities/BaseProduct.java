@@ -38,10 +38,4 @@ public class BaseProduct {
     @Column(columnDefinition = "TEXT")
     private String achievement;
 
-    @Column(length = 255)
-    private String urlsyllabus;
-
-    @Column(length = 255)
-    private String urlJoinClass;
-
 }

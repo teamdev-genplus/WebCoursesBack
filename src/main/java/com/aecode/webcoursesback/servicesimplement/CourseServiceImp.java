@@ -68,4 +68,19 @@ public class CourseServiceImp implements ICourseService {
             return dto;
         });
     }
+
+    @Override
+    public List<HighlightedCourseDTO> getAllHighlightedCourses() {
+        List<Course> courses = cR.findByHighlightedTrueOrderByOrderNumberAsc();
+        return courses.stream()
+                .map(c -> new HighlightedCourseDTO(
+                        c.getCourseId(),
+                        c.getTitle(),
+                        c.getDescription(),
+                        c.getHighlightImage()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

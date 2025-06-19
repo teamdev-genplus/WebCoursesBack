@@ -40,6 +40,13 @@ public class Course{
     @Column(length = 20)
     private Mode mode;
 
+    //NUEVOS ATRIBUTOS PARA DESTACADO
+    @Column(length = 255)
+    private String highlightImage;  // URL o path de la imagen para destacado
+
+    @Column
+    private boolean highlighted = false; // si el curso está destacado
+
 
     public enum Mode {
         ASINCRONO,
