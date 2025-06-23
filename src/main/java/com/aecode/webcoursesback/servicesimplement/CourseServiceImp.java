@@ -37,36 +37,13 @@ public class CourseServiceImp implements ICourseService {
     @Override
     public Page<CourseCardDTO> getAllCourseCards(Pageable pageable) {
         Page<Course> courses = cR.findAll(pageable);
-        return courses.map(course -> {
-            CourseCardDTO dto = new CourseCardDTO();
-            dto.setCourseId(course.getCourseId());
-            dto.setPrincipalImage(course.getPrincipalImage());
-            dto.setTitle(course.getTitle());
-            dto.setOrderNumber(course.getOrderNumber());
-            dto.setType(course.getType());
-            dto.setCantModOrHours(course.getCantModOrHours());
-            dto.setMode(course.getMode());
-            return dto;
-        });
+        return courses.map(this::mapToCourseCardDTO);
     }
 
     @Override
     public Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable) {
-        // Buscar cursos filtrados por tipo con paginación y orden
         Page<Course> coursesPage = cR.findByType(type, pageable);
-
-        // Mapear entidades a DTOs
-        return coursesPage.map(course -> {
-            CourseCardDTO dto = new CourseCardDTO();
-            dto.setCourseId(course.getCourseId());
-            dto.setPrincipalImage(course.getPrincipalImage());
-            dto.setTitle(course.getTitle());
-            dto.setOrderNumber(course.getOrderNumber());
-            dto.setType(course.getType());
-            dto.setCantModOrHours(course.getCantModOrHours());
-            dto.setMode(course.getMode());
-            return dto;
-        });
+        return coursesPage.map(this::mapToCourseCardDTO);
     }
 
     @Override
@@ -80,6 +57,83 @@ public class CourseServiceImp implements ICourseService {
                         c.getHighlightImage()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CourseCardDTO> findCoursesByTitle(String title) {
+        List<Course> courses = cR.findByTitleIgnoreCaseContaining(title);
+        return courses.stream()
+                .map(this::mapToCourseCardDTO)
+                .collect(Collectors.toList());
+    }
+
+    //Implementación del filtro por modalidad
+    @Override
+    public Page<CourseCardDTO> getCourseCardsByMode(String modeStr, Pageable pageable) {
+        if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
+            // Traer todos sin filtro
+            Page<Course> courses = cR.findAll(pageable);
+            return courses.map(this::mapToCourseCardDTO);
+        }
+
+        Course.Mode mode;
+        try {
+            mode = Course.Mode.valueOf(modeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // Si el modo no es válido, devolver página vacía
+            return Page.empty(pageable);
+        }
+
+        Page<Course> courses = cR.findByMode(mode, pageable);
+        return courses.map(this::mapToCourseCardDTO);
+    }
+
+    @Override
+    public Page<CourseCardDTO> getCourseCardsByDurationRange(String range, Pageable pageable) {
+        Page<Course> courses;
+
+        switch (range) {
+            case "1-4":
+                courses = cR.findByCantTotalHoursBetween(1, 4, pageable);
+                break;
+            case "4-10":
+                courses = cR.findByCantTotalHoursBetween(4, 10, pageable);
+                break;
+            case "10-20":
+                courses = cR.findByCantTotalHoursBetween(10, 20, pageable);
+                break;
+            case "+20":
+                courses = cR.findByCantTotalHoursGreaterThanEqual(20, pageable);
+                break;
+            default:
+                // Si no se especifica rango válido, traer todos
+                courses = cR.findAll(pageable);
+                break;
+        }
+
+        return courses.map(this::mapToCourseCardDTO);
+    }
+
+    @Override
+    public Page<CourseCardDTO> getCoursesByModuleTags(List<Long> tagIds, Pageable pageable) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            // Si no hay tags, devolver todos
+            return cR.findAll(pageable).map(this::mapToCourseCardDTO);
+        }
+        Page<Course> courses = cR.findDistinctByModulesTagsIn(tagIds, pageable);
+        return courses.map(this::mapToCourseCardDTO);
+    }
+
+    private CourseCardDTO mapToCourseCardDTO(Course c) {
+        return new CourseCardDTO(
+                c.getCourseId(),
+                c.getPrincipalImage(),
+                c.getTitle(),
+                c.getOrderNumber(),
+                c.getType(),
+                c.getCantModOrHours(),
+                c.getMode()
+        );
     }
 
 

@@ -19,4 +19,16 @@ public interface ICourseService {
     Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable);
 
     List<HighlightedCourseDTO> getAllHighlightedCourses();
+
+    // Service: Servicio para listar cursos filtrados por título
+    List<CourseCardDTO> findCoursesByTitle(String title);
+
+    //Servicio para obtener cards filtrados por modalidad
+    Page<CourseCardDTO> getCourseCardsByMode(String mode, Pageable pageable);
+
+    //Servicio para obtener cards filtrados por rango de horas
+    Page<CourseCardDTO> getCourseCardsByDurationRange(String range, Pageable pageable);
+
+    //Servicio para obtener cards filtrados por tags
+    Page<CourseCardDTO> getCoursesByModuleTags(List<Long> tagIds, Pageable pageable);
 }

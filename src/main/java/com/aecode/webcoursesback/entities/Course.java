@@ -34,7 +34,10 @@ public class Course{
     private Integer orderNumber;
 
     @Column
-    private Integer cantModOrHours;
+    private Integer cantModOrHours; //para card
+
+    @Column
+    private Integer cantTotalHours; //para filtro
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
@@ -51,6 +54,7 @@ public class Course{
     public enum Mode {
         ASINCRONO,
         ENVIVO,
+        PROXIMO,
         GRATUITO,
         MIXTO
     }

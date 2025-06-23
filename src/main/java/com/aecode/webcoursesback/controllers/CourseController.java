@@ -38,7 +38,7 @@ public class CourseController  {
     }
 
     // Obtener cards paginados y filtrados por tipo
-    @GetMapping("/cards")
+    @GetMapping("/cards/type")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCards(
             @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
@@ -59,11 +59,57 @@ public class CourseController  {
         return new ResponseEntity<>(cardsPage, HttpStatus.OK);
     }
 
+    // Obtener cards paginados y filtrados por modalidad
+    @GetMapping("/cards/mode")
+    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByMode(
+            @RequestParam(defaultValue = "TODOS") String mode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderNumber") String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByMode(mode, pageable);
+
+        return new ResponseEntity<>(cardsPage, HttpStatus.OK);
+    }
+
     //OBTENER LOS CURSOS DESTACADOS
     @GetMapping("/courses/highlighted")
     public ResponseEntity<List<HighlightedCourseDTO>> getAllHighlightedCourses() {
         List<HighlightedCourseDTO> highlightedCourses = cS.getAllHighlightedCourses();
         return ResponseEntity.ok(highlightedCourses);
+    }
+
+    //Método para buscar cursos por título
+    @GetMapping("/courses/search")
+    public ResponseEntity<List<CourseCardDTO>> searchCoursesByTitle(@RequestParam String title) {
+        List<CourseCardDTO> courses = cS.findCoursesByTitle(title);
+        return ResponseEntity.ok(courses);
+    }
+
+    // Obtener cards paginados por rango de horas
+    @GetMapping("/cards/duration")
+    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByDuration(
+            @RequestParam String range,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderNumber") String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByDurationRange(range, pageable);
+
+        return new ResponseEntity<>(cardsPage, HttpStatus.OK);
+    }
+    @GetMapping("/courses/filterByTags")
+    public ResponseEntity<Page<CourseCardDTO>> getCoursesByTags(
+            @RequestParam List<Long> tagIds,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderNumber") String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<CourseCardDTO> courses = cS.getCoursesByModuleTags(tagIds, pageable);
+        return ResponseEntity.ok(courses);
     }
 
 
