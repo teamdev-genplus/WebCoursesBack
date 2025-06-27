@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+import com.aecode.webcoursesback.dtos.CourseCartDTO;
 import com.aecode.webcoursesback.dtos.ShoppingCartDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.SecondaryCourses;
@@ -23,53 +24,31 @@ public class ShoppingCartController {
 
     @Autowired
     IShoppingCartService scS;
-    @Autowired
-    private IUserProfileService pS;
-    @Autowired
-    private ISecondCourseService sS;
-    @Autowired
-    private IModuleService mS;
 
-    @PostMapping
-    public ResponseEntity<String> insert(@RequestBody ShoppingCartDTO dto) {
 
-        // Cargar manualmente las entidades UserProfile y Session
-        UserProfile user = pS.listId(dto.getUserId());
-        SecondaryCourses secondaryCourses = sS.listId(dto.getSeccourseId());
-        Module modules = mS.listId(dto.getModuleId());
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario no encontrado");
-        }
-        if (secondaryCourses == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Curso secundario no encontrado");
-        }
-        if (modules == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Modulo no encontrado");
-        }
-
-        // Mapear el DTO a la entidad
-        ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setUserProfile(user); // Asignar el UserProfile
-        shoppingCart.setSecondaryCourse(secondaryCourses); // Asignar el SecondaryCourse
-        shoppingCart.setModule(modules);
-
-        // Guardar en la base de datos
-        scS.insert(shoppingCart);
-
-        return ResponseEntity.ok("Curso Secundario del usuario guardado correctamente");
+    @GetMapping("/{userId}")
+    public ResponseEntity<CourseCartDTO> getCart(@PathVariable Long userId) {
+        CourseCartDTO cart = scS.getCartByUser(userId);
+        return ResponseEntity.ok(cart);
     }
 
-    @GetMapping
-    public List<ShoppingCartDTO> list() {
-        return scS.list().stream().map(x -> {
-            ModelMapper m = new ModelMapper();
-            return m.map(x, ShoppingCartDTO.class);
-        }).collect(Collectors.toList());
+    @PostMapping("/{userId}/modules/{moduleId}")
+    public ResponseEntity<Void> addModule(@PathVariable Long userId, @PathVariable Long moduleId) {
+        scS.addModuleToCart(userId, moduleId);
+        return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Integer id) {
-        scS.delete(id);
+    @PutMapping("/{userId}/modules/{moduleId}")
+    public ResponseEntity<Void> updateModuleSelection(@PathVariable Long userId,
+                                                      @PathVariable Long moduleId,
+                                                      @RequestParam boolean selected) {
+        scS.updateModuleSelection(userId, moduleId, selected);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{userId}/modules/{moduleId}")
+    public ResponseEntity<Void> removeModule(@PathVariable Long userId, @PathVariable Long moduleId) {
+        scS.removeModuleFromCart(userId, moduleId);
+        return ResponseEntity.noContent().build();
     }
 }

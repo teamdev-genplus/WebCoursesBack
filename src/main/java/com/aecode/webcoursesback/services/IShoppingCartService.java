@@ -1,12 +1,14 @@
 package com.aecode.webcoursesback.services;
+import com.aecode.webcoursesback.dtos.CourseCartDTO;
 
-import com.aecode.webcoursesback.entities.ShoppingCart;
 
 import java.util.List;
 public interface IShoppingCartService {
-    void insert(ShoppingCart shoppingCart);
+    CourseCartDTO getCartByUser(Long userId);
 
-    List<ShoppingCart> list();
+    void addModuleToCart(Long userId, Long moduleId);
 
-    void delete(int id);
+    void updateModuleSelection(Long userId, Long moduleId, boolean selected);
+
+    void removeModuleFromCart(Long userId, Long moduleId);
 }
