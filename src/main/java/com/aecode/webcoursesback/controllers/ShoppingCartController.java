@@ -1,22 +1,9 @@
 package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.CourseCartDTO;
-import com.aecode.webcoursesback.dtos.ShoppingCartDTO;
-import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.SecondaryCourses;
-import com.aecode.webcoursesback.entities.ShoppingCart;
-import com.aecode.webcoursesback.entities.UserProfile;
-import com.aecode.webcoursesback.services.IModuleService;
-import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IShoppingCartService;
-import com.aecode.webcoursesback.services.IUserProfileService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/shoppingcart")

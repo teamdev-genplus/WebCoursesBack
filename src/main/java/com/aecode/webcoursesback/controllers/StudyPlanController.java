@@ -2,10 +2,8 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.StudyPlanDTO;
 import com.aecode.webcoursesback.entities.Module;
-import com.aecode.webcoursesback.entities.SecondaryCourses;
 import com.aecode.webcoursesback.entities.StudyPlan;
 import com.aecode.webcoursesback.services.IModuleService;
-import com.aecode.webcoursesback.services.ISecondCourseService;
 import com.aecode.webcoursesback.services.IStudyPlanService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
