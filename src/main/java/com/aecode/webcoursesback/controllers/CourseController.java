@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.controllers;
 import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.services.ICourseService;
+import com.aecode.webcoursesback.services.IUserFavoriteService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,13 +20,15 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
-public class CourseController  {
+public class CourseController {
 
     @Autowired
     private ICourseService cS;
 
     private final ModelMapper modelMapper = new ModelMapper();
 
+    @Autowired
+    private IUserFavoriteService userFavoriteService;
     //----------------------------------------------------------GET----------------------------------------------------------------
 
     @GetMapping("/listall")
@@ -73,12 +76,15 @@ public class CourseController  {
         return new ResponseEntity<>(cardsPage, HttpStatus.OK);
     }
 
+
+    //----------------------------------------------------------FILTROS----------------------------------------------------------------
     //OBTENER LOS CURSOS DESTACADOS
     @GetMapping("/courses/highlighted")
     public ResponseEntity<List<HighlightedCourseDTO>> getAllHighlightedCourses() {
         List<HighlightedCourseDTO> highlightedCourses = cS.getAllHighlightedCourses();
         return ResponseEntity.ok(highlightedCourses);
     }
+
 
     //Método para buscar cursos por título
     @GetMapping("/courses/search")
@@ -100,6 +106,8 @@ public class CourseController  {
 
         return new ResponseEntity<>(cardsPage, HttpStatus.OK);
     }
+
+    // Obtener cards paginados por tags
     @GetMapping("/courses/filterByTags")
     public ResponseEntity<Page<CourseCardDTO>> getCoursesByTags(
             @RequestParam List<Long> tagIds,
@@ -112,6 +120,18 @@ public class CourseController  {
         return ResponseEntity.ok(courses);
     }
 
+    // Obtener cards paginadas de favoritos
+    @GetMapping("/cards/favorites")
+    public ResponseEntity<Page<CourseCardDTO>> getFavoriteCourseCards(
+            @RequestParam Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderNumber") String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<CourseCardDTO> favoriteCourses = userFavoriteService.getFavoriteCoursesByUser(userId, pageable);
+        return ResponseEntity.ok(favoriteCourses);
+    }
 
     //----------------------------------------------------------DELETE----------------------------------------------------------------
      @DeleteMapping("/{courseId}")

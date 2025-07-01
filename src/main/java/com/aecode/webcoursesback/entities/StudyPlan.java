@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "studyplans")
 @SequenceGenerator(name = "studyplan_seq", sequenceName = "studyplan_sequence", allocationSize = 1)
+
 public class StudyPlan {
 
     @Id

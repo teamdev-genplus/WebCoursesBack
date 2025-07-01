@@ -31,6 +31,9 @@ public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificatio
     Page<Course> findByCantTotalHoursBetween(Integer minHours, Integer maxHours, Pageable pageable);
     Page<Course> findByCantTotalHoursGreaterThanEqual(Integer minHours, Pageable pageable);
 
-    @Query("SELECT DISTINCT c FROM Course c JOIN c.modules m JOIN m.tags t WHERE t.id IN :tagIds")
+    @Query("SELECT DISTINCT c FROM Course c JOIN c.modules m JOIN m.tags t WHERE t.tagId IN :tagIds")
     Page<Course> findDistinctByModulesTagsIn(@Param("tagIds") List<Long> tagIds, Pageable pageable);
+
+    //para filtro de favoritos
+    Page<Course> findByCourseIdIn(List<Long> courseIds, Pageable pageable);
 }
