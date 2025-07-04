@@ -54,17 +54,8 @@ public class ModuleServiceImp implements IModuleService {
         ModuleDTO moduleDTO = modelMapper.map(module, ModuleDTO.class);
 
         // Obtener lista de módulos del curso para navegación
-        List<ModuleListDTO> modulesList = mR.findByCourse_CourseIdOrderByOrderNumberAsc(module.getCourse().getCourseId())
-                .stream()
-                .map(m -> ModuleListDTO.builder()
-                        .moduleId(m.getModuleId())
-                        .courseId(m.getCourse().getCourseId())
-                        .programTitle(m.getProgramTitle())
-                        .orderNumber(m.getOrderNumber())
-                        .build())
-                .collect(Collectors.toList());
-
-        moduleDTO.setCourseModules(modulesList);
+        List<Module> courseModules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(module.getCourse().getCourseId());
+        moduleDTO.setCourseModules(mapToModuleListDTOs(courseModules));
 
         return moduleDTO;
     }
@@ -81,21 +72,25 @@ public class ModuleServiceImp implements IModuleService {
 
         // Solo para cursos modulares, agregamos navegación con módulos hermanos
         if ("modular".equalsIgnoreCase(firstModule.getCourse().getType())) {
-            List<ModuleListDTO> modulesList = modules.stream()
-                    .map(m -> ModuleListDTO.builder()
-                            .moduleId(m.getModuleId())
-                            .courseId(m.getCourse().getCourseId())
-                            .programTitle(m.getProgramTitle())
-                            .orderNumber(m.getOrderNumber())
-                            .build())
-                    .collect(Collectors.toList());
-            moduleDTO.setCourseModules(modulesList);
+            moduleDTO.setCourseModules(mapToModuleListDTOs(modules));
         } else {
-            // Para diplomados o simples, no hay navegación entre módulos
             moduleDTO.setCourseModules(List.of());
         }
 
         return moduleDTO;
+    }
+
+    // Métodos privados para mapear entidades a DTOs
+
+    private List<ModuleListDTO> mapToModuleListDTOs(List<Module> modules) {
+        return modules.stream()
+                .map(m -> ModuleListDTO.builder()
+                        .moduleId(m.getModuleId())
+                        .courseId(m.getCourse().getCourseId())
+                        .programTitle(m.getProgramTitle())
+                        .orderNumber(m.getOrderNumber())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 
