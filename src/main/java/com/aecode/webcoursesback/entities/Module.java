@@ -36,10 +36,10 @@ public class Module extends BaseProduct{
     private Integer cantMods;
 
     @Column
-    private Integer cantHours1;
+    private Integer cantHours_live;
 
     @Column
-    private Integer cantHours2;
+    private Integer cantHours_asinc;
 
     //nuevos atributos de plan de estudio cuando es MODULAR.
 
@@ -96,6 +96,13 @@ public class Module extends BaseProduct{
             joinColumns = @JoinColumn(name = "module_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private List<Tag> tags= new ArrayList<>();
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(name = "module_instructors",
+            joinColumns = @JoinColumn(name = "module_id"),
+            inverseJoinColumns = @JoinColumn(name = "instructor_id"))
+    private List<Instructor> instructors = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
