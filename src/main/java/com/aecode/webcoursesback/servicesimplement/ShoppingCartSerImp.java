@@ -51,7 +51,8 @@ public class ShoppingCartSerImp implements IShoppingCartService{
             List<ModuleCartDTO> moduleDTOs = allModules.stream()
                     .map(module -> {
                         boolean selected = items.stream()
-                                .anyMatch(ci -> ci.getModule().getModuleId().equals(module.getModuleId()));
+                                .filter(ci -> ci.getModule().getModuleId().equals(module.getModuleId()))
+                                .anyMatch(ci -> ci.isSelected());
                         return ModuleCartDTO.builder()
                                 .moduleId(module.getModuleId())
                                 .programTitle(module.getProgramTitle())
