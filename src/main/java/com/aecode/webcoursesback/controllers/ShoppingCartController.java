@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/shoppingcart")
 public class ShoppingCartController {
@@ -14,8 +16,8 @@ public class ShoppingCartController {
 
 
     @GetMapping("/{userId}")
-    public ResponseEntity<CourseCartDTO> getCart(@PathVariable Long userId) {
-        CourseCartDTO cart = scS.getCartByUser(userId);
+    public ResponseEntity<List<CourseCartDTO>> getCart(@PathVariable Long userId) {
+        List<CourseCartDTO> cart = scS.getCartByUser(userId);
         return ResponseEntity.ok(cart);
     }
 

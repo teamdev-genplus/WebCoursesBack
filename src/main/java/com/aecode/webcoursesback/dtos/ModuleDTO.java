@@ -59,6 +59,8 @@ public class ModuleDTO {
     private List<ScheduleDTO> schedules = new ArrayList<>();
     @Builder.Default
     private List<RequirementDTO> requirements = new ArrayList<>();
+    @Builder.Default
+    private List<InstructorDTO> instructors= new ArrayList<>();
 
     // Lista para navegación (módulos hermanos)
     @Builder.Default

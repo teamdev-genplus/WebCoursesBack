@@ -29,7 +29,4 @@ public class Instructor {
     @Builder.Default
     private List<String> specialties = new ArrayList<>();
 
-    @Builder.Default
-    @ManyToMany(mappedBy = "instructors")
-    private List<Module> modules = new ArrayList<>();
 }

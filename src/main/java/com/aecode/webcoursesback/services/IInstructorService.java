@@ -1,14 +1,20 @@
 package com.aecode.webcoursesback.services;
 import com.aecode.webcoursesback.dtos.InstructorDTO;
+import com.aecode.webcoursesback.entities.Instructor;
 
 import java.util.List;
 
 public interface IInstructorService {
-    List<InstructorDTO> getInstructorsByModuleId(Long moduleId);
+    // Inserta un nuevo instructor
+    void insert(Instructor instructor);
 
-    InstructorDTO getInstructorById(Long instructorId);
+    // Lista todos los instructores
+    List<Instructor> list();
 
-    InstructorDTO saveInstructor(InstructorDTO instructorDTO);
+    // Elimina un instructor por ID
+    void delete(Long instructorId);
 
-    void deleteInstructor(Long instructorId);
+    // Obtiene un instructor por ID
+    Instructor listId(Long instructorId);
+
 }

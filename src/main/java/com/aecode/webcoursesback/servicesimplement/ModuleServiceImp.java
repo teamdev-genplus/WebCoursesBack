@@ -42,6 +42,7 @@ public class ModuleServiceImp implements IModuleService {
         return mR.findById(moduleId).orElse(new Module());
     }
 
+    //Este método obtiene el detalle completo de un módulo específico identificado por su moduleId
     @Override
     public ModuleDTO getModuleDetailById(Long moduleId) {
         Module module = mR.findById(moduleId)
@@ -60,6 +61,7 @@ public class ModuleServiceImp implements IModuleService {
         return moduleDTO;
     }
 
+    //Este método obtiene el primer módulo de un curso dado, identificado por courseId
     @Override
     public ModuleDTO getFirstModuleByCourseId(Long courseId) {
         List<Module> modules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);

@@ -31,7 +31,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     private ICourseRepo cR;
 
     @Override
-    public CourseCartDTO getCartByUser(Long userId) {
+    public List<CourseCartDTO> getCartByUser(Long userId) {
         List<ShoppingCart> cartItems = scR.findByUserProfile_UserId(userId);
 
         Map<Long, List<ShoppingCart>> itemsByCourse = cartItems.stream()
@@ -73,7 +73,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
             coursesInCart.add(courseDTO);
         }
 
-        return coursesInCart.isEmpty() ? null : coursesInCart.get(0);
+        return coursesInCart;
     }
 
     @Override

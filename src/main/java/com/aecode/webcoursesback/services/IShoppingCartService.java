@@ -4,7 +4,7 @@ import com.aecode.webcoursesback.dtos.CourseCartDTO;
 
 import java.util.List;
 public interface IShoppingCartService {
-    CourseCartDTO getCartByUser(Long userId);
+    List<CourseCartDTO> getCartByUser(Long userId);
 
     void addModuleToCart(Long userId, Long moduleId);
 
