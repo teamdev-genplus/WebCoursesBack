@@ -103,7 +103,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
 
     @Override
-    public void removeModuleFromCart(Long userId, Long moduleId) {
-        scR.deleteByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
+    public void removeCartItemById(Long cartId) {
+        scR.deleteById(cartId);
     }
 }

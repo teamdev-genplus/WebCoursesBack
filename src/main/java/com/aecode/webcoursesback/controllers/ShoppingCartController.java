@@ -35,9 +35,9 @@ public class ShoppingCartController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{userId}/modules/{moduleId}")
-    public ResponseEntity<Void> removeModule(@PathVariable Long userId, @PathVariable Long moduleId) {
-        scS.removeModuleFromCart(userId, moduleId);
+    @DeleteMapping("/cartitem/{cartId}")
+    public ResponseEntity<Void> removeCartItem(@PathVariable Long cartId) {
+        scS.removeCartItemById(cartId);
         return ResponseEntity.noContent().build();
     }
 }
