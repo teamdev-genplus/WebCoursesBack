@@ -11,6 +11,7 @@ import com.aecode.webcoursesback.repositories.IModuleRepo;
 import com.aecode.webcoursesback.repositories.IShoppingCartRepo;
 import com.aecode.webcoursesback.services.IShoppingCartService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -105,5 +106,19 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     @Override
     public void removeCartItemById(Long cartId) {
         scR.deleteById(cartId);
+    }
+    @Override
+    @Transactional
+    public void removeAllModulesFromCourse(Long userId, Long courseId) {
+        // Obtener todos los módulos del curso
+        List<Module> modules = mR.findByCourse_CourseId(courseId);
+
+        // Obtener lista de moduleIds
+        List<Long> moduleIds = modules.stream()
+                .map(Module::getModuleId)
+                .collect(Collectors.toList());
+
+        // Eliminar todos los registros del carrito que coincidan con userId y moduleId en la lista
+        scR.deleteByUserProfile_UserIdAndModule_ModuleIdIn(userId, moduleIds);
     }
 }

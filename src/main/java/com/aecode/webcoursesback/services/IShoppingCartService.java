@@ -11,4 +11,6 @@ public interface IShoppingCartService {
     void updateModuleSelection(Long userId, Long moduleId, boolean selected);
 
     void removeCartItemById(Long cartId);
+
+    void removeAllModulesFromCourse(Long userId, Long courseId);
 }
