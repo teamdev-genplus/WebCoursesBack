@@ -42,9 +42,9 @@ public class ShoppingCartController {
     }
 
     // Endpoint para eliminar todos los módulos de un curso en el carrito de un usuario
-    @DeleteMapping("/{userId}/course/{courseId}")
-    public ResponseEntity<Void> removeCourseFromCart(@PathVariable Long userId, @PathVariable Long courseId) {
-        scS.removeAllModulesFromCourse(userId, courseId);
+    @DeleteMapping("/{email}/course/{courseId}")
+    public ResponseEntity<Void> removeCourseFromCart(@PathVariable String email, @PathVariable Long courseId) {
+        scS.removeAllModulesFromCourse(email, courseId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -14,5 +14,5 @@ public interface IShoppingCartRepo extends JpaRepository<ShoppingCart, Long> {
     Optional<ShoppingCart> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
 
     @Transactional
-    void deleteByUserProfile_UserIdAndModule_ModuleIdIn(Long userId, List<Long> moduleIds);
+    void deleteByUserProfile_EmailAndModule_ModuleIdIn(String email, List<Long> moduleIds);
 }

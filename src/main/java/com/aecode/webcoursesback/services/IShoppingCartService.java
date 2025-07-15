@@ -12,5 +12,5 @@ public interface IShoppingCartService {
 
     void removeCartItemById(Long cartId);
 
-    void removeAllModulesFromCourse(Long userId, Long courseId);
+    void removeAllModulesFromCourse(String email, Long courseId);
 }

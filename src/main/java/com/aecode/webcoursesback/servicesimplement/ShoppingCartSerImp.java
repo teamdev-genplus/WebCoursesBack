@@ -109,7 +109,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
     @Override
     @Transactional
-    public void removeAllModulesFromCourse(Long userId, Long courseId) {
+    public void removeAllModulesFromCourse(String email, Long courseId) {
         // Obtener todos los módulos del curso
         List<Module> modules = mR.findByCourse_CourseId(courseId);
 
@@ -119,6 +119,6 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                 .collect(Collectors.toList());
 
         // Eliminar todos los registros del carrito que coincidan con userId y moduleId en la lista
-        scR.deleteByUserProfile_UserIdAndModule_ModuleIdIn(userId, moduleIds);
+        scR.deleteByUserProfile_EmailAndModule_ModuleIdIn(email, moduleIds);
     }
 }
