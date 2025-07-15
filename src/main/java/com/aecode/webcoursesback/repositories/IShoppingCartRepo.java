@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface IShoppingCartRepo extends JpaRepository<ShoppingCart, Long> {
-    List<ShoppingCart> findByUserProfile_UserId(Long userId);
+    List<ShoppingCart> findByUserProfile_email(String email);
 
     Optional<ShoppingCart> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
 

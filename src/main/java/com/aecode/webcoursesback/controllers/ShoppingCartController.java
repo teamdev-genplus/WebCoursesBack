@@ -15,9 +15,9 @@ public class ShoppingCartController {
     IShoppingCartService scS;
 
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<CourseCartDTO>> getCart(@PathVariable Long userId) {
-        List<CourseCartDTO> cart = scS.getCartByUser(userId);
+    @GetMapping("/{email}")
+    public ResponseEntity<List<CourseCartDTO>> getCart(@PathVariable String email) {
+        List<CourseCartDTO> cart = scS.getCartByUser(email);
         return ResponseEntity.ok(cart);
     }
 

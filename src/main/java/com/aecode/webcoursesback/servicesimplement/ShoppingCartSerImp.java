@@ -32,8 +32,8 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     private ICourseRepo cR;
 
     @Override
-    public List<CourseCartDTO> getCartByUser(Long userId) {
-        List<ShoppingCart> cartItems = scR.findByUserProfile_UserId(userId);
+    public List<CourseCartDTO> getCartByUser(String email) {
+        List<ShoppingCart> cartItems = scR.findByUserProfile_email(email);
 
         Map<Long, List<ShoppingCart>> itemsByCourse = cartItems.stream()
                 .collect(Collectors.groupingBy(item -> item.getModule().getCourse().getCourseId()));
