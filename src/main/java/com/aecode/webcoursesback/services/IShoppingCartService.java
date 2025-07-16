@@ -6,9 +6,9 @@ import java.util.List;
 public interface IShoppingCartService {
     List<CourseCartDTO> getCartByUser(String email);
 
-    void addModuleToCart(Long userId, Long moduleId);
+    void addModuleToCart(String email, Long moduleId);
 
-    void updateModuleSelection(Long userId, Long moduleId, boolean selected);
+    void updateModuleSelection(String email, Long moduleId, boolean selected);
 
     void removeCartItemById(Long cartId);
 

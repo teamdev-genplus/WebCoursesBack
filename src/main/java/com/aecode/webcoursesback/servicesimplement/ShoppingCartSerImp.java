@@ -79,13 +79,13 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
 
     @Override
-    public void addModuleToCart(Long userId, Long moduleId) {
-        Optional<ShoppingCart> existing = scR.findByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
+    public void addModuleToCart(String email, Long moduleId) {
+        Optional<ShoppingCart> existing = scR.findByUserProfile_EmailAndModule_ModuleId(email, moduleId);
         if (existing.isEmpty()) {
             Module module = mR.findById(moduleId)
                     .orElseThrow(() -> new EntityNotFoundException("Module not found"));
             UserProfile user = new UserProfile();
-            user.setUserId(userId);
+            user.setEmail(email);
             ShoppingCart newItem = ShoppingCart.builder()
                     .userProfile(user)
                     .module(module)
@@ -96,8 +96,8 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
 
     @Override
-    public void updateModuleSelection(Long userId, Long moduleId, boolean selected) {
-        ShoppingCart item = scR.findByUserProfile_UserIdAndModule_ModuleId(userId, moduleId)
+    public void updateModuleSelection(String email, Long moduleId, boolean selected) {
+        ShoppingCart item = scR.findByUserProfile_EmailAndModule_ModuleId(email, moduleId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
         item.setSelected(selected);
         scR.save(item);

@@ -21,17 +21,17 @@ public class ShoppingCartController {
         return ResponseEntity.ok(cart);
     }
 
-    @PostMapping("/{userId}/modules/{moduleId}")
-    public ResponseEntity<Void> addModule(@PathVariable Long userId, @PathVariable Long moduleId) {
-        scS.addModuleToCart(userId, moduleId);
+    @PostMapping("/{email}/modules/{moduleId}")
+    public ResponseEntity<Void> addModule(@PathVariable String email, @PathVariable Long moduleId) {
+        scS.addModuleToCart(email, moduleId);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{userId}/modules/{moduleId}")
-    public ResponseEntity<Void> updateModuleSelection(@PathVariable Long userId,
+    @PutMapping("/{email}/modules/{moduleId}")
+    public ResponseEntity<Void> updateModuleSelection(@PathVariable String email,
                                                       @PathVariable Long moduleId,
                                                       @RequestParam boolean selected) {
-        scS.updateModuleSelection(userId, moduleId, selected);
+        scS.updateModuleSelection(email, moduleId, selected);
         return ResponseEntity.ok().build();
     }
 

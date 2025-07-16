@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface IShoppingCartRepo extends JpaRepository<ShoppingCart, Long> {
     List<ShoppingCart> findByUserProfile_email(String email);
 
-    Optional<ShoppingCart> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
+    Optional<ShoppingCart> findByUserProfile_EmailAndModule_ModuleId(String email, Long moduleId);
 
     @Transactional
     void deleteByUserProfile_EmailAndModule_ModuleIdIn(String email, List<Long> moduleIds);
