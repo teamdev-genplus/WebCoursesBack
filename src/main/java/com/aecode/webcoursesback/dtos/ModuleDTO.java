@@ -14,6 +14,9 @@ public class ModuleDTO {
     private String programTitle;
     private String description;
     private Integer orderNumber;
+
+    //Nuevo Atributo 22/07/25
+    private Integer textmode;
     //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     private Integer cantMods;
     private Integer cantHours1;

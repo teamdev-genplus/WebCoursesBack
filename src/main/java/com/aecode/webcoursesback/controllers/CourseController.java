@@ -31,7 +31,7 @@ public class CourseController {
     private IUserFavoriteService userFavoriteService;
     //----------------------------------------------------------GET----------------------------------------------------------------
 
-    @GetMapping("/listall")
+    @GetMapping("/listallcards")
     public ResponseEntity<List<CourseCardDTO>> listAll() {
         List<Course> courses = cS.listAll();
         List<CourseCardDTO> coursescardDTO = courses.stream()

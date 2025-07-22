@@ -3,6 +3,8 @@ package com.aecode.webcoursesback.entities;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +23,26 @@ public class Course{
     @Column( length = 255)
     private String title;
 
+    @Column( length = 255)
+    private String tagcourse;//detail
+
+    @Column( length = 255)
+    private String titledescription;//detail
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column( length = 255)
+    private String namebuttoncommunity;//detail
+
+    @Column( length = 255)
+    private String urlbuttoncommunity;//detail
+
+    @Column
+    private String availableorlaunching; //detail
+
+    @Column( length = 255)
+    private String urlbrochure; //detail
 
     @Column(length = 255)
     private String principalImage;

@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.controllers;
+import com.aecode.webcoursesback.dtos.CourseModuleViewDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.services.IModuleService;
@@ -34,10 +35,10 @@ public class ModuleController {
     }
 
     //Entregar el primer modulo
-    @GetMapping("/first-module/{courseId}")
-    public ResponseEntity<ModuleDTO> getFirstModuleByCourseId(@PathVariable Long courseId) {
-        ModuleDTO moduleDTO = mS.getFirstModuleByCourseId(courseId);
-        return new ResponseEntity<>(moduleDTO, HttpStatus.OK);
+    @GetMapping("/course-and-first-module/{courseId}")
+    public ResponseEntity<CourseModuleViewDTO> getFirstModuleByCourseId(@PathVariable Long courseId) {
+        CourseModuleViewDTO dto  = mS.getCourseAndFirstModule(courseId);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping("/detail/{moduleId}")

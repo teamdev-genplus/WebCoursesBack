@@ -31,6 +31,9 @@ public class Module extends BaseProduct{
     @Column
     private Integer orderNumber;
 
+    @Column
+    private Integer textmode;
+
     //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     @Column
     private Integer cantMods;

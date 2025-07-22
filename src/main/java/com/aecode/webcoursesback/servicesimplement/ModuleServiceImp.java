@@ -63,23 +63,41 @@ public class ModuleServiceImp implements IModuleService {
 
     //Este método obtiene el primer módulo de un curso dado, identificado por courseId
     @Override
-    public ModuleDTO getFirstModuleByCourseId(Long courseId) {
-        List<Module> modules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
-        if (modules.isEmpty()) {
-            throw new EntityNotFoundException("No modules found for course id: " + courseId);
-        }
-        Module firstModule = modules.get(0);
+    public CourseModuleViewDTO getCourseAndFirstModule(Long courseId) {
+        // Obtener curso (para información estática)
+        Module firstModule = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("No se encontró el primer módulo del curso"));
+
+        Course course = firstModule.getCourse();
+
+        CourseInfoDTO courseInfo = CourseInfoDTO.builder()
+                .courseId(course.getCourseId())
+                .title(course.getTitle())
+                .tagcourse(course.getTagcourse())
+                .titledescription(course.getTitledescription())
+                .description(course.getDescription())
+                .namebuttoncommunity(course.getNamebuttoncommunity())
+                .urlbuttoncommunity(course.getUrlbuttoncommunity())
+                .availableorlaunching(course.getAvailableorlaunching())
+                .urlbrochure(course.getUrlbrochure())
+                .principalImage(course.getPrincipalImage())
+                .build();
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);
 
-        // Solo para cursos modulares, agregamos navegación con módulos hermanos
-        if ("modular".equalsIgnoreCase(firstModule.getCourse().getType())) {
+        if ("modular".equalsIgnoreCase(course.getType())) {
+            List<Module> modules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
             moduleDTO.setCourseModules(mapToModuleListDTOs(modules));
         } else {
             moduleDTO.setCourseModules(List.of());
         }
 
-        return moduleDTO;
+        return CourseModuleViewDTO.builder()
+                .course(courseInfo)
+                .module(moduleDTO)
+                .build();
     }
 
     // Métodos privados para mapear entidades a DTOs

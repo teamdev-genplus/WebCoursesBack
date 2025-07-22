@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.services;
+import com.aecode.webcoursesback.dtos.CourseModuleViewDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
 import com.aecode.webcoursesback.entities.Module;
 
@@ -13,5 +14,5 @@ public interface IModuleService {
     // MODULO DETALLADO (solo cuando curso es de tipo modular)
     ModuleDTO getModuleDetailById(Long moduleId);
 
-    ModuleDTO getFirstModuleByCourseId(Long courseId);
+    CourseModuleViewDTO getCourseAndFirstModule(Long courseId);
 }
