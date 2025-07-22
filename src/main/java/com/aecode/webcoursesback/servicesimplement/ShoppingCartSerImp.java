@@ -9,6 +9,7 @@ import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.repositories.ICourseRepo;
 import com.aecode.webcoursesback.repositories.IModuleRepo;
 import com.aecode.webcoursesback.repositories.IShoppingCartRepo;
+import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.IShoppingCartService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -30,6 +31,8 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     private IModuleRepo mR;
     @Autowired
     private ICourseRepo cR;
+    @Autowired
+    private IUserProfileRepository upR;
 
     @Override
     public List<CourseCartDTO> getCartByUser(String email) {
@@ -84,14 +87,18 @@ public class ShoppingCartSerImp implements IShoppingCartService{
         if (existing.isEmpty()) {
             Module module = mR.findById(moduleId)
                     .orElseThrow(() -> new EntityNotFoundException("Module not found"));
-            UserProfile user = new UserProfile();
-            user.setEmail(email);
+
+            // ✅ Aquí usamos el repositorio para obtener un UserProfile persistido
+            UserProfile user = Optional.ofNullable(upR.findByEmail(email))
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+
             ShoppingCart newItem = ShoppingCart.builder()
                     .userProfile(user)
                     .module(module)
                     .selected(true)
                     .build();
-            scR.save(newItem);
+
+            scR.save(newItem); // ✅ Ahora no hay error, porque user está persistido
         }
     }
 
