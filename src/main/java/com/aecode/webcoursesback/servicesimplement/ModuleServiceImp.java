@@ -82,7 +82,7 @@ public class ModuleServiceImp implements IModuleService {
                 .urlbuttoncommunity(course.getUrlbuttoncommunity())
                 .availableorlaunching(course.getAvailableorlaunching())
                 .urlbrochure(course.getUrlbrochure())
-                .principalImage(course.getPrincipalImage())
+                .highlightImage(course.getHighlightImage())
                 .build();
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);

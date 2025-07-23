@@ -24,16 +24,30 @@ public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificatio
     // Busca cursos cuyo título contenga el texto dado (ignora mayúsculas/minúsculas)
     List<Course> findByTitleIgnoreCaseContaining(String title);
 
-    //Para listar por modalidad
-    Page<Course> findByMode(Course.Mode mode, Pageable pageable);
-
-    //filtro por rango de horas
-    Page<Course> findByCantTotalHoursBetween(Integer minHours, Integer maxHours, Pageable pageable);
-    Page<Course> findByCantTotalHoursGreaterThanEqual(Integer minHours, Pageable pageable);
-
-    @Query("SELECT DISTINCT c FROM Course c JOIN c.modules m JOIN m.tags t WHERE t.tagId IN :tagIds")
-    Page<Course> findDistinctByModulesTagsIn(@Param("tagIds") List<Long> tagIds, Pageable pageable);
-
-    //para filtro de favoritos
+    //filtro de favoritos
     Page<Course> findByCourseIdIn(List<Long> courseIds, Pageable pageable);
+
+
+    //Filtros
+    // ✅ Nuevo: Buscar por type y tags (relación many-to-many entre módulos y tags)
+    @Query("""
+        SELECT DISTINCT c FROM Course c 
+        JOIN c.modules m 
+        JOIN m.tags t 
+        WHERE c.type = :type AND t.tagId IN :tagIds
+    """)
+    Page<Course> findDistinctByTypeAndModulesTagsIn(@Param("type") String type, @Param("tagIds") List<Long> tagIds, Pageable pageable);
+
+    // ✅ Nuevo: Buscar por type y modo
+    Page<Course> findByTypeAndMode(Course.Mode mode, String type, Pageable pageable);
+
+    // ✅ Nuevo: Buscar por type y rango de duración
+    Page<Course> findByTypeAndCantTotalHoursBetween(String type, Integer minHours, Integer maxHours, Pageable pageable);
+
+    // ✅ Nuevo: Buscar por type y duración mayor o igual a cierto número
+    Page<Course> findByTypeAndCantTotalHoursGreaterThanEqual(String type, Integer minHours, Pageable pageable);
+
+    //Favoritos
+    Page<Course> findByCourseIdInAndType(List<Long> courseIds, String type, Pageable pageable);
+
 }

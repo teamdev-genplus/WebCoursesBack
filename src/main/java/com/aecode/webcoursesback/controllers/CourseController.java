@@ -62,22 +62,23 @@ public class CourseController {
         return new ResponseEntity<>(cardsPage, HttpStatus.OK);
     }
 
+
+    //----------------------------------------------------------FILTROS----------------------------------------------------------------
+
     // Obtener cards paginados y filtrados por modalidad
-    @GetMapping("/cards/mode")
-    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByMode(
-            @RequestParam(defaultValue = "TODOS") String mode,
+    @GetMapping("/cards/mode/by-type")
+    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByModeAndType(
+            @RequestParam String type,
+            @RequestParam String mode,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByMode(mode, pageable);
-
-        return new ResponseEntity<>(cardsPage, HttpStatus.OK);
+        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByModeAndType(mode, type, pageable);
+        return ResponseEntity.ok(cardsPage);
     }
 
-
-    //----------------------------------------------------------FILTROS----------------------------------------------------------------
     //OBTENER LOS CURSOS DESTACADOS
     @GetMapping("/courses/highlighted")
     public ResponseEntity<List<HighlightedCourseDTO>> getAllHighlightedCourses() {
@@ -94,29 +95,30 @@ public class CourseController {
     }
 
     // Obtener cards paginados por rango de horas
-    @GetMapping("/cards/duration")
-    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByDuration(
+    @GetMapping("/cards/duration/by-type")
+    public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByDurationRangeAndType(
+            @RequestParam String type,
             @RequestParam String range,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByDurationRange(range, pageable);
-
-        return new ResponseEntity<>(cardsPage, HttpStatus.OK);
+        Page<CourseCardDTO> cardsPage = cS.getCourseCardsByDurationRangeAndType(range, type, pageable);
+        return ResponseEntity.ok(cardsPage);
     }
 
     // Obtener cards paginados por tags
-    @GetMapping("/courses/filterByTags")
-    public ResponseEntity<Page<CourseCardDTO>> getCoursesByTags(
+    @GetMapping("/cards/filterByTags/by-type")
+    public ResponseEntity<Page<CourseCardDTO>> getCoursesByTagsAndType(
+            @RequestParam String type,
             @RequestParam List<Long> tagIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<CourseCardDTO> courses = cS.getCoursesByModuleTags(tagIds, pageable);
+        Page<CourseCardDTO> courses = cS.getCoursesByModuleTagsAndType(type, tagIds, pageable);
         return ResponseEntity.ok(courses);
     }
 
@@ -124,14 +126,16 @@ public class CourseController {
     @GetMapping("/cards/favorites")
     public ResponseEntity<Page<CourseCardDTO>> getFavoriteCourseCards(
             @RequestParam Long userId,
+            @RequestParam String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<CourseCardDTO> favoriteCourses = userFavoriteService.getFavoriteCoursesByUser(userId, pageable);
+        Page<CourseCardDTO> favoriteCourses = userFavoriteService.getFavoriteCoursesByUserAndType(userId, type, pageable);
         return ResponseEntity.ok(favoriteCourses);
     }
+
 
     //----------------------------------------------------------DELETE----------------------------------------------------------------
      @DeleteMapping("/{courseId}")

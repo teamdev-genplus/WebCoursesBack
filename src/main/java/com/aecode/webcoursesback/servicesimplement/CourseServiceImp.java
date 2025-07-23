@@ -69,45 +69,40 @@ public class CourseServiceImp implements ICourseService {
 
     //Implementación del filtro por modalidad
     @Override
-    public Page<CourseCardDTO> getCourseCardsByMode(String modeStr, Pageable pageable) {
+    public Page<CourseCardDTO> getCourseCardsByModeAndType(String modeStr, String type, Pageable pageable) {
         if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
-            // Traer todos sin filtro
-            Page<Course> courses = cR.findAll(pageable);
-            return courses.map(this::mapToCourseCardDTO);
+            return cR.findByType(type, pageable).map(this::mapToCourseCardDTO);
         }
 
         Course.Mode mode;
         try {
             mode = Course.Mode.valueOf(modeStr.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Si el modo no es válido, devolver página vacía
             return Page.empty(pageable);
         }
 
-        Page<Course> courses = cR.findByMode(mode, pageable);
-        return courses.map(this::mapToCourseCardDTO);
+        return cR.findByTypeAndMode(mode, type, pageable).map(this::mapToCourseCardDTO);
     }
 
     @Override
-    public Page<CourseCardDTO> getCourseCardsByDurationRange(String range, Pageable pageable) {
+    public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable) {
         Page<Course> courses;
 
         switch (range) {
             case "1-4":
-                courses = cR.findByCantTotalHoursBetween(1, 4, pageable);
+                courses = cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
                 break;
             case "4-10":
-                courses = cR.findByCantTotalHoursBetween(4, 10, pageable);
+                courses = cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
                 break;
             case "10-20":
-                courses = cR.findByCantTotalHoursBetween(10, 20, pageable);
+                courses = cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
                 break;
             case "+20":
-                courses = cR.findByCantTotalHoursGreaterThanEqual(20, pageable);
+                courses = cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
                 break;
             default:
-                // Si no se especifica rango válido, traer todos
-                courses = cR.findAll(pageable);
+                courses = cR.findByType(type, pageable);
                 break;
         }
 
@@ -115,13 +110,11 @@ public class CourseServiceImp implements ICourseService {
     }
 
     @Override
-    public Page<CourseCardDTO> getCoursesByModuleTags(List<Long> tagIds, Pageable pageable) {
+    public Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable) {
         if (tagIds == null || tagIds.isEmpty()) {
-            // Si no hay tags, devolver todos
-            return cR.findAll(pageable).map(this::mapToCourseCardDTO);
+            return cR.findByType(type, pageable).map(this::mapToCourseCardDTO);
         }
-        Page<Course> courses = cR.findDistinctByModulesTagsIn(tagIds, pageable);
-        return courses.map(this::mapToCourseCardDTO);
+        return cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable).map(this::mapToCourseCardDTO);
     }
 
     private CourseCardDTO mapToCourseCardDTO(Course c) {

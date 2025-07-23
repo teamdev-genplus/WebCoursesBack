@@ -14,5 +14,5 @@ public interface IUserFavoriteService {
 
     List<Long> getFavoriteCourseIdsByUser(Long userId);
 
-    Page<CourseCardDTO> getFavoriteCoursesByUser(Long userId, Pageable pageable);
+    Page<CourseCardDTO> getFavoriteCoursesByUserAndType(Long userId, String type, Pageable pageable);
 }

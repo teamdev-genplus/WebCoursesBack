@@ -24,11 +24,14 @@ public interface ICourseService {
     List<CourseCardDTO> findCoursesByTitle(String title);
 
     //Servicio para obtener cards filtrados por modalidad
-    Page<CourseCardDTO> getCourseCardsByMode(String mode, Pageable pageable);
+    Page<CourseCardDTO> getCourseCardsByModeAndType(String mode, String type, Pageable pageable);
+
 
     //Servicio para obtener cards filtrados por rango de horas
-    Page<CourseCardDTO> getCourseCardsByDurationRange(String range, Pageable pageable);
+    Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable);
+
 
     //Servicio para obtener cards filtrados por tags
-    Page<CourseCardDTO> getCoursesByModuleTags(List<Long> tagIds, Pageable pageable);
+    Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable);
+
 }

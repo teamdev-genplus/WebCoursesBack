@@ -56,12 +56,12 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
     }
 
     @Override
-    public Page<CourseCardDTO> getFavoriteCoursesByUser(Long userId, Pageable pageable) {
+    public Page<CourseCardDTO> getFavoriteCoursesByUserAndType(Long userId, String type, Pageable pageable) {
         List<Long> favoriteCourseIds = getFavoriteCourseIdsByUser(userId);
         if (favoriteCourseIds.isEmpty()) {
             return Page.empty(pageable);
         }
-        Page<Course> courses = courseRepo.findByCourseIdIn(favoriteCourseIds, pageable);
+        Page<Course> courses = courseRepo.findByCourseIdInAndType(favoriteCourseIds, type, pageable);
         return courses.map(course -> new CourseCardDTO(
                 course.getCourseId(),
                 course.getPrincipalImage(),
@@ -72,4 +72,5 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
                 course.getMode()
         ));
     }
+
 }
