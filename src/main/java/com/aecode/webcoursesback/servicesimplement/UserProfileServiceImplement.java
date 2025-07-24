@@ -156,8 +156,12 @@ public class UserProfileServiceImplement implements IUserProfileService {
         LocalDate birthdate = detail != null ? detail.getBirthdate() : null;
 
         // ===================== PROGRESO =====================
-        List<UserCourseAccess> userCourses = userCourseAccessRepo.findByUserProfile_UserId(userId);
-        List<UserModuleAccess> userModules = userModuleAccessRepo.findByUserProfile_UserId(userId);
+        List<UserModuleAccess> userModules = userModuleAccessRepo
+                .findByUserProfile_UserId(userId)
+                .stream()
+                .filter(UserModuleAccess::isCompleted)
+                .collect(Collectors.toList());
+
 
         Set<Long> completedCourseIds = new HashSet<>();
         Set<Long> inProgressCourseIds = new HashSet<>();

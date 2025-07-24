@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Integer> {
@@ -23,4 +24,8 @@ public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Integer
 
     @Query("SELECT new com.aecode.webcoursesback.dtos.UserModuleDTO(uma.accessId, uma.userProfile.userId, uma.module.moduleId) FROM UserModuleAccess uma")
     List<UserModuleDTO> findAllUserModuleDTOs();
+
+
+    Optional<UserModuleAccess> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
+
 }

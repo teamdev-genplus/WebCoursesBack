@@ -32,4 +32,8 @@ public interface IUserAccessService {
     List<UserModuleDTO> getAllModules();
 
     public ModuleDTO getModuleById(Long moduleId);
+
+    boolean markModuleAsCompleted(Long userId, Long moduleId);
+
+    List<UserModuleAccess> grantMultipleModuleAccess(Long userId, List<Long> moduleIds);
 }

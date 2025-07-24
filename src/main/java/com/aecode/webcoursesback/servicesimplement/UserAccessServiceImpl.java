@@ -41,13 +41,30 @@ public class UserAccessServiceImpl implements IUserAccessService {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado"));
 
+        // Guardar acceso al curso
         UserCourseAccess access = UserCourseAccess.builder()
                 .userProfile(user)
                 .course(course)
                 .completed(false)
                 .build();
+        userCourseAccessRepo.save(access);
 
-        return userCourseAccessRepo.save(access);
+        // Obtener todos los módulos del curso y registrar acceso
+        List<Module> modules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+        List<UserModuleAccess> moduleAccessList = new ArrayList<>();
+
+        for (Module module : modules) {
+            UserModuleAccess moduleAccess = UserModuleAccess.builder()
+                    .userProfile(user)
+                    .module(module)
+                    .completed(false)
+                    .build();
+            moduleAccessList.add(moduleAccess);
+        }
+
+        userModuleAccessRepo.saveAll(moduleAccessList); // Guardar todos de una sola vez
+
+        return access;
     }
 
     @Override
@@ -141,4 +158,37 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .orElseThrow(() -> new EntityNotFoundException("No tienes acceso a este Modulo"));
         return modelMapper.map(module, ModuleDTO.class);
     }
+
+    @Override
+    public boolean markModuleAsCompleted(Long userId, Long moduleId) {
+        Optional<UserModuleAccess> accessOpt = userModuleAccessRepo.findByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
+        if (accessOpt.isPresent()) {
+            UserModuleAccess access = accessOpt.get();
+            access.setCompleted(true);
+            userModuleAccessRepo.save(access);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<UserModuleAccess> grantMultipleModuleAccess(Long userId, List<Long> moduleIds) {
+        UserProfile user = new UserProfile();
+        user.setUserId(userId);
+
+        List<Module> modules = moduleRepo.findAllById(moduleIds);
+        List<UserModuleAccess> accessList = new ArrayList<>();
+
+        for (Module module : modules) {
+            UserModuleAccess access = UserModuleAccess.builder()
+                    .userProfile(user)
+                    .module(module)
+                    .completed(false)
+                    .build();
+            accessList.add(access);
+        }
+
+        return userModuleAccessRepo.saveAll(accessList);
+    }
+
 }

@@ -73,10 +73,34 @@ public class UserAccessController {
         return ResponseEntity.ok(access);
     }
 
-    // Registrar acceso a módulo (compra individual)
+    // Para compras individuales
     @PostMapping("/grant-module")
     public ResponseEntity<UserModuleAccess> grantModuleAccess(@RequestParam Long userId, @RequestParam Long moduleId) {
         UserModuleAccess access = userAccessService.grantModuleAccess(userId, moduleId);
         return ResponseEntity.ok(access);
     }
+
+    // Para compras múltiples
+    @PostMapping("/grant-modules")
+    public ResponseEntity<List<UserModuleAccess>> grantMultipleModules(
+            @RequestParam Long userId,
+            @RequestBody List<Long> moduleIds) {
+        List<UserModuleAccess> accesses = userAccessService.grantMultipleModuleAccess(userId, moduleIds);
+        return ResponseEntity.ok(accesses);
+    }
+
+
+    // marcar módulo como completado
+    @PutMapping("/complete-module")
+    public ResponseEntity<?> markModuleAsCompleted(@RequestParam Long userId, @RequestParam Long moduleId) {
+        boolean updated = userAccessService.markModuleAsCompleted(userId, moduleId);
+        if (updated) {
+            return ResponseEntity.ok("Módulo marcado como completado");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
+        }
+    }
+
+
+
 }
