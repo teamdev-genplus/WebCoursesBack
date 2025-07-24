@@ -12,4 +12,5 @@ public class UserCourseDTO {
     private int accessId;
     private Long userId;
     private Long courseId;
+    private boolean completed;
 }
