@@ -66,6 +66,14 @@ public class UserAccessController {
         return ResponseEntity.ok(accesses);
     }
 
+    // Listar módulos accesibles por usuario
+    @GetMapping("/modules/{userId}")
+    public ResponseEntity<List<UserModuleDTO>> getUserModules(@PathVariable Long userId) {
+        List<UserModuleDTO> modules = userAccessService.getUserModulesByUserId(userId);
+        return ResponseEntity.ok(modules);
+    }
+
+
     // Registrar acceso a curso (compra completa)
     @PostMapping("/grant-course")
     public ResponseEntity<UserCourseAccess> grantCourseAccess(@RequestParam Long userId, @RequestParam Long courseId) {

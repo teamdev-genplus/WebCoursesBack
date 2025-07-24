@@ -191,4 +191,17 @@ public class UserAccessServiceImpl implements IUserAccessService {
         return userModuleAccessRepo.saveAll(accessList);
     }
 
+    @Override
+    public List<UserModuleDTO> getUserModulesByUserId(Long userId) {
+        List<UserModuleAccess> accesses = userModuleAccessRepo.findByUserProfile_UserId(userId);
+        return accesses.stream()
+                .map(access -> UserModuleDTO.builder()
+                        .accessId(access.getAccessId())
+                        .userId(access.getUserProfile().getUserId())
+                        .moduleId(access.getModule().getModuleId())
+                        .build())
+                .toList();
+    }
+
+
 }
