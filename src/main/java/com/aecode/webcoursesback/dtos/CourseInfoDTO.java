@@ -16,4 +16,5 @@ public class CourseInfoDTO {
     private String availableorlaunching;
     private String urlbrochure;
     private String highlightImage;
+    private String urlnamecourse;
 }

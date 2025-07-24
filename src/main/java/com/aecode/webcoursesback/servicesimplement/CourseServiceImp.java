@@ -125,7 +125,8 @@ public class CourseServiceImp implements ICourseService {
                 c.getOrderNumber(),
                 c.getType(),
                 c.getCantModOrHours(),
-                c.getMode()
+                c.getMode(),
+                c.getUrlnamecourse()
         );
     }
 

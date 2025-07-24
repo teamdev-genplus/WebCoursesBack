@@ -69,7 +69,8 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
                 course.getOrderNumber(),
                 course.getType(),
                 course.getCantModOrHours(),
-                course.getMode()
+                course.getMode(),
+                course.getUrlnamecourse()
         ));
     }
 
