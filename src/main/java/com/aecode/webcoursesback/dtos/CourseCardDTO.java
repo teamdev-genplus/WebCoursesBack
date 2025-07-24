@@ -17,5 +17,5 @@ public class CourseCardDTO {
     private String type;
     private Integer cantModOrHours;
     private Course.Mode mode;
-    private String urlName;
+    private String urlnamecourse;
 }
