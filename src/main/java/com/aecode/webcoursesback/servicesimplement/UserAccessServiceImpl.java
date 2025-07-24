@@ -5,6 +5,7 @@ import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.repositories.*;
 import com.aecode.webcoursesback.services.IUserAccessService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -197,6 +198,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
     }
 
     @Override
+    @Transactional
     public boolean markModuleAsCompleted(Long userId, Long moduleId) {
         Optional<UserModuleAccess> accessOpt = userModuleAccessRepo.findByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
         if (accessOpt.isPresent()) {
@@ -236,6 +238,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
                         .accessId(access.getAccessId())
                         .userId(access.getUserProfile().getUserId())
                         .moduleId(access.getModule().getModuleId())
+                        .completed(access.isCompleted())
                         .build())
                 .toList();
     }
