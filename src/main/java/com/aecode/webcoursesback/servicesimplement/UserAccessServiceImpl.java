@@ -1,9 +1,6 @@
 package com.aecode.webcoursesback.servicesimplement;
 
-import com.aecode.webcoursesback.dtos.CourseCardDTO;
-import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.dtos.UserCourseDTO;
-import com.aecode.webcoursesback.dtos.UserModuleDTO;
+import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.repositories.*;
@@ -84,21 +81,18 @@ public class UserAccessServiceImpl implements IUserAccessService {
     }
 
     @Override
-    public List<CourseCardDTO> getAccessibleCoursesForUser(Long userId) {
+    public List<CourseCardProgressDTO> getAccessibleCoursesForUser(Long userId) {
         // Obtener accesos completos
         List<UserCourseAccess> fullAccess = userCourseAccessRepo.findByUserProfile_UserId(userId);
 
         // Mapear cursos con acceso completo
-        List<CourseCardDTO> fullAccessCards = fullAccess.stream().map(uca -> {
+        List<CourseCardProgressDTO> fullAccessCards = fullAccess.stream().map(uca -> {
             Course course = uca.getCourse();
-            return CourseCardDTO.builder()
+            return CourseCardProgressDTO.builder()
                     .courseId(course.getCourseId())
                     .title(course.getTitle())
                     .principalImage(course.getPrincipalImage())
                     .orderNumber(course.getOrderNumber())
-                    .type(course.getType())
-                    .cantModOrHours(course.getCantModOrHours())
-                    .mode(course.getMode())
                     .urlnamecourse(course.getUrlnamecourse())
                     .completed(uca.isCompleted()) // ✅ Marca si el curso fue completado por el usuario
                     .build();
@@ -112,12 +106,12 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .map(uca -> uca.getCourse().getCourseId())
                 .collect(Collectors.toSet());
 
-        // Mapear accesos parciales
+        // Agrupar accesos por curso (para parciales)
         Map<Long, List<UserModuleAccess>> groupedByCourse = partialAccess.stream()
-                .filter(uma -> !alreadyIncluded.contains(uma.getModule().getCourse().getCourseId())) // evitar duplicados
+                .filter(uma -> !alreadyIncluded.contains(uma.getModule().getCourse().getCourseId()))
                 .collect(Collectors.groupingBy(uma -> uma.getModule().getCourse().getCourseId()));
 
-        List<CourseCardDTO> partialAccessCards = new ArrayList<>();
+        List<CourseCardProgressDTO> partialAccessCards = new ArrayList<>();
 
         for (Map.Entry<Long, List<UserModuleAccess>> entry : groupedByCourse.entrySet()) {
             Long courseId = entry.getKey();
@@ -129,26 +123,24 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
                 boolean isCompleted = allModules.size() == moduleAccesses.stream().filter(UserModuleAccess::isCompleted).count();
 
-                partialAccessCards.add(CourseCardDTO.builder()
+                partialAccessCards.add(CourseCardProgressDTO.builder()
                         .courseId(course.getCourseId())
                         .title(course.getTitle())
                         .principalImage(course.getPrincipalImage())
                         .orderNumber(course.getOrderNumber())
-                        .type(course.getType())
-                        .cantModOrHours(course.getCantModOrHours())
-                        .mode(course.getMode())
                         .urlnamecourse(course.getUrlnamecourse())
-                        .completed(isCompleted) // ✅ Completado solo si terminó todos los módulos comprados
+                        .completed(isCompleted)
                         .build());
             }
         }
 
-        // Combinar ambos y devolver
-        List<CourseCardDTO> result = new ArrayList<>();
+        // Combinar y retornar
+        List<CourseCardProgressDTO> result = new ArrayList<>();
         result.addAll(fullAccessCards);
         result.addAll(partialAccessCards);
         return result;
     }
+
 
 
     @Override

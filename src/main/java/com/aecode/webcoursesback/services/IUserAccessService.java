@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.services;
-import com.aecode.webcoursesback.dtos.CourseCardDTO;
-import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.dtos.UserCourseDTO;
-import com.aecode.webcoursesback.dtos.UserModuleDTO;
+import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.UserCourseAccess;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
 
@@ -16,7 +13,8 @@ public interface IUserAccessService {
     UserModuleAccess grantModuleAccess(Long userId, Long moduleId);
 
     // Obtener lista de cursos accesibles (completo o parcial) para mostrar cards en "Mis Cursos"
-    List<CourseCardDTO> getAccessibleCoursesForUser(Long userId);
+    List<CourseCardProgressDTO> getAccessibleCoursesForUser(Long userId);
+
 
     // Validar acceso a módulo
     boolean hasAccessToModule(Long userId, Long moduleId);
