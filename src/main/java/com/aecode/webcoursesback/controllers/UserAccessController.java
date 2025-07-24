@@ -1,9 +1,6 @@
 package com.aecode.webcoursesback.controllers;
 
-import com.aecode.webcoursesback.dtos.CourseCardDTO;
-import com.aecode.webcoursesback.dtos.ModuleDTO;
-import com.aecode.webcoursesback.dtos.UserCourseDTO;
-import com.aecode.webcoursesback.dtos.UserModuleDTO;
+import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.UserCourseAccess;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
 import com.aecode.webcoursesback.services.IUserAccessService;
@@ -25,8 +22,8 @@ public class UserAccessController {
 
     // Obtener cards de cursos accesibles para usuario
     @GetMapping("/courses/{userId}")
-    public ResponseEntity<List<CourseCardDTO>> getUserCourses(@PathVariable Long userId) {
-        List<CourseCardDTO> courses = userAccessService.getAccessibleCoursesForUser(userId);
+    public ResponseEntity<List<CourseCardProgressDTO>> getUserCourses(@PathVariable Long userId) {
+        List<CourseCardProgressDTO> courses = userAccessService.getAccessibleCoursesForUser(userId);
         return ResponseEntity.ok(courses);
     }
 
