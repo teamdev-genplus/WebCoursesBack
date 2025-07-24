@@ -85,26 +85,71 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
     @Override
     public List<CourseCardDTO> getAccessibleCoursesForUser(Long userId) {
-        // Cursos con acceso completo
+        // Obtener accesos completos
         List<UserCourseAccess> fullAccess = userCourseAccessRepo.findByUserProfile_UserId(userId);
-        Set<Long> courseIds = fullAccess.stream()
+
+        // Mapear cursos con acceso completo
+        List<CourseCardDTO> fullAccessCards = fullAccess.stream().map(uca -> {
+            Course course = uca.getCourse();
+            return CourseCardDTO.builder()
+                    .courseId(course.getCourseId())
+                    .title(course.getTitle())
+                    .principalImage(course.getPrincipalImage())
+                    .orderNumber(course.getOrderNumber())
+                    .type(course.getType())
+                    .cantModOrHours(course.getCantModOrHours())
+                    .mode(course.getMode())
+                    .urlnamecourse(course.getUrlnamecourse())
+                    .completed(uca.isCompleted()) // ✅ Marca si el curso fue completado por el usuario
+                    .build();
+        }).collect(Collectors.toList());
+
+        // Obtener accesos parciales (módulos sueltos)
+        List<UserModuleAccess> partialAccess = userModuleAccessRepo.findByUserProfile_UserId(userId);
+
+        // Obtener los cursos que ya se incluyeron arriba (para evitar duplicados)
+        Set<Long> alreadyIncluded = fullAccess.stream()
                 .map(uca -> uca.getCourse().getCourseId())
                 .collect(Collectors.toSet());
 
-        // Cursos con acceso parcial (a partir de módulos)
-        List<UserModuleAccess> partialAccess = userModuleAccessRepo.findByUserProfile_UserId(userId);
-        partialAccess.stream()
-                .map(uma -> uma.getModule().getCourse().getCourseId())
-                .forEach(courseIds::add);
+        // Mapear accesos parciales
+        Map<Long, List<UserModuleAccess>> groupedByCourse = partialAccess.stream()
+                .filter(uma -> !alreadyIncluded.contains(uma.getModule().getCourse().getCourseId())) // evitar duplicados
+                .collect(Collectors.groupingBy(uma -> uma.getModule().getCourse().getCourseId()));
 
-        // Obtener cursos únicos
-        List<Course> courses = courseRepo.findAllById(courseIds);
+        List<CourseCardDTO> partialAccessCards = new ArrayList<>();
 
-        // Mapear a DTOs
-        return courses.stream()
-                .map(course -> modelMapper.map(course, CourseCardDTO.class))
-                .collect(Collectors.toList());
+        for (Map.Entry<Long, List<UserModuleAccess>> entry : groupedByCourse.entrySet()) {
+            Long courseId = entry.getKey();
+            List<UserModuleAccess> moduleAccesses = entry.getValue();
+
+            Optional<Course> courseOpt = courseRepo.findById(courseId);
+            if (courseOpt.isPresent()) {
+                Course course = courseOpt.get();
+                List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+                boolean isCompleted = allModules.size() == moduleAccesses.stream().filter(UserModuleAccess::isCompleted).count();
+
+                partialAccessCards.add(CourseCardDTO.builder()
+                        .courseId(course.getCourseId())
+                        .title(course.getTitle())
+                        .principalImage(course.getPrincipalImage())
+                        .orderNumber(course.getOrderNumber())
+                        .type(course.getType())
+                        .cantModOrHours(course.getCantModOrHours())
+                        .mode(course.getMode())
+                        .urlnamecourse(course.getUrlnamecourse())
+                        .completed(isCompleted) // ✅ Completado solo si terminó todos los módulos comprados
+                        .build());
+            }
+        }
+
+        // Combinar ambos y devolver
+        List<CourseCardDTO> result = new ArrayList<>();
+        result.addAll(fullAccessCards);
+        result.addAll(partialAccessCards);
+        return result;
     }
+
 
     @Override
     public boolean hasAccessToModule(Long userId, Long moduleId) {

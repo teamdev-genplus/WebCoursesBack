@@ -18,4 +18,5 @@ public class CourseCardDTO {
     private Integer cantModOrHours;
     private Course.Mode mode;
     private String urlnamecourse;
+    private boolean completed;
 }
