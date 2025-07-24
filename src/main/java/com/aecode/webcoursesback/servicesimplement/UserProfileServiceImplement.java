@@ -1,18 +1,16 @@
 package com.aecode.webcoursesback.servicesimplement;
 
-import com.aecode.webcoursesback.dtos.LoginDTO;
-import com.aecode.webcoursesback.dtos.RegistrationDTO;
-import com.aecode.webcoursesback.dtos.UserProfileDTO;
-import com.aecode.webcoursesback.dtos.UserUpdateDTO;
-import com.aecode.webcoursesback.entities.UserDetail;
-import com.aecode.webcoursesback.entities.UserProfile;
-import com.aecode.webcoursesback.repositories.IUserDetailRepo;
-import com.aecode.webcoursesback.repositories.IUserProfileRepository;
+import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.entities.*;
+import com.aecode.webcoursesback.entities.Module;
+import com.aecode.webcoursesback.repositories.*;
 import com.aecode.webcoursesback.services.IUserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserProfileServiceImplement implements IUserProfileService {
@@ -20,6 +18,18 @@ public class UserProfileServiceImplement implements IUserProfileService {
     private IUserProfileRepository upR;
     @Autowired
     private IUserDetailRepo udR;
+    @Autowired
+    private IUserCourseRepo userCourseAccessRepo;
+
+    @Autowired
+    private IUserModuleRepo userModuleAccessRepo;
+
+    @Autowired
+    private IUserCertificateRepo userCertificateRepo;
+
+    @Autowired
+    private IModuleRepo moduleRepo;
+
     @Override
     public void insert(RegistrationDTO dto) {
         if (upR.existsByProfile_email(dto.getEmail())) {
@@ -131,4 +141,92 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 .linkedin(detail != null ? detail.getLinkedin() : null)
                 .build();
     }
+
+    @Override
+    public MyProfileDTO getMyProfile(Long userId) {
+        UserProfile user = upR.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        UserDetail detail = udR.findByUserId(userId);
+
+        // ===================== INFO PERSONAL =====================
+        String fullname = user.getFullname();
+        String email = user.getEmail();
+        String phone = detail != null ? detail.getPhoneNumber() : null;
+        String education = detail != null ? detail.getEducation() : null;
+        String country = detail != null ? detail.getCountry() : null;
+        LocalDate birthdate = detail != null ? detail.getBirthdate() : null;
+
+        // ===================== PROGRESO =====================
+        List<UserCourseAccess> userCourses = userCourseAccessRepo.findByUserProfile_UserId(userId);
+        List<UserModuleAccess> userModules = userModuleAccessRepo.findByUserProfile_UserId(userId);
+
+        Set<Long> completedCourseIds = new HashSet<>();
+        Set<Long> inProgressCourseIds = new HashSet<>();
+        int totalHours = 0;
+
+        Map<Long, List<com.aecode.webcoursesback.entities.Module>> courseModulesMap = new HashMap<>();
+
+        // Agrupar módulos por curso
+        for (UserModuleAccess uma : userModules) {
+            com.aecode.webcoursesback.entities.Module module = uma.getModule();
+            Long courseId = module.getCourse().getCourseId();
+            courseModulesMap.computeIfAbsent(courseId, k -> new ArrayList<>()).add(module);
+
+            // Sumar horas (asinc + live)
+            totalHours += (module.getCantHours_asinc() != null ? module.getCantHours_asinc() : 0)
+                    + (module.getCantHours_live() != null ? module.getCantHours_live() : 0);
+        }
+
+        for (Map.Entry<Long, List<com.aecode.webcoursesback.entities.Module>> entry : courseModulesMap.entrySet()) {
+            Long courseId = entry.getKey();
+            List<com.aecode.webcoursesback.entities.Module> completedModules = entry.getValue();
+
+            List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+            if (completedModules.size() == allModules.size()) {
+                completedCourseIds.add(courseId);
+            } else {
+                inProgressCourseIds.add(courseId);
+            }
+        }
+
+        UserProgressDTO progressDTO = UserProgressDTO.builder()
+                .completedCourses(completedCourseIds.size())
+                .inProgressCourses(inProgressCourseIds.size())
+                .totalLearningHours(totalHours)
+                .build();
+
+        // ===================== SKILLS (tags de módulos) =====================
+        Set<MySkillsDTO> skillSet = new HashSet<>();
+        for (UserModuleAccess uma : userModules) {
+            List<Tag> tags = uma.getModule().getTags();
+            for (Tag tag : tags) {
+                skillSet.add(MySkillsDTO.builder()
+                        .tagId(tag.getTagId())
+                        .tagName(tag.getName())
+                        .build());
+            }
+        }
+
+        // ===================== CERTIFICADOS =====================
+        List<UserCertificate> certs = userCertificateRepo.findByUserProfile_UserId(userId);
+        List<MyCertificateDTO> certificateDTOs = certs.stream().map(cert ->
+                MyCertificateDTO.builder()
+                        .certificateName(cert.getCertificateName())
+                        .certificateUrl(cert.getCertificateUrl())
+                        .build()
+        ).toList();
+
+        // ===================== Construcción del DTO final =====================
+        return MyProfileDTO.builder()
+                .fullname(fullname)
+                .email(email)
+                .phoneNumber(phone)
+                .education(education)
+                .country(country)
+                .birthdate(birthdate)
+                .progress(progressDTO)
+                .skills(skillSet.stream().toList())
+                .certificates(certificateDTOs)
+                .build();
+    }
+
 }

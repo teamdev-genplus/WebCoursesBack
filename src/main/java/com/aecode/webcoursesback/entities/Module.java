@@ -38,11 +38,11 @@ public class Module extends BaseProduct{
     @Column
     private Integer cantMods;
 
-    @Column
-    private Integer cantHours_live;
+        @Column
+        private Integer cantHours_live;
 
-    @Column
-    private Integer cantHours_asinc;
+        @Column
+        private Integer cantHours_asinc;
 
     //nuevos atributos de plan de estudio cuando es MODULAR.
 

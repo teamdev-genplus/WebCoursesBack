@@ -137,6 +137,13 @@ public class UserProfileController {
         }
     }
 
+    @GetMapping("/my-profile/{userId}")
+    public ResponseEntity<MyProfileDTO> getMyProfile(@PathVariable Long userId) {
+        MyProfileDTO dto = upS.getMyProfile(userId);
+        return ResponseEntity.ok(dto);
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

@@ -44,6 +44,9 @@ public class Course{
     @Column( length = 255)
     private String urlbrochure; //detail
 
+    @Column( length = 255)
+    private String urlnamecoures; //Para la url del curso
+
     @Column(length = 255)
     private String principalImage;
 

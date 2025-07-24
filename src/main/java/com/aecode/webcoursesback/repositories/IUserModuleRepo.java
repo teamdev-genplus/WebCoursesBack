@@ -1,5 +1,4 @@
 package com.aecode.webcoursesback.repositories;
-import com.aecode.webcoursesback.dtos.UserCourseDTO;
 import com.aecode.webcoursesback.dtos.UserModuleDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
