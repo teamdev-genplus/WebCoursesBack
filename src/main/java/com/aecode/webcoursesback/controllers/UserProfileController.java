@@ -40,6 +40,17 @@ public class UserProfileController {
         }
     }
 
+    // Registro de un usuario de Clerk
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUserClerk(@RequestBody UserClerkDTO dto) {
+        try {
+            upS.insertuserClerk(dto);
+            return ResponseEntity.ok("Usuario de Clerk guardado exitosamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     // Autenticación de usuario existente
     @PostMapping("/login")
     public ResponseEntity<UserProfileDTO> login(@RequestBody LoginDTO dto) {

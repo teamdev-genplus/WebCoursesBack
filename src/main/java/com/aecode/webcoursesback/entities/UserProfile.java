@@ -22,6 +22,10 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     private Long userId;
 
+    //se manejara como un texto
+    @Column(columnDefinition = "TEXT")
+    private String clerkId;
+
     @Column(length = 50)
     private String fullname;
     //abcd

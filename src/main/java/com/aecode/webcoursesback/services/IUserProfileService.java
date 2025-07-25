@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface IUserProfileService {
     public void insert(RegistrationDTO dto);
+
+    public void insertuserClerk(UserClerkDTO dto);
     List<UserProfile> list();
     public void delete(Long userId);
     public UserProfile listId(Long userId);

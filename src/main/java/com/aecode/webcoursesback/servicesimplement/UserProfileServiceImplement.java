@@ -47,6 +47,14 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
+    public void insertuserClerk(UserClerkDTO dto) {
+        UserProfile userProfile = new UserProfile();
+        userProfile.setClerkId(dto.getClerkId());
+        userProfile.setEmail(dto.getEmail());
+        upR.save(userProfile);
+    }
+
+    @Override
     public List<UserProfile> list() {
         return upR.findAll();
     }
