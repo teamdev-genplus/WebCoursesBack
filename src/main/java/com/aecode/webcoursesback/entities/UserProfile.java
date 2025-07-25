@@ -32,7 +32,7 @@ public class UserProfile {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String passwordHash;
 
     @Column(length = 100)

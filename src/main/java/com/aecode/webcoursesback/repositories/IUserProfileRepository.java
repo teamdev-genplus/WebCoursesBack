@@ -25,6 +25,7 @@ public interface IUserProfileRepository extends JpaRepository<UserProfile, Long>
             "FROM UserProfile u WHERE u.userId = :userId AND u.passwordHash = :currentPassword")
     boolean validateCurrentPassword(@Param("userId") Long userId, @Param("currentPassword") String currentPassword);
 
+    boolean existsByClerkId(String clerkId);
 
 
 }

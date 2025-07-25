@@ -48,6 +48,13 @@ public class UserProfileServiceImplement implements IUserProfileService {
 
     @Override
     public void insertuserClerk(UserClerkDTO dto) {
+        if (upR.existsByClerkId(dto.getClerkId())) {
+            throw new RuntimeException("El usuario ya existe con ese Clerk ID");
+        }
+
+        if (upR.existsByProfile_email(dto.getEmail())) {
+            throw new RuntimeException("El correo electrónico ya está registrado");
+        }
         UserProfile userProfile = new UserProfile();
         userProfile.setClerkId(dto.getClerkId());
         userProfile.setEmail(dto.getEmail());

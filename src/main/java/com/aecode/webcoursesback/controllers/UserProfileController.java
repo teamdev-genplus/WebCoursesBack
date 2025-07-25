@@ -41,7 +41,7 @@ public class UserProfileController {
     }
 
     // Registro de un usuario de Clerk
-    @PostMapping("/register")
+    @PostMapping("/registeruserclerk")
     public ResponseEntity<String> registerUserClerk(@RequestBody UserClerkDTO dto) {
         try {
             upS.insertuserClerk(dto);
