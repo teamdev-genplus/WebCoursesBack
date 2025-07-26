@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IUserProfileRepository extends JpaRepository<UserProfile, Long> {
@@ -26,6 +27,8 @@ public interface IUserProfileRepository extends JpaRepository<UserProfile, Long>
     boolean validateCurrentPassword(@Param("userId") Long userId, @Param("currentPassword") String currentPassword);
 
     boolean existsByClerkId(String clerkId);
+
+    Optional<UserProfile> findByClerkId(String clerkId);
 
 
 }

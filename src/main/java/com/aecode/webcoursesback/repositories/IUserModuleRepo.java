@@ -28,4 +28,16 @@ public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Integer
 
     Optional<UserModuleAccess> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
 
+
+    //NUEVO PARA CLERK
+    List<UserModuleAccess> findByUserProfile_ClerkId(String clerkId);
+
+    @Query("SELECT uma.module FROM UserModuleAccess uma WHERE uma.userProfile.clerkId = :clerkId AND uma.module.course.courseId = :courseId")
+    List<Module> findModulesByClerkIdAndCourseId(@Param("clerkId") String clerkId, @Param("courseId") Long courseId);
+
+    boolean existsByUserProfile_ClerkIdAndModule_ModuleId(String clerkId, Long moduleId);
+
+    Optional<UserModuleAccess> findByUserProfile_ClerkIdAndModule_ModuleId(String clerkId, Long moduleId);
+
+
 }

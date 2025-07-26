@@ -6,34 +6,16 @@ import com.aecode.webcoursesback.entities.UserModuleAccess;
 import java.util.List;
 
 public interface IUserAccessService {
-    // Registrar acceso a curso completo
-    UserCourseAccess grantCourseAccess(Long userId, Long courseId);
-
-    // Registrar acceso a módulo individual
-    UserModuleAccess grantModuleAccess(Long userId, Long moduleId);
-
-    // Obtener lista de cursos accesibles (completo o parcial) para mostrar cards en "Mis Cursos"
-    List<CourseCardProgressDTO> getAccessibleCoursesForUser(Long userId);
-
-
-    // Validar acceso a módulo
-    boolean hasAccessToModule(Long userId, Long moduleId);
-
-    //obtener el primer módulo comprado de un curso por usuario
-    ModuleDTO getFirstAccessibleModuleForUser(Long userId, Long courseId);
-
-    //Listar todo para curso
+    UserCourseAccess grantCourseAccess(String clerkId, Long courseId);
+    UserModuleAccess grantModuleAccess(String clerkId, Long moduleId);
+    List<CourseCardProgressDTO> getAccessibleCoursesForUser(String clerkId);
+    boolean hasAccessToModule(String clerkId, Long moduleId);
+    ModuleDTO getFirstAccessibleModuleForUser(String clerkId, Long courseId);
     List<UserCourseDTO> getAllCourses();
-
-    //Listar todo para modulo
     List<UserModuleDTO> getAllModules();
-
-    public ModuleDTO getModuleById(Long moduleId);
-
-    boolean markModuleAsCompleted(Long userId, Long moduleId);
-
-    List<UserModuleAccess> grantMultipleModuleAccess(Long userId, List<Long> moduleIds);
-
-    List<UserModuleDTO> getUserModulesByUserId(Long userId);
+    ModuleDTO getModuleById(Long moduleId);
+    boolean markModuleAsCompleted(String clerkId, Long moduleId);
+    List<UserModuleAccess> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds);
+    List<UserModuleDTO> getUserModulesByClerkId(String clerkId);
 
 }

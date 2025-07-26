@@ -21,4 +21,10 @@ public interface IUserCourseRepo extends JpaRepository<UserCourseAccess, Integer
 
     @Query("SELECT new com.aecode.webcoursesback.dtos.UserCourseDTO(uca.accessId, uca.userProfile.userId, uca.course.courseId, uca.completed) FROM UserCourseAccess uca")
     List<UserCourseDTO> findAllUserCourseDTOs();
+
+    //NUEVO PARA CLERK
+    List<UserCourseAccess> findByUserProfile_ClerkId(String clerkId);
+
+    boolean existsByUserProfile_ClerkIdAndCourse_CourseId(String clerkId, Long courseId);
+
 }

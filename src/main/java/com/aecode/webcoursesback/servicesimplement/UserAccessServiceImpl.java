@@ -16,12 +16,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserAccessServiceImpl implements IUserAccessService {
-
     @Autowired
     private IUserCourseRepo userCourseAccessRepo;
 
     @Autowired
     private IUserModuleRepo userModuleAccessRepo;
+
+    @Autowired
+    private IUserProfileRepository userProfileRepo;
 
     @Autowired
     private ICourseRepo courseRepo;
@@ -32,14 +34,17 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Autowired
     private ModelMapper modelMapper;
 
+    private UserProfile getUserByClerkId(String clerkId) {
+        return userProfileRepo.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario con Clerk ID no encontrado: " + clerkId));
+    }
+
     @Override
-    public UserCourseAccess grantCourseAccess(Long userId, Long courseId) {
-        UserProfile user = new UserProfile();
-        user.setUserId(userId);
+    public UserCourseAccess grantCourseAccess(String clerkId, Long courseId) {
+        UserProfile user = getUserByClerkId(clerkId);
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado"));
 
-        // Guardar acceso al curso
         UserCourseAccess access = UserCourseAccess.builder()
                 .userProfile(user)
                 .course(course)
@@ -47,7 +52,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .build();
         userCourseAccessRepo.save(access);
 
-        // Obtener todos los módulos del curso y registrar acceso
         List<Module> modules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
         List<UserModuleAccess> moduleAccessList = new ArrayList<>();
 
@@ -60,15 +64,13 @@ public class UserAccessServiceImpl implements IUserAccessService {
             moduleAccessList.add(moduleAccess);
         }
 
-        userModuleAccessRepo.saveAll(moduleAccessList); // Guardar todos de una sola vez
-
+        userModuleAccessRepo.saveAll(moduleAccessList);
         return access;
     }
 
     @Override
-    public UserModuleAccess grantModuleAccess(Long userId, Long moduleId) {
-        UserProfile user = new UserProfile();
-        user.setUserId(userId);
+    public UserModuleAccess grantModuleAccess(String clerkId, Long moduleId) {
+        UserProfile user = getUserByClerkId(clerkId);
         Module module = moduleRepo.findById(moduleId)
                 .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
 
@@ -77,16 +79,13 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .module(module)
                 .completed(false)
                 .build();
-
         return userModuleAccessRepo.save(access);
     }
 
     @Override
-    public List<CourseCardProgressDTO> getAccessibleCoursesForUser(Long userId) {
-        // Obtener accesos completos
-        List<UserCourseAccess> fullAccess = userCourseAccessRepo.findByUserProfile_UserId(userId);
+    public List<CourseCardProgressDTO> getAccessibleCoursesForUser(String clerkId) {
+        List<UserCourseAccess> fullAccess = userCourseAccessRepo.findByUserProfile_ClerkId(clerkId);
 
-        // Mapear cursos con acceso completo
         List<CourseCardProgressDTO> fullAccessCards = fullAccess.stream().map(uca -> {
             Course course = uca.getCourse();
             return CourseCardProgressDTO.builder()
@@ -95,19 +94,16 @@ public class UserAccessServiceImpl implements IUserAccessService {
                     .principalImage(course.getPrincipalImage())
                     .orderNumber(course.getOrderNumber())
                     .urlnamecourse(course.getUrlnamecourse())
-                    .completed(uca.isCompleted()) // ✅ Marca si el curso fue completado por el usuario
+                    .completed(uca.isCompleted())
                     .build();
         }).collect(Collectors.toList());
 
-        // Obtener accesos parciales (módulos sueltos)
-        List<UserModuleAccess> partialAccess = userModuleAccessRepo.findByUserProfile_UserId(userId);
+        List<UserModuleAccess> partialAccess = userModuleAccessRepo.findByUserProfile_ClerkId(clerkId);
 
-        // Obtener los cursos que ya se incluyeron arriba (para evitar duplicados)
         Set<Long> alreadyIncluded = fullAccess.stream()
                 .map(uca -> uca.getCourse().getCourseId())
                 .collect(Collectors.toSet());
 
-        // Agrupar accesos por curso (para parciales)
         Map<Long, List<UserModuleAccess>> groupedByCourse = partialAccess.stream()
                 .filter(uma -> !alreadyIncluded.contains(uma.getModule().getCourse().getCourseId()))
                 .collect(Collectors.groupingBy(uma -> uma.getModule().getCourse().getCourseId()));
@@ -135,48 +131,40 @@ public class UserAccessServiceImpl implements IUserAccessService {
             }
         }
 
-        // Combinar y retornar
         List<CourseCardProgressDTO> result = new ArrayList<>();
         result.addAll(fullAccessCards);
         result.addAll(partialAccessCards);
         return result;
     }
 
-
-
     @Override
-    public boolean hasAccessToModule(Long userId, Long moduleId) {
+    public boolean hasAccessToModule(String clerkId, Long moduleId) {
         Module module = moduleRepo.findById(moduleId)
                 .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
         Long courseId = module.getCourse().getCourseId();
 
-        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_UserIdAndCourse_CourseId(userId, courseId);
+        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
         if (hasFullAccess) return true;
 
-        return userModuleAccessRepo.existsByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
+        return userModuleAccessRepo.existsByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
     }
 
     @Override
-    public ModuleDTO getFirstAccessibleModuleForUser(Long userId, Long courseId) {
-        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_UserIdAndCourse_CourseId(userId, courseId);
+    public ModuleDTO getFirstAccessibleModuleForUser(String clerkId, Long courseId) {
+        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
         List<Module> accessibleModules;
 
         if (hasFullAccess) {
-            // Usuario tiene acceso completo, obtener todos los módulos ordenados
             accessibleModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
         } else {
-            // Usuario tiene acceso parcial, obtener solo módulos comprados ordenados
-            accessibleModules = userModuleAccessRepo.findModulesByUserIdAndCourseId(userId, courseId)
+            accessibleModules = userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
                     .stream()
                     .sorted(Comparator.comparing(Module::getOrderNumber))
                     .collect(Collectors.toList());
         }
 
-        if (accessibleModules.isEmpty()) {
-            return null; // No tiene acceso a ningún módulo
-        }
+        if (accessibleModules.isEmpty()) return null;
 
-        // Mapear el primer módulo a DTO y devolver
         return modelMapper.map(accessibleModules.get(0), ModuleDTO.class);
     }
 
@@ -193,14 +181,14 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Override
     public ModuleDTO getModuleById(Long moduleId) {
         Module module = moduleRepo.findById(moduleId)
-                .orElseThrow(() -> new EntityNotFoundException("No tienes acceso a este Modulo"));
+                .orElseThrow(() -> new EntityNotFoundException("No tienes acceso a este Módulo"));
         return modelMapper.map(module, ModuleDTO.class);
     }
 
     @Override
     @Transactional
-    public boolean markModuleAsCompleted(Long userId, Long moduleId) {
-        Optional<UserModuleAccess> accessOpt = userModuleAccessRepo.findByUserProfile_UserIdAndModule_ModuleId(userId, moduleId);
+    public boolean markModuleAsCompleted(String clerkId, Long moduleId) {
+        Optional<UserModuleAccess> accessOpt = userModuleAccessRepo.findByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
         if (accessOpt.isPresent()) {
             UserModuleAccess access = accessOpt.get();
             access.setCompleted(true);
@@ -211,10 +199,8 @@ public class UserAccessServiceImpl implements IUserAccessService {
     }
 
     @Override
-    public List<UserModuleAccess> grantMultipleModuleAccess(Long userId, List<Long> moduleIds) {
-        UserProfile user = new UserProfile();
-        user.setUserId(userId);
-
+    public List<UserModuleAccess> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds) {
+        UserProfile user = getUserByClerkId(clerkId);
         List<Module> modules = moduleRepo.findAllById(moduleIds);
         List<UserModuleAccess> accessList = new ArrayList<>();
 
@@ -231,8 +217,8 @@ public class UserAccessServiceImpl implements IUserAccessService {
     }
 
     @Override
-    public List<UserModuleDTO> getUserModulesByUserId(Long userId) {
-        List<UserModuleAccess> accesses = userModuleAccessRepo.findByUserProfile_UserId(userId);
+    public List<UserModuleDTO> getUserModulesByClerkId(String clerkId) {
+        List<UserModuleAccess> accesses = userModuleAccessRepo.findByUserProfile_ClerkId(clerkId);
         return accesses.stream()
                 .map(access -> UserModuleDTO.builder()
                         .accessId(access.getAccessId())
@@ -240,8 +226,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
                         .moduleId(access.getModule().getModuleId())
                         .completed(access.isCompleted())
                         .build())
-                .toList();
+                .collect(Collectors.toList());
     }
-
-
 }
