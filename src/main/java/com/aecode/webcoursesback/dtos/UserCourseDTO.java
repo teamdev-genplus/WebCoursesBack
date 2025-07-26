@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserCourseDTO {
     private int accessId;
-    private Long userId;
+    private String clerkId;
     private Long courseId;
     private boolean completed;
 }

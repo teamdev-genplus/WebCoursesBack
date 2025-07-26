@@ -22,7 +22,7 @@ public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Integer
     // Verificar si usuario tiene acceso a un módulo específico
     boolean existsByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
 
-    @Query("SELECT new com.aecode.webcoursesback.dtos.UserModuleDTO(uma.accessId, uma.userProfile.userId, uma.module.moduleId, uma.completed) FROM UserModuleAccess uma")
+    @Query("SELECT new com.aecode.webcoursesback.dtos.UserModuleDTO(uma.accessId, uma.userProfile.clerkId, uma.module.moduleId, uma.completed) FROM UserModuleAccess uma")
     List<UserModuleDTO> findAllUserModuleDTOs();
 
 

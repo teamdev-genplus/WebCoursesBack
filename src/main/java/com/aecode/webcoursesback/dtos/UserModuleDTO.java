@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserModuleDTO {
     private int accessId;
-    private Long userId;
+    private String clerkId;
     private Long moduleId;
     private boolean completed;
 }

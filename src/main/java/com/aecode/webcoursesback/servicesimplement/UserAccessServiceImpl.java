@@ -222,7 +222,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
         return accesses.stream()
                 .map(access -> UserModuleDTO.builder()
                         .accessId(access.getAccessId())
-                        .userId(access.getUserProfile().getUserId())
+                        .clerkId(access.getUserProfile().getClerkId())
                         .moduleId(access.getModule().getModuleId())
                         .completed(access.isCompleted())
                         .build())
