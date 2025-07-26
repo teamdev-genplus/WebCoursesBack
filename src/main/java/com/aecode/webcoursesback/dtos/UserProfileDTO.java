@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.dtos;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,9 @@ public class UserProfileDTO {
     private String rol;
     private String status;
 
+    @JsonIgnore
     private List<UserCourseDTO> usercourseaccess;
+    @JsonIgnore
     private List<UserModuleDTO> usermoduleaccess;
 
 }
