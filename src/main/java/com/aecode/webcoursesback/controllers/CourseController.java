@@ -125,14 +125,14 @@ public class CourseController {
     // Obtener cards paginadas de favoritos
     @GetMapping("/cards/favorites")
     public ResponseEntity<Page<CourseCardDTO>> getFavoriteCourseCards(
-            @RequestParam Long userId,
+            @RequestParam String clerkId,
             @RequestParam String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        Page<CourseCardDTO> favoriteCourses = userFavoriteService.getFavoriteCoursesByUserAndType(userId, type, pageable);
+        Page<CourseCardDTO> favoriteCourses = userFavoriteService.getFavoriteCoursesByUserAndType(clerkId, type, pageable);
         return ResponseEntity.ok(favoriteCourses);
     }
 

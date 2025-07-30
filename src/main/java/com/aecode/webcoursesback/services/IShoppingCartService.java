@@ -4,13 +4,13 @@ import com.aecode.webcoursesback.dtos.CourseCartDTO;
 
 import java.util.List;
 public interface IShoppingCartService {
-    List<CourseCartDTO> getCartByUser(String email);
+    List<CourseCartDTO> getCartByUser(String clerkId);
 
-    void addModuleToCart(String email, Long moduleId);
+    void addModuleToCart(String clerkId, Long moduleId);
 
-    void updateModuleSelection(String email, Long moduleId, boolean selected);
+    void updateModuleSelection(String clerkId, Long moduleId, boolean selected);
 
     void removeCartItemById(Long cartId);
 
-    void removeAllModulesFromCourse(String email, Long courseId);
+    void removeAllModulesFromCourse(String clerkId, Long courseId);
 }

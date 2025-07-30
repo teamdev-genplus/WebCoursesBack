@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface IShoppingCartRepo extends JpaRepository<ShoppingCart, Long> {
-    List<ShoppingCart> findByUserProfile_email(String email);
+    List<ShoppingCart> findByUserProfile_clerkId(String clerkId);
 
-    Optional<ShoppingCart> findByUserProfile_EmailAndModule_ModuleId(String email, Long moduleId);
+    Optional<ShoppingCart> findByUserProfile_ClerkIdAndModule_ModuleId(String clerkId, Long moduleId);
 
     @Transactional
-    void deleteByUserProfile_EmailAndModule_ModuleIdIn(String email, List<Long> moduleIds);
+    void deleteByUserProfile_ClerkIdAndModule_ModuleIdIn(String clerkId, List<Long> moduleIds);
 }

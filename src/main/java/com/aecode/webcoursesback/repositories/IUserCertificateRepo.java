@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface IUserCertificateRepo extends JpaRepository<UserCertificate,Long> {
-    List<UserCertificate> findByUserProfile_UserId(Long userId);
+    List<UserCertificate> findByUserProfile_ClerkId(String clerkId);
 }

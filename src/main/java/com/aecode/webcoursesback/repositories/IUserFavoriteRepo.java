@@ -10,10 +10,10 @@ import java.util.Optional;
 @Repository
 public interface IUserFavoriteRepo extends JpaRepository<UserFavorite, Long> {
 
-    List<UserFavorite> findByUserProfile_UserId(Long userId);
+    List<UserFavorite> findByUserProfile_ClerkId(String clerkId);
 
-    Optional<UserFavorite> findByUserProfile_UserIdAndCourse_CourseId(Long userId, Long courseId);
+    Optional<UserFavorite> findByUserProfile_ClerkIdAndCourse_CourseId(String clerkId, Long courseId);
 
-    void deleteByUserProfile_UserIdAndCourse_CourseId(Long userId, Long courseId);
+    void deleteByUserProfile_ClerkIdAndCourse_CourseId(String clerkId, Long courseId);
 
 }

@@ -35,8 +35,8 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     private IUserProfileRepository upR;
 
     @Override
-    public List<CourseCartDTO> getCartByUser(String email) {
-        List<ShoppingCart> cartItems = scR.findByUserProfile_email(email);
+    public List<CourseCartDTO> getCartByUser(String clerkId) {
+        List<ShoppingCart> cartItems = scR.findByUserProfile_clerkId(clerkId);
 
         Map<Long, List<ShoppingCart>> itemsByCourse = cartItems.stream()
                 .collect(Collectors.groupingBy(item -> item.getModule().getCourse().getCourseId()));
@@ -82,15 +82,16 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
 
     @Override
-    public void addModuleToCart(String email, Long moduleId) {
-        Optional<ShoppingCart> existing = scR.findByUserProfile_EmailAndModule_ModuleId(email, moduleId);
+    public void addModuleToCart(String clerkId, Long moduleId) {
+        Optional<ShoppingCart> existing = scR.findByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
         if (existing.isEmpty()) {
             Module module = mR.findById(moduleId)
                     .orElseThrow(() -> new EntityNotFoundException("Module not found"));
 
             // ✅ Aquí usamos el repositorio para obtener un UserProfile persistido
-            UserProfile user = Optional.ofNullable(upR.findByEmail(email))
-                    .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+            UserProfile user = upR.findByClerkId(clerkId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with clerkId: " + clerkId));
+
 
             ShoppingCart newItem = ShoppingCart.builder()
                     .userProfile(user)
@@ -98,13 +99,13 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                     .selected(true)
                     .build();
 
-            scR.save(newItem); // ✅ Ahora no hay error, porque user está persistido
+            scR.save(newItem);
         }
     }
 
     @Override
-    public void updateModuleSelection(String email, Long moduleId, boolean selected) {
-        ShoppingCart item = scR.findByUserProfile_EmailAndModule_ModuleId(email, moduleId)
+    public void updateModuleSelection(String clerkId, Long moduleId, boolean selected) {
+        ShoppingCart item = scR.findByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
         item.setSelected(selected);
         scR.save(item);
@@ -116,7 +117,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
     @Override
     @Transactional
-    public void removeAllModulesFromCourse(String email, Long courseId) {
+    public void removeAllModulesFromCourse(String clerkId, Long courseId) {
         // Obtener todos los módulos del curso
         List<Module> modules = mR.findByCourse_CourseId(courseId);
 
@@ -126,6 +127,6 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                 .collect(Collectors.toList());
 
         // Eliminar todos los registros del carrito que coincidan con userId y moduleId en la lista
-        scR.deleteByUserProfile_EmailAndModule_ModuleIdIn(email, moduleIds);
+        scR.deleteByUserProfile_ClerkIdAndModule_ModuleIdIn(clerkId, moduleIds);
     }
 }

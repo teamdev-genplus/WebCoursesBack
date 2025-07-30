@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.servicesimplement;
 
 import com.aecode.webcoursesback.dtos.CourseCardDTO;
+import com.aecode.webcoursesback.dtos.UserFavoriteDTO;
 import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.entities.UserFavorite;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -8,6 +9,7 @@ import com.aecode.webcoursesback.repositories.ICourseRepo;
 import com.aecode.webcoursesback.repositories.IUserFavoriteRepo;
 import com.aecode.webcoursesback.services.IUserFavoriteService;
 import jakarta.persistence.EntityNotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +28,16 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
     @Autowired
     private ICourseRepo courseRepo;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
+
     @Override
-    public void addFavorite(Long userId, Long courseId) {
-        Optional<UserFavorite> existing = userFavoriteRepo.findByUserProfile_UserIdAndCourse_CourseId(userId, courseId);
+    public void addFavorite(String clerkId, Long courseId) {
+        Optional<UserFavorite> existing = userFavoriteRepo.findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
         if (existing.isEmpty()) {
             UserProfile user = new UserProfile();
-            user.setUserId(userId);
+            user.setClerkId(clerkId);
             Course course = courseRepo.findById(courseId)
                     .orElseThrow(() -> new EntityNotFoundException("Course not found"));
             UserFavorite favorite = UserFavorite.builder()
@@ -43,21 +49,21 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
     }
 
     @Override
-    public void removeFavorite(Long userId, Long courseId) {
-        userFavoriteRepo.deleteByUserProfile_UserIdAndCourse_CourseId(userId, courseId);
+    public void removeFavorite(String clerkId, Long courseId) {
+        userFavoriteRepo.deleteByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
     }
 
     @Override
-    public List<Long> getFavoriteCourseIdsByUser(Long userId) {
-        return userFavoriteRepo.findByUserProfile_UserId(userId)
+    public List<Long> getFavoriteCourseIdsByUser(String clerkId) {
+        return userFavoriteRepo.findByUserProfile_ClerkId(clerkId)
                 .stream()
                 .map(fav -> fav.getCourse().getCourseId())
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Page<CourseCardDTO> getFavoriteCoursesByUserAndType(Long userId, String type, Pageable pageable) {
-        List<Long> favoriteCourseIds = getFavoriteCourseIdsByUser(userId);
+    public Page<CourseCardDTO> getFavoriteCoursesByUserAndType(String clerkId, String type, Pageable pageable) {
+        List<Long> favoriteCourseIds = getFavoriteCourseIdsByUser(clerkId);
         if (favoriteCourseIds.isEmpty()) {
             return Page.empty(pageable);
         }
@@ -73,5 +79,29 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
                 course.getUrlnamecourse()
         ));
     }
+
+    @Override
+    public List<UserFavoriteDTO> getAllFavorites() {
+        return userFavoriteRepo.findAll().stream()
+                .map(fav -> UserFavoriteDTO.builder()
+                        .favoriteId(fav.getFavoriteId())
+                        .userId(fav.getUserProfile().getUserId())
+                        .courseId(fav.getCourse().getCourseId())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserFavoriteDTO> getFavoritesByClerkId(String clerkId) {
+        return userFavoriteRepo.findByUserProfile_ClerkId(clerkId).stream()
+                .map(fav -> UserFavoriteDTO.builder()
+                        .favoriteId(fav.getFavoriteId())
+                        .userId(fav.getUserProfile().getUserId())
+                        .courseId(fav.getCourse().getCourseId())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
 
 }

@@ -10,8 +10,8 @@ import java.util.Optional;
 @Repository
 public interface IUserDetailRepo extends JpaRepository<UserDetail, Integer> {
     //buscar user por userId de UserProfile
-    @Query("SELECT u FROM UserDetail u WHERE u.userProfile.userId = ?1")
-    UserDetail findByUserId(Long userId);
+    @Query("SELECT u FROM UserDetail u WHERE u.userProfile.clerkId = ?1")
+    UserDetail findByClerkId(String clerkId);
 
 
 }

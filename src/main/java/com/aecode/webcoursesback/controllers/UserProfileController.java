@@ -28,24 +28,31 @@ public class UserProfileController {
 
     @Autowired
     private IUserDetailService udS;
-
-    // Registro de un nuevo usuario
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegistrationDTO dto) {
-        try {
-            upS.insert(dto);
-            return ResponseEntity.ok("Perfil creado exitosamente");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
+    //---------------------------------------------------ACTIVO-----------------------------------------------------
     // Registro de un usuario de Clerk
     @PostMapping("/registeruserclerk")
     public ResponseEntity<String> registerUserClerk(@RequestBody UserClerkDTO dto) {
         try {
             upS.insertuserClerk(dto);
             return ResponseEntity.ok("Usuario de Clerk guardado exitosamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserUpdateDTO>> getAllProfiles() {
+        List<UserUpdateDTO> profiles = upS.listusers();
+        return ResponseEntity.ok(profiles);
+    }
+
+    //---------------------------------------------------INACTIVO-----------------------------------------------------
+    // Registro de un nuevo usuario
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody RegistrationDTO dto) {
+        try {
+            upS.insert(dto);
+            return ResponseEntity.ok("Perfil creado exitosamente");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -132,25 +139,20 @@ public class UserProfileController {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @GetMapping
-    public ResponseEntity<List<UserUpdateDTO>> getAllProfiles() {
-        List<UserUpdateDTO> profiles = upS.listusers();
-        return ResponseEntity.ok(profiles);
-    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserUpdateDTO> getProfileById(@PathVariable Long id) {
+    @GetMapping("/{clerkId}")
+    public ResponseEntity<UserUpdateDTO> getProfileById(@PathVariable String clerkId) {
         try {
-            UserUpdateDTO profile = upS.listusersId(id);
+            UserUpdateDTO profile = upS.listClerkId(clerkId);
             return ResponseEntity.ok(profile);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/my-profile/{userId}")
-    public ResponseEntity<MyProfileDTO> getMyProfile(@PathVariable Long userId) {
-        MyProfileDTO dto = upS.getMyProfile(userId);
+    @GetMapping("/my-profile/{clerkId}")
+    public ResponseEntity<MyProfileDTO> getMyProfile(@PathVariable String clerkId) {
+        MyProfileDTO dto = upS.getMyProfile(clerkId);
         return ResponseEntity.ok(dto);
     }
 

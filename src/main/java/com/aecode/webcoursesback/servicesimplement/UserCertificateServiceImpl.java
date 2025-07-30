@@ -26,8 +26,8 @@ public class UserCertificateServiceImpl implements IUserCertificateService {
     private IModuleRepo moduleRepo;
 
     @Override
-    public List<UserCertificateDTO> getCertificatesByUser(Long userId) {
-        List<UserCertificate> certificates = userCertificateRepo.findByUserProfile_UserId(userId);
+    public List<UserCertificateDTO> getCertificatesByUser(String clerkId) {
+        List<UserCertificate> certificates = userCertificateRepo.findByUserProfile_ClerkId(clerkId);
         return certificates.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());

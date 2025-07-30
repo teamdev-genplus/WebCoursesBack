@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface IUserCertificateService {
 
-    List<UserCertificateDTO> getCertificatesByUser(Long userId);
+    List<UserCertificateDTO> getCertificatesByUser(String clerkId);
 
     UserCertificateDTO addUserCertificate(UserCertificateDTO userCertificateDTO);
 

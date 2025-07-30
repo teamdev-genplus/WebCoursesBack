@@ -19,9 +19,9 @@ public interface IUserProfileService {
 
 
     public List<UserUpdateDTO> listusers();
-    public UserUpdateDTO listusersId(Long userId);
+    public UserUpdateDTO listClerkId(String clerkId);
 
-    MyProfileDTO getMyProfile(Long userId);
+    MyProfileDTO getMyProfile(String clerkId);
 
 
 }

@@ -15,9 +15,9 @@ public class UserCertificateController {
 
     //----------------------------------------------------------GET----------------------------------------------------------------
     // Obtener certificados de un usuario
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserCertificateDTO>> getCertificatesByUser(@PathVariable Long userId) {
-        List<UserCertificateDTO> certificates = userCertificateService.getCertificatesByUser(userId);
+    @GetMapping("/user/{clerkId}")
+    public ResponseEntity<List<UserCertificateDTO>> getCertificatesByUser(@PathVariable String clerkId) {
+        List<UserCertificateDTO> certificates = userCertificateService.getCertificatesByUser(clerkId);
         return ResponseEntity.ok(certificates);
     }
 

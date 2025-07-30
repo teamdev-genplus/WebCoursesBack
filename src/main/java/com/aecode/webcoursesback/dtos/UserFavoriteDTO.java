@@ -9,4 +9,5 @@ public class UserFavoriteDTO {
     private Long favoriteId;
     private Long userId;
     private Long courseId;
+
 }

@@ -112,7 +112,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
         List<UserProfile> users = upR.findAll();
 
         return users.stream().map(user -> {
-            UserDetail detail = udR.findByUserId(user.getUserId());
+            UserDetail detail = udR.findByClerkId(user.getClerkId());
             return UserUpdateDTO.builder()
                     .userId(user.getUserId())
                     .fullname(user.getFullname())
@@ -133,13 +133,13 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
-    public UserUpdateDTO listusersId(Long userId) {
-        UserProfile user = upR.findById(userId).orElse(null);
+    public UserUpdateDTO listClerkId(String clerkId) {
+        UserProfile user = upR.findByClerkId(clerkId).orElse(null);
         if (user == null) {
-            throw new RuntimeException("Usuario no encontrado con ID: " + userId);
+            throw new RuntimeException("Usuario no encontrado con ID: " + clerkId);
         }
 
-        UserDetail detail = udR.findByUserId(userId);
+        UserDetail detail = udR.findByClerkId(clerkId);
 
         return UserUpdateDTO.builder()
                 .userId(user.getUserId())
@@ -158,9 +158,9 @@ public class UserProfileServiceImplement implements IUserProfileService {
     }
 
     @Override
-    public MyProfileDTO getMyProfile(Long userId) {
-        UserProfile user = upR.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        UserDetail detail = udR.findByUserId(userId);
+    public MyProfileDTO getMyProfile(String clerkId) {
+        UserProfile user = upR.findByClerkId(clerkId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        UserDetail detail = udR.findByClerkId(clerkId);
 
         // ===================== INFO PERSONAL =====================
         String fullname = user.getFullname();
@@ -172,7 +172,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
 
         // ===================== PROGRESO =====================
         List<UserModuleAccess> userModules = userModuleAccessRepo
-                .findByUserProfile_UserId(userId)
+                .findByUserProfile_ClerkId(clerkId)
                 .stream()
                 .filter(UserModuleAccess::isCompleted)
                 .collect(Collectors.toList());
@@ -226,7 +226,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
         }
 
         // ===================== CERTIFICADOS =====================
-        List<UserCertificate> certs = userCertificateRepo.findByUserProfile_UserId(userId);
+        List<UserCertificate> certs = userCertificateRepo.findByUserProfile_ClerkId(clerkId);
         List<MyCertificateDTO> certificateDTOs = certs.stream().map(cert ->
                 MyCertificateDTO.builder()
                         .certificateName(cert.getCertificateName())
