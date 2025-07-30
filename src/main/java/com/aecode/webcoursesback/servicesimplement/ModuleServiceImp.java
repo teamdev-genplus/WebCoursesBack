@@ -111,6 +111,9 @@ public class ModuleServiceImp implements IModuleService {
                         .courseId(m.getCourse().getCourseId())
                         .programTitle(m.getProgramTitle())
                         .orderNumber(m.getOrderNumber())
+                        .priceRegular(m.getPriceRegular())
+                        .promptPaymentPrice(m.getPromptPaymentPrice())
+                        .isOnSale(m.getIsOnSale())
                         .build())
                 .collect(Collectors.toList());
     }
