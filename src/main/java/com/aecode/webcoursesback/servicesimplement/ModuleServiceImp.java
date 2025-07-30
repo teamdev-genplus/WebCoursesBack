@@ -89,12 +89,8 @@ public class ModuleServiceImp implements IModuleService {
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);
 
-        if ("modular".equalsIgnoreCase(course.getType())) {
-            List<Module> modules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
-            moduleDTO.setCourseModules(mapToModuleListDTOs(modules));
-        } else {
-            moduleDTO.setCourseModules(List.of());
-        }
+        List<Module> modules = mR.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+        moduleDTO.setCourseModules(mapToModuleListDTOs(modules));
 
         return CourseModuleViewDTO.builder()
                 .course(courseInfo)
