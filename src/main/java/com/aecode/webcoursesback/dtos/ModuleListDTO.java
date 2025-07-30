@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.dtos;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,7 @@ public class ModuleListDTO {
     private Long courseId;
     private String programTitle;
     private Integer orderNumber;
+    private Double priceRegular;
+    private Double promptPaymentPrice;
+    private Boolean isOnSale;
 }
