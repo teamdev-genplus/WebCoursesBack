@@ -21,7 +21,4 @@ public class Benefits {
 
     @Column(nullable = false, length = 255)
     private String benefit;
-
-    @Column
-    private String urlCourses;
 }

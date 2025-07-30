@@ -31,9 +31,8 @@ public class Module extends BaseProduct{
     @Column
     private Integer orderNumber;
 
-
     @Column
-    private Integer textmode;
+    private String textmode;
 
     //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     @Column
@@ -119,5 +118,9 @@ public class Module extends BaseProduct{
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Requirement> requirements = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Benefits> benefits = new ArrayList<>();
 
 }

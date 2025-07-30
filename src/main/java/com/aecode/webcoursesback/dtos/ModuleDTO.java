@@ -16,7 +16,7 @@ public class ModuleDTO {
     private Integer orderNumber;
 
     //Nuevo Atributo 22/07/25
-    private Integer textmode;
+    private String textmode;
     //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     private Integer cantMods;
     private Integer cantHours1;
@@ -64,6 +64,8 @@ public class ModuleDTO {
     private List<RequirementDTO> requirements = new ArrayList<>();
     @Builder.Default
     private List<InstructorDTO> instructors= new ArrayList<>();
+    @Builder.Default
+    private List<BenefitDTO> benefits= new ArrayList<>();
 
     // Lista para navegación (módulos hermanos)
     @Builder.Default
