@@ -15,23 +15,23 @@ public class ShoppingCartController {
     IShoppingCartService scS;
 
 
-    @GetMapping("/{email}")
-    public ResponseEntity<List<CourseCartDTO>> getCart(@PathVariable String email) {
-        List<CourseCartDTO> cart = scS.getCartByUser(email);
+    @GetMapping("/{clerkId}")
+    public ResponseEntity<List<CourseCartDTO>> getCart(@PathVariable String clerkId) {
+        List<CourseCartDTO> cart = scS.getCartByUser(clerkId);
         return ResponseEntity.ok(cart);
     }
 
-    @PostMapping("/{email}/modules/{moduleId}")
-    public ResponseEntity<Void> addModule(@PathVariable String email, @PathVariable Long moduleId) {
-        scS.addModuleToCart(email, moduleId);
+    @PostMapping("/{clerkId}/modules/{moduleId}")
+    public ResponseEntity<Void> addModule(@PathVariable String clerkId, @PathVariable Long moduleId) {
+        scS.addModuleToCart(clerkId, moduleId);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{email}/modules/{moduleId}")
-    public ResponseEntity<Void> updateModuleSelection(@PathVariable String email,
+    @PutMapping("/{clerkId}/modules/{moduleId}")
+    public ResponseEntity<Void> updateModuleSelection(@PathVariable String clerkId,
                                                       @PathVariable Long moduleId,
                                                       @RequestParam boolean selected) {
-        scS.updateModuleSelection(email, moduleId, selected);
+        scS.updateModuleSelection(clerkId, moduleId, selected);
         return ResponseEntity.ok().build();
     }
 
@@ -42,9 +42,9 @@ public class ShoppingCartController {
     }
 
     // Endpoint para eliminar todos los módulos de un curso en el carrito de un usuario
-    @DeleteMapping("/{email}/course/{courseId}")
-    public ResponseEntity<Void> removeCourseFromCart(@PathVariable String email, @PathVariable Long courseId) {
-        scS.removeAllModulesFromCourse(email, courseId);
+    @DeleteMapping("/{clerkId}/course/{courseId}")
+    public ResponseEntity<Void> removeCourseFromCart(@PathVariable String clerkId, @PathVariable Long courseId) {
+        scS.removeAllModulesFromCourse(clerkId, courseId);
         return ResponseEntity.noContent().build();
     }
 }
