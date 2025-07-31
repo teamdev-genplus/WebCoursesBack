@@ -19,8 +19,8 @@ public class ModuleDTO {
     private String textmode;
     //nuevos atributos de plan de estudio cuando es DIPLOMADO.
     private Integer cantMods;
-    private Integer cantHours1;
-    private Integer cantHours2;
+    private Integer cantHours_live;
+    private Integer cantHours_asinc;
     //nuevos atributos de plan de estudio cuando es MODULAR.
     private String titleStudyplan;
     private String descriptionStudyplan;
