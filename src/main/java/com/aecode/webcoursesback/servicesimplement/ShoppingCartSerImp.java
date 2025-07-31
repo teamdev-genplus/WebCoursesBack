@@ -129,4 +129,26 @@ public class ShoppingCartSerImp implements IShoppingCartService{
         // Eliminar todos los registros del carrito que coincidan con userId y moduleId en la lista
         scR.deleteByUserProfile_ClerkIdAndModule_ModuleIdIn(clerkId, moduleIds);
     }
+
+    @Override
+    public void addModulesToCart(String clerkId, List<Long> moduleIds) {
+        UserProfile user = upR.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with clerkId: " + clerkId));
+
+        for (Long moduleId : moduleIds) {
+            Optional<ShoppingCart> existing = scR.findByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
+            if (existing.isEmpty()) {
+                Module module = mR.findById(moduleId)
+                        .orElseThrow(() -> new EntityNotFoundException("Module not found with id: " + moduleId));
+
+                ShoppingCart newItem = ShoppingCart.builder()
+                        .userProfile(user)
+                        .module(module)
+                        .selected(true)
+                        .build();
+
+                scR.save(newItem);
+            }
+        }
+    }
 }

@@ -13,4 +13,7 @@ public interface IShoppingCartService {
     void removeCartItemById(Long cartId);
 
     void removeAllModulesFromCourse(String clerkId, Long courseId);
+
+    void addModulesToCart(String clerkId, List<Long> moduleIds);
+
 }

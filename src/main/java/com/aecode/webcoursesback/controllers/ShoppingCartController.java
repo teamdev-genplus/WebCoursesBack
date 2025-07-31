@@ -47,4 +47,11 @@ public class ShoppingCartController {
         scS.removeAllModulesFromCourse(clerkId, courseId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{clerkId}/modules")
+    public ResponseEntity<Void> addModulesToCart(@PathVariable String clerkId, @RequestBody List<Long> moduleIds) {
+        scS.addModulesToCart(clerkId, moduleIds);
+        return ResponseEntity.ok().build();
+    }
+
 }
