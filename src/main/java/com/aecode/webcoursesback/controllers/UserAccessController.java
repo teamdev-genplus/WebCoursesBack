@@ -1,18 +1,16 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
 import com.aecode.webcoursesback.entities.UserCourseAccess;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
 import com.aecode.webcoursesback.services.IUserAccessService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 @RestController
 @RequestMapping("/user-access")
 public class UserAccessController {
@@ -20,89 +18,116 @@ public class UserAccessController {
     @Autowired
     private IUserAccessService userAccessService;
 
-    // Obtener cards de cursos accesibles para usuario
+    // ======================
+    // ACCESO DEL USUARIO
+    // ======================
+
+    /**
+     * Obtener cards de los cursos a los que el usuario tiene acceso (completo o parcial).
+     */
     @GetMapping("/courses/{clerkId}")
     public ResponseEntity<List<CourseCardProgressDTO>> getUserCourses(@PathVariable String clerkId) {
-        List<CourseCardProgressDTO> courses = userAccessService.getAccessibleCoursesForUser(clerkId);
-        return ResponseEntity.ok(courses);
+        return ResponseEntity.ok(userAccessService.getAccessibleCoursesForUser(clerkId));
     }
 
-    // Obtener el primer módulo comprado de un curso por usuario
-    @GetMapping("/first-module/{clerkId}/{courseId}")
-    public ResponseEntity<ModuleDTO> getFirstAccessibleModule(@PathVariable String clerkId, @PathVariable Long courseId) {
-        ModuleDTO firstModule = userAccessService.getFirstAccessibleModuleForUser(clerkId, courseId);
-        if (firstModule == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(firstModule);
+    /**
+     * Obtener el primer módulo disponible de un curso al que el usuario tenga acceso.
+     */
+    @GetMapping("/courses/{courseId}/first-module")
+    public ResponseEntity<ModuleProfileDTO> getFirstAccessibleModule(
+            @RequestParam String clerkId,
+            @PathVariable Long courseId
+    ) {
+        return ResponseEntity.ok(userAccessService.getFirstAccessibleModuleForUser(clerkId, courseId));
     }
 
-    // Validar acceso a módulo
-    @GetMapping("/module/{clerkId}/{moduleId}")
-    public ResponseEntity<?> getModuleIfHasAccess(@PathVariable String clerkId, @PathVariable Long moduleId) {
-        boolean hasAccess = userAccessService.hasAccessToModule(clerkId, moduleId);
-        if (!hasAccess) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "No tienes acceso a este módulo");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-        }
-        ModuleDTO moduleDTO = userAccessService.getModuleById(moduleId);
-        return ResponseEntity.ok(moduleDTO);
+    /**
+     * Obtener información de un módulo si el usuario tiene acceso a él.
+     */
+    @GetMapping("/modules/{moduleId}")
+    public ResponseEntity<?> getModuleIfHasAccess(
+            @RequestParam String clerkId,
+            @PathVariable Long moduleId
+    ) {
+        return ResponseEntity.ok(userAccessService.getModuleById(moduleId, clerkId));
     }
 
-    // Listar todo para curso
-    @GetMapping("/all-courses")
-    public ResponseEntity<List<UserCourseDTO>> getAll() {
-        List<UserCourseDTO> accesses = userAccessService.getAllCourses();
-        return ResponseEntity.ok(accesses);
+    /**
+     * Obtener los módulos a los que el usuario tiene acceso.
+     */
+    @GetMapping("/modules")
+    public ResponseEntity<List<UserModuleDTO>> getUserModules(@RequestParam String clerkId) {
+        return ResponseEntity.ok(userAccessService.getUserModulesByClerkId(clerkId));
     }
 
-    // Listar todo para módulo
-    @GetMapping("/all-modules")
-    public ResponseEntity<List<UserModuleDTO>> getAllModules() {
-        List<UserModuleDTO> accesses = userAccessService.getAllModules();
-        return ResponseEntity.ok(accesses);
+    // ======================
+    // ACCESO ADMIN / BACKOFFICE
+    // ======================
+
+    /**
+     * Obtener todos los cursos con acceso registrado.
+     */
+    @GetMapping("/admin/courses")
+    public ResponseEntity<List<UserCourseDTO>> getAllCoursesAccess() {
+        return ResponseEntity.ok(userAccessService.getAllCourses());
     }
 
-    // Listar módulos accesibles por usuario
-    @GetMapping("/modules/{clerkId}")
-    public ResponseEntity<List<UserModuleDTO>> getUserModules(@PathVariable String clerkId) {
-        List<UserModuleDTO> modules = userAccessService.getUserModulesByClerkId(clerkId);
-        return ResponseEntity.ok(modules);
+    /**
+     * Obtener todos los módulos con acceso registrado.
+     */
+    @GetMapping("/admin/modules")
+    public ResponseEntity<List<UserModuleDTO>> getAllModulesAccess() {
+        return ResponseEntity.ok(userAccessService.getAllModules());
     }
 
-    // Registrar acceso a curso (compra completa)
-    @PostMapping("/grant-course")
-    public ResponseEntity<UserCourseAccess> grantCourseAccess(@RequestParam String clerkId, @RequestParam Long courseId) {
-        UserCourseAccess access = userAccessService.grantCourseAccess(clerkId, courseId);
-        return ResponseEntity.ok(access);
+    // ======================
+    // GESTIÓN DE ACCESO (COMPRAS / TRACKING)
+    // ======================
+
+    /**
+     * Otorgar acceso completo a un curso al usuario (incluye todos los módulos).
+     */
+    @PostMapping("/courses/access")
+    public ResponseEntity<UserCourseAccess> grantCourseAccess(
+            @RequestParam String clerkId,
+            @RequestParam Long courseId
+    ) {
+        return ResponseEntity.ok(userAccessService.grantCourseAccess(clerkId, courseId));
     }
 
-    // Registrar acceso a módulo individual
-    @PostMapping("/grant-module")
-    public ResponseEntity<UserModuleAccess> grantModuleAccess(@RequestParam String clerkId, @RequestParam Long moduleId) {
-        UserModuleAccess access = userAccessService.grantModuleAccess(clerkId, moduleId);
-        return ResponseEntity.ok(access);
+    /**
+     * Otorgar acceso individual a un módulo al usuario.
+     */
+    @PostMapping("/modules/access")
+    public ResponseEntity<UserModuleAccess> grantModuleAccess(
+            @RequestParam String clerkId,
+            @RequestParam Long moduleId
+    ) {
+        return ResponseEntity.ok(userAccessService.grantModuleAccess(clerkId, moduleId));
     }
 
-    // Registrar acceso a múltiples módulos
-    @PostMapping("/grant-modules")
+    /**
+     * Otorgar acceso a múltiples módulos al usuario (compra parcial).
+     */
+    @PostMapping("/modules/access/multiple")
     public ResponseEntity<List<UserModuleAccess>> grantMultipleModules(
             @RequestParam String clerkId,
-            @RequestBody List<Long> moduleIds) {
-        List<UserModuleAccess> accesses = userAccessService.grantMultipleModuleAccess(clerkId, moduleIds);
-        return ResponseEntity.ok(accesses);
+            @RequestBody List<Long> moduleIds
+    ) {
+        return ResponseEntity.ok(userAccessService.grantMultipleModuleAccess(clerkId, moduleIds));
     }
 
-    // Marcar módulo como completado
-    @PutMapping("/complete-module")
-    public ResponseEntity<?> markModuleAsCompleted(@RequestParam String clerkId, @RequestParam Long moduleId) {
+    /**
+     * Marcar un módulo como completado por el usuario.
+     */
+    @PutMapping("/modules/{moduleId}/complete")
+    public ResponseEntity<?> markModuleAsCompleted(
+            @RequestParam String clerkId,
+            @PathVariable Long moduleId
+    ) {
         boolean updated = userAccessService.markModuleAsCompleted(clerkId, moduleId);
-        if (updated) {
-            return ResponseEntity.ok("Módulo marcado como completado");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
-        }
+        return updated
+                ? ResponseEntity.ok("Módulo marcado como completado")
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
     }
-
 }

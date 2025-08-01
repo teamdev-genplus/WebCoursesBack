@@ -1,5 +1,8 @@
-package com.aecode.webcoursesback.dtos;
+package com.aecode.webcoursesback.dtos.Profile;
 
+import com.aecode.webcoursesback.dtos.MyCertificateDTO;
+import com.aecode.webcoursesback.dtos.MySkillsDTO;
+import com.aecode.webcoursesback.dtos.UserProgressDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.dtos.Profile.MyProfileDTO;
 import com.aecode.webcoursesback.entities.UserDetail;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.services.IUserDetailService;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/userprofile")

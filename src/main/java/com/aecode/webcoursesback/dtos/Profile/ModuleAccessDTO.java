@@ -1,4 +1,4 @@
-package com.aecode.webcoursesback.dtos;
+package com.aecode.webcoursesback.dtos.Profile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,14 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ModuleListDTO {
+public class ModuleAccessDTO {
     private Long moduleId;
     private Long courseId;
     private String programTitle;
     private Integer orderNumber;
-
-    /// Solo para vista de compra
-    private Double priceRegular;
-    private Double promptPaymentPrice;
-    private Boolean isOnSale;
+    private Boolean hasAccess;
 }

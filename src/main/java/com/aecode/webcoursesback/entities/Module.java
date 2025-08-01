@@ -54,13 +54,7 @@ public class Module extends BaseProduct{
 
     //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULO
     @Column(length = 255)
-    private String urlrecording;
-
-    @Column(length = 255)
     private String dmaterial;
-
-    @Column(length = 255)
-    private String viewpresentation;
 
     @Column(length = 255)
     private String urlJoinClass;

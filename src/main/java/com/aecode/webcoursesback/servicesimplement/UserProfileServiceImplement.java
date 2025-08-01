@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.servicesimplement;
 
 import com.aecode.webcoursesback.dtos.*;
+import com.aecode.webcoursesback.dtos.Profile.MyProfileDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.repositories.*;

@@ -25,9 +25,7 @@ public class ModuleDTO {
     private String titleStudyplan;
     private String descriptionStudyplan;
     //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULO
-    private String urlrecording;
     private String dmaterial;
-    private String viewpresentation;
     private String urlJoinClass;
 
     //Newbotton para instructores
