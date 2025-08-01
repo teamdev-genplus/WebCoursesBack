@@ -1,8 +1,6 @@
 package com.aecode.webcoursesback.services;
 import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
-import com.aecode.webcoursesback.entities.UserCourseAccess;
-import com.aecode.webcoursesback.entities.UserModuleAccess;
 
 import java.util.List;
 

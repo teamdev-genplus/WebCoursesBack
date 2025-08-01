@@ -139,12 +139,34 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Override
     public ModuleProfileDTO getFirstAccessibleModuleForUser(String clerkId, Long courseId) {
         boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
-        List<Module> modules = hasFullAccess ?
-                moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId) :
-                userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
-                        .stream().sorted(Comparator.comparing(Module::getOrderNumber)).toList();
 
-        return modules.isEmpty() ? null : modelMapper.map(modules.get(0), ModuleProfileDTO.class);
+        List<Module> modules = hasFullAccess
+                ? moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId)
+                : userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
+                .stream().sorted(Comparator.comparing(Module::getOrderNumber)).toList();
+
+        if (modules.isEmpty()) return null;
+
+        Module firstModule = modules.get(0);
+        ModuleProfileDTO dto = modelMapper.map(firstModule, ModuleProfileDTO.class);
+
+        // Aquí agregamos lo que faltaba: calcular acceso módulo por módulo
+        List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+        Set<Long> userModuleIds = userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
+                .stream().map(Module::getModuleId).collect(Collectors.toSet());
+
+        List<ModuleAccessDTO> moduleAccessList = allModules.stream().map(m ->
+                ModuleAccessDTO.builder()
+                        .moduleId(m.getModuleId())
+                        .courseId(courseId)
+                        .programTitle(m.getProgramTitle())
+                        .orderNumber(m.getOrderNumber())
+                        .hasAccess(hasFullAccess || userModuleIds.contains(m.getModuleId()))
+                        .build()
+        ).toList();
+
+        dto.setCourseModules(moduleAccessList);
+        return dto;
     }
 
     // ACCESO: Obtener un módulo específico si tiene acceso
