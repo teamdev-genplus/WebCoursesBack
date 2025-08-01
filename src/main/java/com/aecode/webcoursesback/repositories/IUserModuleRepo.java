@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Integer> {
+public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Long> {
 
     // Obtener módulos accesibles de un curso para un usuario
     @Query("SELECT uma.module FROM UserModuleAccess uma WHERE uma.userProfile.userId = :userId AND uma.module.course.courseId = :courseId")

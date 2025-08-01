@@ -7,8 +7,8 @@ import com.aecode.webcoursesback.entities.UserModuleAccess;
 import java.util.List;
 
 public interface IUserAccessService {
-    UserCourseAccess grantCourseAccess(String clerkId, Long courseId);
-    UserModuleAccess grantModuleAccess(String clerkId, Long moduleId);
+    UserCourseDTO grantCourseAccess(String clerkId, Long courseId);
+    UserModuleDTO  grantModuleAccess(String clerkId, Long moduleId);
     List<CourseCardProgressDTO> getAccessibleCoursesForUser(String clerkId);
     boolean hasAccessToModule(String clerkId, Long moduleId);
     ModuleProfileDTO getFirstAccessibleModuleForUser(String clerkId, Long courseId);
@@ -16,7 +16,7 @@ public interface IUserAccessService {
     List<UserModuleDTO> getAllModules();
     ModuleProfileDTO getModuleById(Long moduleId, String clerkId);
     boolean markModuleAsCompleted(String clerkId, Long moduleId);
-    List<UserModuleAccess> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds);
+    List<UserModuleDTO> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds);
     List<UserModuleDTO> getUserModulesByClerkId(String clerkId);
 
 }

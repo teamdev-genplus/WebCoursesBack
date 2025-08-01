@@ -17,7 +17,7 @@ public class UserModuleAccess {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "accessmod_seq")
-    private int accessId;
+    private Long accessId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

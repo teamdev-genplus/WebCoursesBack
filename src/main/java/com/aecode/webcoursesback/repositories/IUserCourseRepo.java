@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface IUserCourseRepo extends JpaRepository<UserCourseAccess, Integer> {
+public interface IUserCourseRepo extends JpaRepository<UserCourseAccess, Long> {
     // Obtener accesos a cursos por usuario
     List<UserCourseAccess> findByUserProfile_UserId(Long userId);
 

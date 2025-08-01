@@ -13,7 +13,7 @@ import jakarta.persistence.*;
 public class UserCourseAccess {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ucaccess_seq")
-    private int accessId;
+    private Long accessId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

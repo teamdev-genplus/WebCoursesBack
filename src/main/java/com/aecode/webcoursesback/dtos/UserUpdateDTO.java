@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Builder
 public class UserUpdateDTO {
     private Long userId;
+    private String clerkId;
     private String fullname;
     private String email;
     private String password;

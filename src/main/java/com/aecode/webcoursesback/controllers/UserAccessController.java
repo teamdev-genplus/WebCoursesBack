@@ -88,32 +88,37 @@ public class UserAccessController {
      * Otorgar acceso completo a un curso al usuario (incluye todos los módulos).
      */
     @PostMapping("/courses/access")
-    public ResponseEntity<UserCourseAccess> grantCourseAccess(
+    public ResponseEntity<UserCourseDTO> grantCourseAccess(
             @RequestParam String clerkId,
             @RequestParam Long courseId
     ) {
-        return ResponseEntity.ok(userAccessService.grantCourseAccess(clerkId, courseId));
+        UserCourseDTO result = userAccessService.grantCourseAccess(clerkId, courseId);
+        return ResponseEntity.ok(result);
     }
 
     /**
      * Otorgar acceso individual a un módulo al usuario.
      */
     @PostMapping("/modules/access")
-    public ResponseEntity<UserModuleAccess> grantModuleAccess(
+    public ResponseEntity<UserModuleDTO> grantModuleAccess(
             @RequestParam String clerkId,
             @RequestParam Long moduleId
     ) {
-        return ResponseEntity.ok(userAccessService.grantModuleAccess(clerkId, moduleId));
+        UserModuleDTO result = userAccessService.grantModuleAccess(clerkId, moduleId);
+        return ResponseEntity.ok(result);
     }
 
     /**
      * Otorgar acceso a múltiples módulos al usuario (compra parcial).
      */
     @PostMapping("/modules/access/multiple")
-    public ResponseEntity<List<UserModuleAccess>> grantMultipleModules(
+    public ResponseEntity<List<UserModuleDTO>> grantMultipleModules(
             @RequestParam String clerkId,
             @RequestBody List<Long> moduleIds
     ) {
+        if (moduleIds == null || moduleIds.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
         return ResponseEntity.ok(userAccessService.grantMultipleModuleAccess(clerkId, moduleIds));
     }
 

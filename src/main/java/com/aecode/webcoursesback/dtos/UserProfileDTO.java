@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class UserProfileDTO {
     private Long userId;
+    private String clerkId;
     private String fullname;
     private String email;
     private String passwordHash;

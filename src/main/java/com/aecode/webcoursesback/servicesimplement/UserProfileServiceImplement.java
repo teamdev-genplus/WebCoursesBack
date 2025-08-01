@@ -116,6 +116,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
             UserDetail detail = udR.findByClerkId(user.getClerkId());
             return UserUpdateDTO.builder()
                     .userId(user.getUserId())
+                    .clerkId(user.getClerkId())
                     .fullname(user.getFullname())
                     .email(user.getEmail())
                     .password(user.getPasswordHash())
@@ -144,6 +145,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
 
         return UserUpdateDTO.builder()
                 .userId(user.getUserId())
+                .clerkId(user.getClerkId())
                 .fullname(user.getFullname())
                 .email(user.getEmail())
                 .password(user.getPasswordHash()) // Nunca se debe retornar la contraseña

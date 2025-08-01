@@ -33,34 +33,52 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
     // COMPRA: Dar acceso total a un curso y todos sus módulos
     @Override
-    public UserCourseAccess grantCourseAccess(String clerkId, Long courseId) {
-        UserProfile user = getUserByClerkId(clerkId);
+    public UserCourseDTO grantCourseAccess(String clerkId, Long courseId) {
+        UserProfile user = userProfileRepo.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with clerkId: " + clerkId));
+
         Course course = courseRepo.findById(courseId)
-                .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + courseId));
 
-        UserCourseAccess access = userCourseAccessRepo.save(
-                UserCourseAccess.builder().userProfile(user).course(course).completed(false).build()
-        );
+        UserCourseAccess access = UserCourseAccess.builder()
+                .userProfile(user)
+                .course(course)
+                .completed(false)
+                .build();
 
-        List<Module> modules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
-        List<UserModuleAccess> moduleAccessList = modules.stream().map(module ->
-                UserModuleAccess.builder().userProfile(user).module(module).completed(false).build()
-        ).collect(Collectors.toList());
+        UserCourseAccess savedAccess = userCourseAccessRepo.save(access);
 
-        userModuleAccessRepo.saveAll(moduleAccessList);
-        return access;
+        return UserCourseDTO.builder()
+                .accessId((long) savedAccess.getAccessId())
+                .clerkId(clerkId)
+                .courseId(courseId)
+                .completed(savedAccess.isCompleted())
+                .build();
     }
 
     // COMPRA: Dar acceso individual a un módulo
     @Override
-    public UserModuleAccess grantModuleAccess(String clerkId, Long moduleId) {
-        UserProfile user = getUserByClerkId(clerkId);
-        Module module = moduleRepo.findById(moduleId)
-                .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
+    public UserModuleDTO  grantModuleAccess(String clerkId, Long moduleId) {
+        UserProfile user = userProfileRepo.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with clerkId: " + clerkId));
 
-        return userModuleAccessRepo.save(
-                UserModuleAccess.builder().userProfile(user).module(module).completed(false).build()
-        );
+        Module module = moduleRepo.findById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Module not found with ID: " + moduleId));
+
+        UserModuleAccess access = UserModuleAccess.builder()
+                .userProfile(user)
+                .module(module)
+                .completed(false)
+                .build();
+
+        UserModuleAccess savedAccess = userModuleAccessRepo.save(access);
+
+        return UserModuleDTO.builder()
+                .accessId((long) savedAccess.getAccessId())
+                .clerkId(clerkId)
+                .moduleId(moduleId)
+                .completed(savedAccess.isCompleted())
+                .build();
     }
 
     // PERFIL: Obtener los cursos accesibles desde "Mis cursos"
@@ -177,14 +195,27 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
     // COMPRA MASIVA: Dar acceso a múltiples módulos
     @Override
-    public List<UserModuleAccess> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds) {
+    public List<UserModuleDTO> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds) {
         UserProfile user = getUserByClerkId(clerkId);
-        List<Module> modules = moduleRepo.findAllById(moduleIds);
-        List<UserModuleAccess> accessList = modules.stream().map(m ->
-                UserModuleAccess.builder().userProfile(user).module(m).completed(false).build()
-        ).collect(Collectors.toList());
 
-        return userModuleAccessRepo.saveAll(accessList);
+        List<Module> modules = moduleRepo.findAllById(moduleIds);
+
+        List<UserModuleAccess> accessList = modules.stream().map(m ->
+                UserModuleAccess.builder()
+                        .userProfile(user)
+                        .module(m)
+                        .completed(false)
+                        .build()
+        ).toList();
+
+        List<UserModuleAccess> saved = userModuleAccessRepo.saveAll(accessList);
+
+        return saved.stream().map(access -> UserModuleDTO.builder()
+                .accessId((long) access.getAccessId())
+                .clerkId(clerkId)
+                .moduleId(access.getModule().getModuleId())
+                .completed(access.isCompleted())
+                .build()).toList();
     }
 
     // ADMIN/USER: Obtener módulos con acceso por usuario
