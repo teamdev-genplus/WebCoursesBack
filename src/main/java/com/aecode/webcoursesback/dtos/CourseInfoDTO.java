@@ -18,4 +18,5 @@ public class CourseInfoDTO {
     private String highlightImage;
     private String urlnamecourse;
     private String type;
+    private Double fullprice;
 }

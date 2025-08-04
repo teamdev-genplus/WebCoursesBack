@@ -85,6 +85,7 @@ public class ModuleServiceImp implements IModuleService {
                 .highlightImage(course.getHighlightImage())
                 .urlnamecourse(course.getUrlnamecourse())
                 .type(course.getType())
+                .fullprice(course.getFullprice())
                 .build();
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);

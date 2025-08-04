@@ -56,6 +56,13 @@ public class Course{
     @Column
     private Integer orderNumber;
 
+    //New Attribut
+    @Column
+    private Double fullprice;
+
+    @Column
+    private Integer cantModules;
+
     @Column
     private Integer cantModOrHours; //para card
 
