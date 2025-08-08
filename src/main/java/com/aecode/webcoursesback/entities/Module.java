@@ -52,7 +52,7 @@ public class Module extends BaseProduct{
     @Column
     private String descriptionStudyplan;
 
-    //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULO
+    //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULOBBBBBBBBBBBBBBBBBBBB
     @Column(length = 255)
     private String dmaterial;
 
