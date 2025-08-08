@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface UserChatKeyRepository extends JpaRepository<UserChatKey, Long> {
     Optional<UserChatKey> findByClerkId(String clerkId);
     void deleteByClerkId(String clerkId);
+    boolean existsByClerkId(String clerkId);
 }

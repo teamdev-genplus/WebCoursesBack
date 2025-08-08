@@ -13,8 +13,9 @@ public class UserChatKeyController {
     private final UserChatKeyService service;
 
     @PostMapping
-    public ResponseEntity<UserChatKeyDTO> save(@RequestBody UserChatKeyDTO dto) {
-        return ResponseEntity.ok(service.saveChatKey(dto));
+    public ResponseEntity<String> save(@RequestBody UserChatKeyDTO dto) {
+        service.saveChatKey(dto);
+        return ResponseEntity.ok("Chat key registrada correctamente");
     }
 
     @GetMapping("/{clerkId}")
@@ -28,8 +29,8 @@ public class UserChatKeyController {
     }
 
     @DeleteMapping("/{clerkId}")
-    public ResponseEntity<Void> delete(@PathVariable String clerkId) {
+    public ResponseEntity<String> delete(@PathVariable String clerkId) {
         service.deleteChatKey(clerkId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Chat key eliminada correctamente");
     }
 }
