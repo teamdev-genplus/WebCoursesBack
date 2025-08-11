@@ -78,10 +78,6 @@ public class Module extends BaseProduct{
     private List<StudyPlan> studyPlans= new ArrayList<>();
 
     @Builder.Default
-    @ManyToMany(mappedBy = "module")
-    private List<Coupon> coupons = new ArrayList<>();
-
-    @Builder.Default
     @ManyToMany
     @JoinTable(name = "module_freqquests",
             joinColumns = @JoinColumn(name = "module_id"),
