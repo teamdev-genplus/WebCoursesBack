@@ -1,4 +1,5 @@
 package com.aecode.webcoursesback.entities;
+import com.aecode.webcoursesback.entities.Coupon.Coupon;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;

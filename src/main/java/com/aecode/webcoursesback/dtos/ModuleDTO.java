@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.dtos;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.aecode.webcoursesback.dtos.Coupon.CouponApplyRequestDTO;
 import lombok.*;
 import java.time.LocalDate;
 
@@ -49,7 +51,7 @@ public class ModuleDTO {
     @Builder.Default
     private List<StudyPlanDTO> studyPlans = new ArrayList<>();
     @Builder.Default
-    private List<CouponDTO> coupons = new ArrayList<>();
+    private List<CouponApplyRequestDTO> coupons = new ArrayList<>();
     @Builder.Default
     private List<FreqQuestDTO> freqquests = new ArrayList<>();
     @Builder.Default
