@@ -59,6 +59,8 @@ public class Course{
     //New Attribut
     @Column
     private Double fullprice;
+    @Column
+    private Double pricewithdiscount;
 
     @Column
     private Integer cantModules;

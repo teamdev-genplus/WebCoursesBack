@@ -86,6 +86,7 @@ public class ModuleServiceImp implements IModuleService {
                 .urlnamecourse(course.getUrlnamecourse())
                 .type(course.getType())
                 .fullprice(course.getFullprice())
+                .pricewithdiscount(course.getPricewithdiscount())
                 .build();
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);
