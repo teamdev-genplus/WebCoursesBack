@@ -8,16 +8,16 @@ import com.aecode.webcoursesback.entities.Course;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRedemptionRepository;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRepository;
 import com.aecode.webcoursesback.repositories.ICourseRepo;
+import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.ICouponService;
-import com.google.api.gax.rpc.NotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ValidationException;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +25,22 @@ public class CouponServiceImpl implements ICouponService {
     private final CouponRepository couponRepository;
     private final CouponRedemptionRepository redemptionRepository;
     private final ICourseRepo courseRepository;
+    private final IUserProfileRepository userProfileRepository;
 
     @Override
     @Transactional
     public CouponApplyResponseDTO applyCoupon(CouponApplyRequestDTO request) {
+        if (!userProfileRepository.existsByClerkId(request.getClerkId())) {
+            throw new EntityNotFoundException("Usuario con clerkId '" + request.getClerkId() + "' no encontrado");
+        }
+
+
+        //Si ingresan un cupón que no existe, lanza una excepcion
         Coupon coupon = couponRepository.findByCode(request.getCouponCode())
-                .orElseThrow(() -> new EntityNotFoundException("Cupón no encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("El cupón ingresado no es válido"));
 
         LocalDate today = LocalDate.now();
+
 
         // Suponiendo que usageCount y usageLimit son no nulos (Integer), revisamos límites:
         if (coupon.getUsageLimit() != null && coupon.getUsageCount() != null && coupon.getUsageCount() >= coupon.getUsageLimit()) {
@@ -44,8 +52,19 @@ public class CouponServiceImpl implements ICouponService {
             throw new IllegalArgumentException("El cupón no está activo");
         }
 
-        if (today.isBefore(coupon.getStartDate()) || today.isAfter(coupon.getEndDate())) {
-            throw new IllegalArgumentException("El cupón no está dentro de su rango de validez");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy", new Locale("es", "ES"));
+
+        if (today.isBefore(coupon.getStartDate())) {
+            throw new IllegalArgumentException(
+                    "Este cupón no es válido hasta el " + coupon.getStartDate().format(formatter)
+            );
+        }
+
+        if (today.isAfter(coupon.getEndDate())) {
+            throw new IllegalArgumentException(
+                    "Este cupón expiró el " + coupon.getEndDate().format(formatter)
+            );
         }
 
         if (Boolean.TRUE.equals(coupon.getSingleUsePerUser())) {
@@ -92,6 +111,6 @@ public class CouponServiceImpl implements ICouponService {
             redemptionRepository.save(redemption);
         }
 
-        return new CouponApplyResponseDTO(originalPrice, discount, finalPrice, true, "Cupón aplicado con éxito");
+        return new CouponApplyResponseDTO(originalPrice, discount, finalPrice, true, "¡Cupón aplicado exitosaente!");
     }
 }
