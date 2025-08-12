@@ -52,6 +52,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
 
             List<Module> allModules = course.getModules();
 
+
             List<ModuleCartDTO> moduleDTOs = allModules.stream()
                     .map(module -> {
                         boolean selected = items.stream()
@@ -67,12 +68,16 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                     })
                     .collect(Collectors.toList());
 
+            //calcular descuento de curso fullprice - pricewithdiscount
+            double descuento= course.getFullprice()-course.getPricewithdiscount();
+
             CourseCartDTO courseDTO = CourseCartDTO.builder()
                     .courseId(course.getCourseId())
                     .principalImage(course.getPrincipalImage())
                     .title(course.getTitle())
                     .cantTotalHours(course.getCantTotalHours())
-                    .fullprice(course.getFullprice())
+                    .dicount(descuento)
+                    .pricewithdiscount(course.getPricewithdiscount())
                     .modules(moduleDTOs)
                     .build();
 
