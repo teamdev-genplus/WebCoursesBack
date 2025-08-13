@@ -15,7 +15,7 @@ public class CourseCartDTO {
     private String principalImage;
     private String title;
     private Integer cantTotalHours;
-    private double dicount;
+    private double discount;
     private double pricewithdiscount;
     private List<ModuleCartDTO> modules;
 }

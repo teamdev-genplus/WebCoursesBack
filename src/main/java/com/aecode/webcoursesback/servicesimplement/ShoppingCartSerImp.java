@@ -76,7 +76,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                     .principalImage(course.getPrincipalImage())
                     .title(course.getTitle())
                     .cantTotalHours(course.getCantTotalHours())
-                    .dicount(descuento)
+                    .discount(descuento)
                     .pricewithdiscount(course.getPricewithdiscount())
                     .modules(moduleDTOs)
                     .build();

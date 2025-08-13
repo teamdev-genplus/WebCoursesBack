@@ -44,7 +44,7 @@ public class Coupon {
 
     // Contador de usos actual
     @Column(nullable = false)
-    private Integer usageCount;
+    private Integer usageCount = 0;
 
     // Si true, un usuario solo puede usar el cupón una vez
     @Column(nullable = false)
