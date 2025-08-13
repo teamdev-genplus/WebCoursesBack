@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +16,5 @@ public class CouponValidateResponseDTO {
     private Double discountAmount;
     private Boolean couponValid;
     private String message;
-    private Long courseId;
+    private List<Long> applicableCourseIds;
 }

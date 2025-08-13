@@ -159,12 +159,21 @@ public class CouponServiceImpl implements ICouponService {
                     .build();
         }
 
+        // Si es específico de curso, convertir las entidades a IDs
+        List<Long> courseIds = null;
+        if (Boolean.TRUE.equals(coupon.getCourseSpecific()) && coupon.getApplicableCourses() != null) {
+            courseIds = coupon.getApplicableCourses().stream()
+                    .map(Course::getCourseId) // O el nombre del método de ID en tu entidad Course
+                    .toList();
+        }
+
         return CouponValidateResponseDTO.builder()
                 .couponCode(coupon.getCode())
                 .discountPercentage(coupon.getDiscountPercentage())
                 .discountAmount(coupon.getDiscountAmount())
                 .couponValid(true)
                 .message("¡Cupón aplicado exitosamente!")
+                .applicableCourseIds(courseIds)
                 .build();
     }
     @Override
