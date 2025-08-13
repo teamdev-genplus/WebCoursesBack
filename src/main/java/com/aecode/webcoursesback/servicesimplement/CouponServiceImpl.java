@@ -185,6 +185,7 @@ public class CouponServiceImpl implements ICouponService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .usageLimit(request.getUsageLimit())
+                .usageCount(0)
                 .singleUsePerUser(request.getSingleUsePerUser())
                 .courseSpecific(request.getCourseSpecific())
                 .active(request.getActive() != null ? request.getActive() : true)
