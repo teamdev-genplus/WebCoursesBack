@@ -14,4 +14,5 @@ public class CouponValidateResponseDTO {
     private Double discountAmount;
     private Boolean couponValid;
     private String message;
+    private Long courseId;
 }
