@@ -25,6 +25,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Autowired private ICourseRepo courseRepo;
     @Autowired private IModuleRepo moduleRepo;
     @Autowired private ModelMapper modelMapper;
+    @Autowired
+    private IShoppingCartRepo shoppingCartRepo;
+
 
     private UserProfile getUserByClerkId(String clerkId) {
         return userProfileRepo.findByClerkId(clerkId)
@@ -231,6 +234,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
         ).toList();
 
         List<UserModuleAccess> saved = userModuleAccessRepo.saveAll(accessList);
+
+        // 4. BORRAR del carrito los módulos comprados
+        shoppingCartRepo.deleteByUserProfile_ClerkIdAndModule_ModuleIdIn(clerkId, moduleIds);
 
         return saved.stream().map(access -> UserModuleDTO.builder()
                 .accessId((long) access.getAccessId())
