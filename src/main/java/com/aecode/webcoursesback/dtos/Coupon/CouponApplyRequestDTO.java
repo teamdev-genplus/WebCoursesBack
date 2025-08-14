@@ -13,4 +13,5 @@ public class CouponApplyRequestDTO {
     private String clerkId;
     private Long courseId;
     private String couponCode;
+
 }
