@@ -139,6 +139,32 @@ public class ShoppingCartSerImp implements IShoppingCartService{
     }
 
     @Override
+    @Transactional
+    public void removeCartItemByClerkIdAndModuleId(String clerkId, Long moduleId) {
+        // Validar existencia de usuario
+        boolean userExists = upR.existsByClerkId(clerkId);
+        if (!userExists) {
+            throw new EntityNotFoundException("No existe un usuario con clerkId: " + clerkId);
+        }
+
+        // Validar existencia de módulo
+        boolean moduleExists = mR.existsById(moduleId);
+        if (!moduleExists) {
+            throw new EntityNotFoundException("No existe un módulo con id: " + moduleId);
+        }
+
+        // Validar que el item esté en el carrito
+        Optional<ShoppingCart> cartItem = scR.findByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
+        if (cartItem.isEmpty()) {
+            throw new EntityNotFoundException("No se encontró el módulo con id " + moduleId + " en el carrito del usuario " + clerkId);
+        }
+
+        // Eliminar
+        scR.delete(cartItem.get());
+    }
+
+
+    @Override
     public void addModulesToCart(String clerkId, List<Long> moduleIds) {
         UserProfile user = upR.findByClerkId(clerkId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with clerkId: " + clerkId));

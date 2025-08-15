@@ -12,6 +12,8 @@ public interface IShoppingCartService {
 
     void removeCartItemById(Long cartId);
 
+    void removeCartItemByClerkIdAndModuleId(String clerkId, Long moduleId);
+
     void removeAllModulesFromCourse(String clerkId, Long courseId);
 
     void addModulesToCart(String clerkId, List<Long> moduleIds);

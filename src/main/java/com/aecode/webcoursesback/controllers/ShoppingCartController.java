@@ -48,6 +48,15 @@ public class ShoppingCartController {
         return ResponseEntity.noContent().build();
     }
 
+
+    // Eliminar un módulo específico del carrito de un usuario
+    @DeleteMapping("/{clerkId}/modules/{moduleId}")
+    public ResponseEntity<Void> removeCartItem(@PathVariable String clerkId, @PathVariable Long moduleId) {
+        scS.removeCartItemByClerkIdAndModuleId(clerkId, moduleId);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @PostMapping("/{clerkId}/modules")
     public ResponseEntity<Void> addModulesToCart(@PathVariable String clerkId, @RequestBody List<Long> moduleIds) {
         scS.addModulesToCart(clerkId, moduleIds);
