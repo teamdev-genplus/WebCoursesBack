@@ -4,14 +4,17 @@ import com.aecode.webcoursesback.dtos.Coupon.*;
 import com.aecode.webcoursesback.entities.Coupon.Coupon;
 import com.aecode.webcoursesback.entities.Coupon.CouponRedemption;
 import com.aecode.webcoursesback.entities.Course;
+import com.aecode.webcoursesback.entities.ShoppingCart;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRedemptionRepository;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRepository;
 import com.aecode.webcoursesback.repositories.ICourseRepo;
+import com.aecode.webcoursesback.repositories.IShoppingCartRepo;
 import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.ICouponService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +30,8 @@ public class CouponServiceImpl implements ICouponService {
     private final CouponRedemptionRepository redemptionRepository;
     private final ICourseRepo courseRepository;
     private final IUserProfileRepository userProfileRepository;
+    @Autowired
+    private IShoppingCartRepo shoppingCartRepo;
 
     @Override
     @Transactional
@@ -122,10 +127,9 @@ public class CouponServiceImpl implements ICouponService {
                 .orElseThrow(() -> new EntityNotFoundException("El cupón ingresado no es válido"));
 
         LocalDate today = LocalDate.now();
-
-        // Formato de fecha en español
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy", new Locale("es", "ES"));
 
+        // Validaciones actuales...
         if (coupon.getActive() != null && !coupon.getActive()) {
             return CouponValidateResponseDTO.builder()
                     .couponCode(coupon.getCode())
@@ -159,12 +163,33 @@ public class CouponServiceImpl implements ICouponService {
                     .build();
         }
 
-        // Si es específico de curso, convertir las entidades a IDs
-        List<Long> courseIds = null;
+        // Validación contra el carrito si es específico de curso
+        List<Long> applicableCourseIds = null;
         if (Boolean.TRUE.equals(coupon.getCourseSpecific()) && coupon.getApplicableCourses() != null) {
-            courseIds = coupon.getApplicableCourses().stream()
-                    .map(Course::getCourseId) // O el nombre del método de ID en tu entidad Course
+            applicableCourseIds = coupon.getApplicableCourses().stream()
+                    .map(Course::getCourseId)
                     .toList();
+
+            // Obtener carrito del usuario
+            List<ShoppingCart> cartItems = shoppingCartRepo.findByUserProfile_clerkId(request.getClerkId());
+
+            // Extraer courseIds desde los módulos del carrito
+            List<Long> cartCourseIds = cartItems.stream()
+                    .map(item -> item.getModule().getCourse().getCourseId())
+                    .distinct()
+                    .toList();
+
+            // Validar si hay intersección
+            boolean hayCoincidencia = cartCourseIds.stream()
+                    .anyMatch(applicableCourseIds::contains);
+
+            if (!hayCoincidencia) {
+                return CouponValidateResponseDTO.builder()
+                        .couponCode(coupon.getCode())
+                        .couponValid(false)
+                        .message("El cupón no aplica a ningún curso de tu carrito")
+                        .build();
+            }
         }
 
         return CouponValidateResponseDTO.builder()
@@ -173,9 +198,10 @@ public class CouponServiceImpl implements ICouponService {
                 .discountAmount(coupon.getDiscountAmount())
                 .couponValid(true)
                 .message("¡Cupón aplicado exitosamente!")
-                .applicableCourseIds(courseIds)
+                .applicableCourseIds(applicableCourseIds)
                 .build();
     }
+
     @Override
     public List<CouponResponseDTO> getAllCoupons() {
         return couponRepository.findAll().stream()

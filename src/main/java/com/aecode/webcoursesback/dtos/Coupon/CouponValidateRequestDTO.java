@@ -7,4 +7,5 @@ import lombok.*;
 @Builder
 public class CouponValidateRequestDTO {
     private String couponCode;
+    private String clerkId;
 }
