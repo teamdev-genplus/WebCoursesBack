@@ -70,7 +70,6 @@ public class ShoppingCartSerImp implements IShoppingCartService{
 
             //calcular descuento de curso fullprice - pricewithdiscount
             double descuento= course.getFullprice()-course.getPricewithdiscount();
-            double porcentaje= (descuento/course.getFullprice())*100;
 
             CourseCartDTO courseDTO = CourseCartDTO.builder()
                     .courseId(course.getCourseId())
@@ -78,7 +77,7 @@ public class ShoppingCartSerImp implements IShoppingCartService{
                     .title(course.getTitle())
                     .cantTotalHours(course.getCantTotalHours())
                     .discount(descuento)
-                    .discountInPercentage(porcentaje)
+                    .discountPercentage(course.getDiscountPercentage())
                     .pricewithdiscount(course.getPricewithdiscount())
                     .modules(moduleDTOs)
                     .build();

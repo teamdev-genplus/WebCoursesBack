@@ -50,6 +50,7 @@ public class Course{
     @Column(length = 255)
     private String principalImage;
 
+
     @Column
     private String type;
 
@@ -61,6 +62,9 @@ public class Course{
     private Double fullprice;
     @Column
     private Double pricewithdiscount;
+
+    @Column
+    private int discountPercentage;
 
     @Column
     private Integer cantModules;
