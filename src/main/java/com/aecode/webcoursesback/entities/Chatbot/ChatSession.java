@@ -19,8 +19,6 @@ public class ChatSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Si tienes relación con UserProfile y quieres FK fuerte,
-    // puedes reemplazar por ManyToOne a UserProfile y usar join.
     @Column(name = "clerk_id", nullable = false)
     private String clerkId;
 

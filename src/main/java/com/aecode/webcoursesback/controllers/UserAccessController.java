@@ -4,7 +4,11 @@ import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
 import com.aecode.webcoursesback.entities.UserCourseAccess;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
+import com.aecode.webcoursesback.entities.UserProfile;
+import com.aecode.webcoursesback.services.EmailSenderService;
 import com.aecode.webcoursesback.services.IUserAccessService;
+import com.aecode.webcoursesback.services.IUserProfileService;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -17,6 +21,8 @@ public class UserAccessController {
 
     @Autowired
     private IUserAccessService userAccessService;
+    private EmailSenderService emailSenderService;
+    private IUserProfileService pS;
 
     // ======================
     // ACCESO DEL USUARIO
@@ -135,4 +141,6 @@ public class UserAccessController {
                 ? ResponseEntity.ok("Módulo marcado como completado")
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
     }
+
+
 }
