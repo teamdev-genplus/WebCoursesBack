@@ -7,8 +7,10 @@ import com.aecode.webcoursesback.entities.UserFavorite;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.repositories.ICourseRepo;
 import com.aecode.webcoursesback.repositories.IUserFavoriteRepo;
+import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.IUserFavoriteService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,29 +26,38 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
 
     @Autowired
     private IUserFavoriteRepo userFavoriteRepo;
+    @Autowired
+    private IUserProfileRepository userProfileRepo;
 
     @Autowired
     private ICourseRepo courseRepo;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-
     @Override
+    @Transactional
     public void addFavorite(String clerkId, Long courseId) {
-        Optional<UserFavorite> existing = userFavoriteRepo.findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
-        if (existing.isEmpty()) {
-            UserProfile user = new UserProfile();
-            user.setClerkId(clerkId);
-            Course course = courseRepo.findById(courseId)
-                    .orElseThrow(() -> new EntityNotFoundException("Course not found"));
-            UserFavorite favorite = UserFavorite.builder()
-                    .userProfile(user)
-                    .course(course)
-                    .build();
-            userFavoriteRepo.save(favorite);
+        // 1) Evitar duplicado por clerkId + courseId
+        Optional<UserFavorite> existing = userFavoriteRepo
+                .findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
+        if (existing.isPresent()) {
+            return; // ya existe, no hacemos nada
         }
+
+        // 2) Cargar ENTIDADES MANAGED desde BD
+        UserProfile user = userProfileRepo.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("UserProfile no encontrado por clerkId: " + clerkId));
+
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course no encontrado id: " + courseId));
+
+        // 3) Construir favorito con entidades managed y guardar
+        UserFavorite favorite = UserFavorite.builder()
+                .userProfile(user)  // ENTIDAD MANAGED, con ID
+                .course(course)     // ENTIDAD MANAGED, con ID
+                .build();
+
+        userFavoriteRepo.save(favorite);
     }
+
 
     @Override
     public void removeFavorite(String clerkId, Long courseId) {
