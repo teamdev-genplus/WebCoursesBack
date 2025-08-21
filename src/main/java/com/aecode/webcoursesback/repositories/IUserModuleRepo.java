@@ -23,5 +23,9 @@ public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Long> {
 
     Optional<UserModuleAccess> findByUserProfile_ClerkIdAndModule_ModuleId(String clerkId, Long moduleId);
 
+    @Query("SELECT new com.aecode.webcoursesback.dtos.UserModuleDTO(" +
+            "uma.accessId, uma.userProfile.clerkId, uma.module.moduleId, uma.completed) " +
+            "FROM UserModuleAccess uma")
+    List<UserModuleDTO> findAllUserModuleDTOs();
 
 }
