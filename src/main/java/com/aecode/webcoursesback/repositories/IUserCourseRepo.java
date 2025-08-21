@@ -13,11 +13,6 @@ import java.util.List;
 
 @Repository
 public interface IUserCourseRepo extends JpaRepository<UserCourseAccess, Long> {
-    // Obtener accesos a cursos por usuario
-    List<UserCourseAccess> findByUserProfile_UserId(Long userId);
-
-    // Verificar si usuario tiene acceso completo a un curso
-    boolean existsByUserProfile_UserIdAndCourse_CourseId(Long userId, Long courseId);
 
     @Query("SELECT new com.aecode.webcoursesback.dtos.UserCourseDTO(uca.accessId, uca.userProfile.clerkId, uca.course.courseId, uca.completed) FROM UserCourseAccess uca")
     List<UserCourseDTO> findAllUserCourseDTOs();

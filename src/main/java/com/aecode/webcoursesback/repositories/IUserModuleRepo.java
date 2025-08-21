@@ -13,20 +13,6 @@ import java.util.Optional;
 @Repository
 public interface IUserModuleRepo extends JpaRepository<UserModuleAccess, Long> {
 
-    // Obtener módulos accesibles de un curso para un usuario
-    @Query("SELECT uma.module FROM UserModuleAccess uma WHERE uma.userProfile.userId = :userId AND uma.module.course.courseId = :courseId")
-    List<Module> findModulesByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
-
-    // Verificar si usuario tiene acceso a un módulo específico
-    boolean existsByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
-
-    @Query("SELECT new com.aecode.webcoursesback.dtos.UserModuleDTO(uma.accessId, uma.userProfile.clerkId, uma.module.moduleId, uma.completed) FROM UserModuleAccess uma")
-    List<UserModuleDTO> findAllUserModuleDTOs();
-
-
-    Optional<UserModuleAccess> findByUserProfile_UserIdAndModule_ModuleId(Long userId, Long moduleId);
-
-
     //NUEVO PARA CLERK
     List<UserModuleAccess> findByUserProfile_ClerkId(String clerkId);
 
