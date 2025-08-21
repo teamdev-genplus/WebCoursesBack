@@ -81,7 +81,7 @@ public class CourseServiceImp implements ICourseService {
             return Page.empty(pageable);
         }
 
-        return cR.findByTypeAndMode(mode, type, pageable).map(this::mapToCourseCardDTO);
+        return cR.findByTypeAndMode(type, mode, pageable).map(this::mapToCourseCardDTO);
     }
 
     @Override

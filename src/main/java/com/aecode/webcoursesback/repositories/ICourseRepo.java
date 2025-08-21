@@ -39,7 +39,7 @@ public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificatio
     Page<Course> findDistinctByTypeAndModulesTagsIn(@Param("type") String type, @Param("tagIds") List<Long> tagIds, Pageable pageable);
 
     // ✅ Nuevo: Buscar por type y modo
-    Page<Course> findByTypeAndMode(Course.Mode mode, String type, Pageable pageable);
+    Page<Course> findByTypeAndMode(String type, Course.Mode mode, Pageable p);
 
     // ✅ Nuevo: Buscar por type y rango de duración
     Page<Course> findByTypeAndCantTotalHoursBetween(String type, Integer minHours, Integer maxHours, Pageable pageable);
