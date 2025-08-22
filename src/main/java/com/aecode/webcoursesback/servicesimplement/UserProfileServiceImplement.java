@@ -162,48 +162,65 @@ public class UserProfileServiceImplement implements IUserProfileService {
 
     @Override
     public MyProfileDTO getMyProfile(String clerkId) {
-        UserProfile user = upR.findByClerkId(clerkId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        UserProfile user = upR.findByClerkId(clerkId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         UserDetail detail = udR.findByClerkId(clerkId);
 
         // ===================== INFO PERSONAL =====================
-        String fullname = user.getFullname();
-        String email = user.getEmail();
-        String phone = detail != null ? detail.getPhoneNumber() : null;
-        String education = detail != null ? detail.getEducation() : null;
-        String country = detail != null ? detail.getCountry() : null;
+        String fullname  = user.getFullname();
+        String email     = user.getEmail();
+        String phone     = detail != null ? detail.getPhoneNumber() : null;
+        String education = detail != null ? detail.getEducation()    : null;
+        String country   = detail != null ? detail.getCountry()      : null;
         LocalDate birthdate = detail != null ? detail.getBirthdate() : null;
 
         // ===================== PROGRESO =====================
-        List<UserModuleAccess> userModules = userModuleAccessRepo
-                .findByUserProfile_ClerkId(clerkId)
-                .stream()
+        // Solo módulos COMPLETADOS
+        List<UserModuleAccess> completedUMAs = userModuleAccessRepo
+                .findByUserProfile_ClerkId(clerkId).stream()
                 .filter(UserModuleAccess::isCompleted)
                 .collect(Collectors.toList());
 
+        // Agrupar por curso (solo de los módulos completados)
+        Map<Long, List<com.aecode.webcoursesback.entities.Module>> courseToCompletedModules = new HashMap<>();
 
-        Set<Long> completedCourseIds = new HashSet<>();
-        Set<Long> inProgressCourseIds = new HashSet<>();
         int totalHours = 0;
 
-        Map<Long, List<com.aecode.webcoursesback.entities.Module>> courseModulesMap = new HashMap<>();
-
-        // Agrupar módulos por curso
-        for (UserModuleAccess uma : userModules) {
+        for (UserModuleAccess uma : completedUMAs) {
             com.aecode.webcoursesback.entities.Module module = uma.getModule();
-            Long courseId = module.getCourse().getCourseId();
-            courseModulesMap.computeIfAbsent(courseId, k -> new ArrayList<>()).add(module);
+            if (module == null || module.getCourse() == null) {
+                // Módulo sin curso asociado (posible por nullable=true): lo ignoramos en conteo de cursos
+                // pero si quisieras contar horas aunque no tenga curso, puedes sumar aquí igual:
+                totalHours += nvl(module != null ? module.getCantHours_asinc() : null)
+                        + nvl(module != null ? module.getCantHours_live()  : null);
+                continue;
+            }
 
-            // Sumar horas (asinc + live)
-            totalHours += (module.getCantHours_asinc() != null ? module.getCantHours_asinc() : 0)
-                    + (module.getCantHours_live() != null ? module.getCantHours_live() : 0);
+            Long courseId = module.getCourse().getCourseId();
+
+            courseToCompletedModules
+                    .computeIfAbsent(courseId, k -> new ArrayList<>())
+                    .add(module);
+
+            // Sumar horas de módulos completados
+            totalHours += nvl(module.getCantHours_asinc()) + nvl(module.getCantHours_live());
         }
 
-        for (Map.Entry<Long, List<com.aecode.webcoursesback.entities.Module>> entry : courseModulesMap.entrySet()) {
+        // Determinar cursos completados o en progreso
+        Set<Long> completedCourseIds  = new HashSet<>();
+        Set<Long> inProgressCourseIds = new HashSet<>();
+
+        for (Map.Entry<Long, List<com.aecode.webcoursesback.entities.Module>> entry : courseToCompletedModules.entrySet()) {
             Long courseId = entry.getKey();
             List<com.aecode.webcoursesback.entities.Module> completedModules = entry.getValue();
 
+            // Buscar TODOS los módulos del curso
             List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
-            if (completedModules.size() == allModules.size()) {
+
+            // Si el curso tiene 0 módulos (caso raro de data), lo tratamos como completado
+            int totalInCourse = allModules != null ? allModules.size() : 0;
+
+            if (totalInCourse == 0 || completedModules.size() == totalInCourse) {
                 completedCourseIds.add(courseId);
             } else {
                 inProgressCourseIds.add(courseId);
@@ -216,15 +233,23 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 .totalLearningHours(totalHours)
                 .build();
 
-        // ===================== SKILLS (tags de módulos) =====================
-        Set<MySkillsDTO> skillSet = new HashSet<>();
-        for (UserModuleAccess uma : userModules) {
-            List<Tag> tags = uma.getModule().getTags();
+        // ===================== SKILLS (sin duplicados) =====================
+        Set<Integer> seenTagIds = new HashSet<>();
+        List<MySkillsDTO> skills = new ArrayList<>();
+
+        for (UserModuleAccess uma : completedUMAs) {
+            com.aecode.webcoursesback.entities.Module m = uma.getModule();
+            if (m == null) continue;
+
+            List<Tag> tags = Optional.ofNullable(m.getTags()).orElse(Collections.emptyList());
             for (Tag tag : tags) {
-                skillSet.add(MySkillsDTO.builder()
-                        .tagId(tag.getTagId())
-                        .tagName(tag.getName())
-                        .build());
+                if (tag == null) continue;
+                if (seenTagIds.add(tag.getTagId())) {
+                    skills.add(MySkillsDTO.builder()
+                            .tagId(tag.getTagId())
+                            .tagName(tag.getName())
+                            .build());
+                }
             }
         }
 
@@ -237,7 +262,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
                         .build()
         ).toList();
 
-        // ===================== Construcción del DTO final =====================
+        // ===================== DTO Final =====================
         return MyProfileDTO.builder()
                 .fullname(fullname)
                 .email(email)
@@ -246,9 +271,14 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 .country(country)
                 .birthdate(birthdate)
                 .progress(progressDTO)
-                .skills(skillSet.stream().toList())
+                .skills(skills)
                 .certificates(certificateDTOs)
                 .build();
     }
+
+    // Helper para evitar NPE en sumas
+    private static int nvl(Integer v) { return v == null ? 0 : v; }
+
+
 
 }
