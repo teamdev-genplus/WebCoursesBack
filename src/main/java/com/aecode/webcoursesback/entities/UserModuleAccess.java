@@ -24,9 +24,10 @@ public class UserModuleAccess {
     private UserProfile userProfile;
 
     @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false)
+    @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
     @Column(name = "completed", nullable = false)
+    @Builder.Default
     private boolean completed = false;
 }
