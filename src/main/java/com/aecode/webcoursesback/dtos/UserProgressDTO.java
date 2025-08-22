@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UserProgressDTO {
-    private int completedCourses;
-    private int inProgressCourses;
-    private int totalLearningHours;
+    private int completedModules;    // módulos con completed = true
+    private int inProgressModules;   // módulos otorgados al usuario con completed = false
+    private int totalLearningHours;  // suma de horas (asinc + live) SOLO de módulos completados
 }

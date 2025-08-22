@@ -174,71 +174,41 @@ public class UserProfileServiceImplement implements IUserProfileService {
         String country   = detail != null ? detail.getCountry()      : null;
         LocalDate birthdate = detail != null ? detail.getBirthdate() : null;
 
-        // ===================== PROGRESO =====================
-        // Solo módulos COMPLETADOS
-        List<UserModuleAccess> completedUMAs = userModuleAccessRepo
-                .findByUserProfile_ClerkId(clerkId).stream()
-                .filter(UserModuleAccess::isCompleted)
-                .collect(Collectors.toList());
+        // ===================== PROGRESO (por MÓDULOS) =====================
+        // Trae TODOS los accesos del usuario (completados y no completados)
+        List<UserModuleAccess> allUMAs = userModuleAccessRepo.findByUserProfile_ClerkId(clerkId);
 
-        // Agrupar por curso (solo de los módulos completados)
-        Map<Long, List<com.aecode.webcoursesback.entities.Module>> courseToCompletedModules = new HashMap<>();
+        int completedModules = 0;
+        int inProgressModules = 0;
+        int totalLearningHours = 0;
 
-        int totalHours = 0;
-
-        for (UserModuleAccess uma : completedUMAs) {
-            com.aecode.webcoursesback.entities.Module module = uma.getModule();
-            if (module == null || module.getCourse() == null) {
-                // Módulo sin curso asociado (posible por nullable=true): lo ignoramos en conteo de cursos
-                // pero si quisieras contar horas aunque no tenga curso, puedes sumar aquí igual:
-                totalHours += nvl(module != null ? module.getCantHours_asinc() : null)
-                        + nvl(module != null ? module.getCantHours_live()  : null);
-                continue;
-            }
-
-            Long courseId = module.getCourse().getCourseId();
-
-            courseToCompletedModules
-                    .computeIfAbsent(courseId, k -> new ArrayList<>())
-                    .add(module);
-
-            // Sumar horas de módulos completados
-            totalHours += nvl(module.getCantHours_asinc()) + nvl(module.getCantHours_live());
-        }
-
-        // Determinar cursos completados o en progreso
-        Set<Long> completedCourseIds  = new HashSet<>();
-        Set<Long> inProgressCourseIds = new HashSet<>();
-
-        for (Map.Entry<Long, List<com.aecode.webcoursesback.entities.Module>> entry : courseToCompletedModules.entrySet()) {
-            Long courseId = entry.getKey();
-            List<com.aecode.webcoursesback.entities.Module> completedModules = entry.getValue();
-
-            // Buscar TODOS los módulos del curso
-            List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
-
-            // Si el curso tiene 0 módulos (caso raro de data), lo tratamos como completado
-            int totalInCourse = allModules != null ? allModules.size() : 0;
-
-            if (totalInCourse == 0 || completedModules.size() == totalInCourse) {
-                completedCourseIds.add(courseId);
+        for (UserModuleAccess uma : allUMAs) {
+            Module module = uma.getModule();
+            if (uma.isCompleted()) {
+                completedModules++;
+                // Sumar horas SOLO de módulos completados
+                if (module != null) {
+                    totalLearningHours += nvl(module.getCantHours_asinc()) + nvl(module.getCantHours_live());
+                }
             } else {
-                inProgressCourseIds.add(courseId);
+                inProgressModules++;
             }
         }
 
         UserProgressDTO progressDTO = UserProgressDTO.builder()
-                .completedCourses(completedCourseIds.size())
-                .inProgressCourses(inProgressCourseIds.size())
-                .totalLearningHours(totalHours)
+                .completedModules(completedModules)
+                .inProgressModules(inProgressModules)
+                .totalLearningHours(totalLearningHours)
                 .build();
 
-        // ===================== SKILLS (sin duplicados) =====================
+        // ===================== SKILLS (sin duplicados, SOLO de módulos completados) =====================
         Set<Integer> seenTagIds = new HashSet<>();
         List<MySkillsDTO> skills = new ArrayList<>();
 
-        for (UserModuleAccess uma : completedUMAs) {
-            com.aecode.webcoursesback.entities.Module m = uma.getModule();
+        for (UserModuleAccess uma : allUMAs) {
+            if (!uma.isCompleted()) continue; // skills solo si el módulo está completado
+
+            Module m = uma.getModule();
             if (m == null) continue;
 
             List<Tag> tags = Optional.ofNullable(m.getTags()).orElse(Collections.emptyList());
@@ -278,7 +248,6 @@ public class UserProfileServiceImplement implements IUserProfileService {
 
     // Helper para evitar NPE en sumas
     private static int nvl(Integer v) { return v == null ? 0 : v; }
-
 
 
 }

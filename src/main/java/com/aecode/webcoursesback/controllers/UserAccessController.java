@@ -124,23 +124,6 @@ public class UserAccessController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Otorgar acceso a múltiples módulos al usuario (compra parcial).
-     */
-    /*
-
-    @PostMapping("/modules/access/multiple")
-    public ResponseEntity<List<UserModuleDTO>> grantMultipleModules(
-            @RequestParam String clerkId,
-            @RequestBody List<Long> moduleIds
-    ) {
-        if (moduleIds == null || moduleIds.isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
-        return ResponseEntity.ok(userAccessService.grantMultipleModuleAccess(clerkId, moduleIds));
-    }
-
-    */
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //ADAPTAR ESTE ENVIO DE CORREOS DE UN ANTERIOR CONTROLLER Y ENDPOINT A grantMultipleModules
     @PostMapping("/modules/access/multiple")
