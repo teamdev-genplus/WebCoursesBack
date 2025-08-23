@@ -61,7 +61,8 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
 
     @Override
     public void removeFavorite(String clerkId, Long courseId) {
-        userFavoriteRepo.deleteByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
+        int rows = userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
+        if (rows == 0) throw new EntityNotFoundException("Favorite not found");
     }
 
     @Override
