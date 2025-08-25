@@ -112,31 +112,31 @@ public class CourseServiceImp implements ICourseService {
         return toCardPage(cR.findByTypeAndMode(type, mode, pageable), favs);
     }
 
-    // ----------------- Filtro por duración -----------------
+    // ----------------- Filtro por duración (sin favoritos) -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable) {
         Page<Course> courses = switch (range) {
-            case "1-4"  -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
-            case "4-10" -> cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
-            case "10-20"-> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
-            case "+20"  -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
-            default     -> cR.findByType(type, pageable);
+            case "1-9"   -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 9, pageable);
+            case "10-20" -> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
+            case "+20"   -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 21, pageable);
+            default      -> Page.empty(pageable); // Si llega un valor inesperado, devolver vacío
         };
         return toCardPage(courses, Collections.emptySet());
     }
 
+    // ----------------- Filtro por duración (con favoritos) -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, String clerkId, Pageable pageable) {
         Set<Long> favs = favoritesOf(clerkId);
         Page<Course> courses = switch (range) {
-            case "1-4"  -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
-            case "4-10" -> cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
-            case "10-20"-> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
-            case "+20"  -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
-            default     -> cR.findByType(type, pageable);
+            case "1-9"   -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 9, pageable);
+            case "10-20" -> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
+            case "+20"   -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 21, pageable);
+            default      -> Page.empty(pageable);
         };
         return toCardPage(courses, favs);
     }
+
 
     // ----------------- Filtro por tags -----------------
     @Override

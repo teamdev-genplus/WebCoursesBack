@@ -96,7 +96,7 @@ public class CourseController {
     @GetMapping("/cards/duration/by-type")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByDurationRangeAndType(
             @RequestParam String type,
-            @RequestParam String range,
+            @RequestParam String range, // valores permitidos: "1-9", "10-20", "+20"
             @RequestParam(required = false) String clerkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
@@ -106,6 +106,7 @@ public class CourseController {
         Page<CourseCardDTO> cardsPage = (clerkId == null || clerkId.isBlank())
                 ? cS.getCourseCardsByDurationRangeAndType(range, type, pageable)
                 : cS.getCourseCardsByDurationRangeAndType(range, type, clerkId, pageable);
+
         return ResponseEntity.ok(cardsPage);
     }
 
