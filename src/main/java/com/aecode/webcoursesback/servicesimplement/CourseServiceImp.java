@@ -4,6 +4,7 @@ import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.repositories.*;
 import com.aecode.webcoursesback.services.ICourseService;
+import com.aecode.webcoursesback.services.IUserFavoriteService;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,124 +12,148 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import java.util.List;
 
 @Service
 public class CourseServiceImp implements ICourseService {
-    @Autowired
-    private ICourseRepo cR;
+    @Autowired private ICourseRepo cR;
+    @Autowired private IUserFavoriteService favoriteService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Override
-    public List<Course> listAll() {
-        return cR.findAll();
+    // ----------------- utilidades -----------------
+    private Set<Long> favoritesOf(String clerkId) {
+        if (clerkId == null || clerkId.isBlank()) return Collections.emptySet();
+        return new HashSet<>(favoriteService.getFavoriteCourseIdsByUser(clerkId));
     }
 
-    @Override
-    public void delete(Long courseId) {
-        cR.deleteById(courseId);
+    private CourseCardDTO mapToCourseCardDTO(Course c, boolean favorite) {
+        return CourseCardDTO.builder()
+                .courseId(c.getCourseId())
+                .principalImage(c.getPrincipalImage())
+                .title(c.getTitle())
+                .orderNumber(c.getOrderNumber())
+                .type(c.getType())
+                .cantModOrHours(c.getCantModOrHours())
+                .mode(c.getMode())
+                .urlnamecourse(c.getUrlnamecourse())
+                .favorite(favorite)
+                .build();
     }
 
+    private Page<CourseCardDTO> toCardPage(Page<Course> page, Set<Long> favs) {
+        return page.map(c -> mapToCourseCardDTO(c, favs.contains(c.getCourseId())));
+    }
+
+    // ----------------- CRUD básicos -----------------
+    @Override public List<Course> listAll() { return cR.findAll(); }
+    @Override public void delete(Long courseId) { cR.deleteById(courseId); }
+
+    // ----------------- Cards sin favoritos (público) -----------------
     @Override
     public Page<CourseCardDTO> getAllCourseCards(Pageable pageable) {
-        Page<Course> courses = cR.findAll(pageable);
-        return courses.map(this::mapToCourseCardDTO);
+        return toCardPage(cR.findAll(pageable), Collections.emptySet());
     }
 
     @Override
     public Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable) {
-        Page<Course> coursesPage = cR.findByType(type, pageable);
-        return coursesPage.map(this::mapToCourseCardDTO);
+        return toCardPage(cR.findByType(type, pageable), Collections.emptySet());
+    }
+
+    // ----------------- Cards con favoritos (autenticado) -----------------
+    @Override
+    public Page<CourseCardDTO> getAllCourseCards(String clerkId, Pageable pageable) {
+        return toCardPage(cR.findAll(pageable), favoritesOf(clerkId));
     }
 
     @Override
+    public Page<CourseCardDTO> getCourseCardsByType(String type, String clerkId, Pageable pageable) {
+        return toCardPage(cR.findByType(type, pageable), favoritesOf(clerkId));
+    }
+
+    // ----------------- Destacados y búsquedas -----------------
+    @Override
     public List<HighlightedCourseDTO> getAllHighlightedCourses() {
-        List<Course> courses = cR.findByHighlightedTrueOrderByOrderNumberAsc();
-        return courses.stream()
-                .map(c -> new HighlightedCourseDTO(
-                        c.getCourseId(),
-                        c.getTitle(),
-                        c.getDescription(),
-                        c.getHighlightImage()
-                ))
+        return cR.findByHighlightedTrueOrderByOrderNumberAsc()
+                .stream()
+                .map(c -> new HighlightedCourseDTO(c.getCourseId(), c.getTitle(), c.getDescription(), c.getHighlightImage()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CourseCardDTO> findCoursesByTitle(String title) {
-        List<Course> courses = cR.findByTitleIgnoreCaseContaining(title);
-        return courses.stream()
-                .map(this::mapToCourseCardDTO)
+        return cR.findByTitleIgnoreCaseContaining(title).stream()
+                .map(c -> mapToCourseCardDTO(c, false))
                 .collect(Collectors.toList());
     }
 
-    //Implementación del filtro por modalidad
+    // ----------------- Filtros por modalidad -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByModeAndType(String modeStr, String type, Pageable pageable) {
         if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
-            return cR.findByType(type, pageable).map(this::mapToCourseCardDTO);
+            return toCardPage(cR.findByType(type, pageable), Collections.emptySet());
         }
-
         Course.Mode mode;
-        try {
-            mode = Course.Mode.valueOf(modeStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return Page.empty(pageable);
-        }
-
-        return cR.findByTypeAndMode(type, mode, pageable).map(this::mapToCourseCardDTO);
+        try { mode = Course.Mode.valueOf(modeStr.toUpperCase()); }
+        catch (IllegalArgumentException e) { return Page.empty(pageable); }
+        return toCardPage(cR.findByTypeAndMode(type, mode, pageable), Collections.emptySet());
     }
 
+    @Override
+    public Page<CourseCardDTO> getCourseCardsByModeAndType(String modeStr, String type, String clerkId, Pageable pageable) {
+        Set<Long> favs = favoritesOf(clerkId);
+        if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
+            return toCardPage(cR.findByType(type, pageable), favs);
+        }
+        Course.Mode mode;
+        try { mode = Course.Mode.valueOf(modeStr.toUpperCase()); }
+        catch (IllegalArgumentException e) { return Page.empty(pageable); }
+        return toCardPage(cR.findByTypeAndMode(type, mode, pageable), favs);
+    }
+
+    // ----------------- Filtro por duración -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable) {
-        Page<Course> courses;
-
-        switch (range) {
-            case "1-4":
-                courses = cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
-                break;
-            case "4-10":
-                courses = cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
-                break;
-            case "10-20":
-                courses = cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
-                break;
-            case "+20":
-                courses = cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
-                break;
-            default:
-                courses = cR.findByType(type, pageable);
-                break;
-        }
-
-        return courses.map(this::mapToCourseCardDTO);
+        Page<Course> courses = switch (range) {
+            case "1-4"  -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
+            case "4-10" -> cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
+            case "10-20"-> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
+            case "+20"  -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
+            default     -> cR.findByType(type, pageable);
+        };
+        return toCardPage(courses, Collections.emptySet());
     }
 
     @Override
+    public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, String clerkId, Pageable pageable) {
+        Set<Long> favs = favoritesOf(clerkId);
+        Page<Course> courses = switch (range) {
+            case "1-4"  -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 4, pageable);
+            case "4-10" -> cR.findByTypeAndCantTotalHoursBetween(type, 4, 10, pageable);
+            case "10-20"-> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
+            case "+20"  -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 20, pageable);
+            default     -> cR.findByType(type, pageable);
+        };
+        return toCardPage(courses, favs);
+    }
+
+    // ----------------- Filtro por tags -----------------
+    @Override
     public Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable) {
-        if (tagIds == null || tagIds.isEmpty()) {
-            return cR.findByType(type, pageable).map(this::mapToCourseCardDTO);
-        }
-        return cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable).map(this::mapToCourseCardDTO);
+        Page<Course> page = (tagIds == null || tagIds.isEmpty())
+                ? cR.findByType(type, pageable)
+                : cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable);
+        return toCardPage(page, Collections.emptySet());
     }
 
-    private CourseCardDTO mapToCourseCardDTO(Course c) {
-        return new CourseCardDTO(
-                c.getCourseId(),
-                c.getPrincipalImage(),
-                c.getTitle(),
-                c.getOrderNumber(),
-                c.getType(),
-                c.getCantModOrHours(),
-                c.getMode(),
-                c.getUrlnamecourse()
-        );
+    @Override
+    public Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, String clerkId, Pageable pageable) {
+        Set<Long> favs = favoritesOf(clerkId);
+        Page<Course> page = (tagIds == null || tagIds.isEmpty())
+                ? cR.findByType(type, pageable)
+                : cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable);
+        return toCardPage(page, favs);
     }
-
-
 }
+

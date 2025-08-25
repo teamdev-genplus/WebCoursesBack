@@ -50,4 +50,6 @@ public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificatio
     //Favoritos
     Page<Course> findByCourseIdInAndType(List<Long> courseIds, String type, Pageable pageable);
 
+
+
 }

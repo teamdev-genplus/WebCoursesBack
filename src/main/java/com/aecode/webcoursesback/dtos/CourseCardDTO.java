@@ -18,4 +18,7 @@ public class CourseCardDTO {
     private Integer cantModOrHours;
     private Course.Mode mode;
     private String urlnamecourse;
+
+    //NUEVO
+    private boolean favorite;
 }

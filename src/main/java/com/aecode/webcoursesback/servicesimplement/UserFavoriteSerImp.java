@@ -60,10 +60,12 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
 
 
     @Override
+    @Transactional
     public void removeFavorite(String clerkId, Long courseId) {
-        int rows = userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
-        if (rows == 0) throw new EntityNotFoundException("Favorite not found");
+        userFavoriteRepo.findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId)
+                .ifPresent(fav -> userFavoriteRepo.deleteById(fav.getFavoriteId()));
     }
+
 
     @Override
     public List<Long> getFavoriteCourseIdsByUser(String clerkId) {
@@ -80,16 +82,18 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
             return Page.empty(pageable);
         }
         Page<Course> courses = courseRepo.findByCourseIdInAndType(favoriteCourseIds, type, pageable);
-        return courses.map(course -> new CourseCardDTO(
-                course.getCourseId(),
-                course.getPrincipalImage(),
-                course.getTitle(),
-                course.getOrderNumber(),
-                course.getType(),
-                course.getCantModOrHours(),
-                course.getMode(),
-                course.getUrlnamecourse()
-        ));
+        return courses.map(course -> CourseCardDTO.builder()
+                .courseId(course.getCourseId())
+                .principalImage(course.getPrincipalImage())
+                .title(course.getTitle())
+                .orderNumber(course.getOrderNumber())
+                .type(course.getType())
+                .cantModOrHours(course.getCantModOrHours())
+                .mode(course.getMode())
+                .urlnamecourse(course.getUrlnamecourse())
+                .favorite(true)
+                .build()
+        );
     }
 
     @Override

@@ -13,25 +13,30 @@ public interface ICourseService {
     List<Course> listAll();
     void delete(Long courseId);
 
-    //Mostrar cards de todos los cursos
+    // (público) sin favoritos
     Page<CourseCardDTO> getAllCourseCards(Pageable pageable);
-    //MOSTRAR CARDS DE LOS CURSOS POR TIPO Y PAGINADOS
     Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable);
+
+    // (autenticado) con favoritos
+    Page<CourseCardDTO> getAllCourseCards(String clerkId, Pageable pageable);
+    Page<CourseCardDTO> getCourseCardsByType(String type, String clerkId, Pageable pageable);
+
+
+    ///////////////////////
+
 
     List<HighlightedCourseDTO> getAllHighlightedCourses();
 
     // Service: Servicio para listar cursos filtrados por título
     List<CourseCardDTO> findCoursesByTitle(String title);
 
-    //Servicio para obtener cards filtrados por modalidad
+    // Filtros (te propongo overloads con clerkId)
     Page<CourseCardDTO> getCourseCardsByModeAndType(String mode, String type, Pageable pageable);
+    Page<CourseCardDTO> getCourseCardsByModeAndType(String mode, String type, String clerkId, Pageable pageable);
 
-
-    //Servicio para obtener cards filtrados por rango de horas
     Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable);
+    Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, String clerkId, Pageable pageable);
 
-
-    //Servicio para obtener cards filtrados por tags
     Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable);
-
+    Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, String clerkId, Pageable pageable);
 }
