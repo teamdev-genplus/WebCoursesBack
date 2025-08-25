@@ -202,26 +202,35 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 .build();
 
         // ===================== SKILLS (sin duplicados, SOLO de módulos completados) =====================
-        Set<Integer> seenTagIds = new HashSet<>();
-        List<MySkillsDTO> skills = new ArrayList<>();
+        Map<Integer, MySkillsDTO> skillMap = new LinkedHashMap<>(); // mantiene orden de inserción
 
         for (UserModuleAccess uma : allUMAs) {
-            if (!uma.isCompleted()) continue; // skills solo si el módulo está completado
-
             Module m = uma.getModule();
             if (m == null) continue;
 
             List<Tag> tags = Optional.ofNullable(m.getTags()).orElse(Collections.emptyList());
             for (Tag tag : tags) {
                 if (tag == null) continue;
-                if (seenTagIds.add(tag.getTagId())) {
-                    skills.add(MySkillsDTO.builder()
+
+                MySkillsDTO current = skillMap.get(tag.getTagId());
+                if (current == null) {
+                    // primera vez que vemos este tag
+                    current = MySkillsDTO.builder()
                             .tagId(tag.getTagId())
                             .tagName(tag.getName())
-                            .build());
+                            .achieved(false) // por defecto
+                            .build();
+                    skillMap.put(tag.getTagId(), current);
+                }
+                // si este UMA está completado, esta skill queda lograda
+                if (uma.isCompleted()) {
+                    current.setAchieved(true);
                 }
             }
         }
+
+        // Si quieres devolver orden alfabético por nombre:
+        List<MySkillsDTO> skills = new ArrayList<>(skillMap.values());
 
         // ===================== CERTIFICADOS =====================
         List<UserCertificate> certs = userCertificateRepo.findByUserProfile_ClerkId(clerkId);

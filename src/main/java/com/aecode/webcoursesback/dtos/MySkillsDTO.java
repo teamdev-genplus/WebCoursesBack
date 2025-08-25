@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 public class MySkillsDTO {
     private int tagId;
     private String tagName;
+    // Nuevo: indica si el usuario ya "ganó" esta skill (terminó al menos un módulo que tenga este tag)
+    private boolean achieved;
 }
