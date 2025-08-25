@@ -232,14 +232,32 @@ public class UserProfileServiceImplement implements IUserProfileService {
         // Si quieres devolver orden alfabético por nombre:
         List<MySkillsDTO> skills = new ArrayList<>(skillMap.values());
 
-        // ===================== CERTIFICADOS =====================
-        List<UserCertificate> certs = userCertificateRepo.findByUserProfile_ClerkId(clerkId);
-        List<MyCertificateDTO> certificateDTOs = certs.stream().map(cert ->
-                MyCertificateDTO.builder()
-                        .certificateName(cert.getCertificateName())
-                        .certificateUrl(cert.getCertificateUrl())
+        // ===== CERTIFICADOS (desde user_certificates) =====
+        // 1) Mapa: moduleId -> completed (true/false)
+        Map<Long, Boolean> moduleCompleted = allUMAs.stream()
+                .filter(uma -> uma.getModule() != null && uma.getModule().getModuleId() != null)
+                .collect(Collectors.toMap(
+                        uma -> uma.getModule().getModuleId(),
+                        UserModuleAccess::isCompleted,
+                        (a, b) -> a || b // si hay duplicates por algún motivo, si uno es true queda true
+                ));
+
+        // 2) Traer certificados del usuario
+        List<UserCertificate> userCerts = userCertificateRepo.findByUserProfile_ClerkId(clerkId);
+
+        // 3) Mapear a DTO con achieved según módulo completado
+        List<MyCertificateDTO> certificateDTOs = userCerts.stream()
+                .map(uc -> MyCertificateDTO.builder()
+                        .certificateName(uc.getCertificateName())
+                        .certificateUrl(uc.getCertificateUrl())
+                        .achieved(moduleCompleted.getOrDefault(
+                                uc.getModule() != null ? uc.getModule().getModuleId() : null,
+                                false
+                        ))
                         .build()
-        ).toList();
+                )
+                .toList();
+
 
         // ===================== DTO Final =====================
         return MyProfileDTO.builder()
