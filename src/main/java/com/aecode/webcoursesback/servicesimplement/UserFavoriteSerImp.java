@@ -35,35 +35,29 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
     @Override
     @Transactional
     public void addFavorite(String clerkId, Long courseId) {
-        // 1) Evitar duplicado por clerkId + courseId
-        Optional<UserFavorite> existing = userFavoriteRepo
-                .findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
-        if (existing.isPresent()) {
-            return; // ya existe, no hacemos nada
-        }
+        if (userFavoriteRepo.existsByClerkAndCourse(clerkId, courseId)) return;
 
-        // 2) Cargar ENTIDADES MANAGED desde BD
+        // ENTIDADES managed
         UserProfile user = userProfileRepo.findByClerkId(clerkId)
                 .orElseThrow(() -> new EntityNotFoundException("UserProfile no encontrado por clerkId: " + clerkId));
 
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("Course no encontrado id: " + courseId));
 
-        // 3) Construir favorito con entidades managed y guardar
-        UserFavorite favorite = UserFavorite.builder()
-                .userProfile(user)  // ENTIDAD MANAGED, con ID
-                .course(course)     // ENTIDAD MANAGED, con ID
-                .build();
-
-        userFavoriteRepo.save(favorite);
+        userFavoriteRepo.save(UserFavorite.builder()
+                .userProfile(user)
+                .course(course)
+                .build());
     }
 
 
     @Override
     @Transactional
     public void removeFavorite(String clerkId, Long courseId) {
-        userFavoriteRepo.findByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId)
-                .ifPresent(fav -> userFavoriteRepo.deleteById(fav.getFavoriteId()));
+        userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
+        // Si quieres saber si realmente borró algo:
+        // int deleted = userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
+        // if (deleted == 0) { ... opcionalmente loggear o devolver 404 desde controller ... }
     }
 
 

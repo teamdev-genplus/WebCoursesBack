@@ -25,4 +25,11 @@ public interface IUserFavoriteRepo extends JpaRepository<UserFavorite, Long> {
           AND uf.course = (SELECT c FROM Course c WHERE c.courseId = :courseId)
     """)
     int deleteByClerkAndCourse(@Param("clerkId") String clerkId, @Param("courseId") Long courseId);
+
+    // para chequear rápido si ya es favorito (sin traer la fila completa)
+    @Query("""
+       SELECT COUNT(uf) > 0 FROM UserFavorite uf
+       WHERE uf.userProfile.clerkId = :clerkId AND uf.course.courseId = :courseId
+    """)
+    boolean existsByClerkAndCourse(@Param("clerkId") String clerkId, @Param("courseId") Long courseId);
 }
