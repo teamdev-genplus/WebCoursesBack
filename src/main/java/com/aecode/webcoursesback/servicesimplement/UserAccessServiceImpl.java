@@ -13,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,7 +87,15 @@ public class UserAccessServiceImpl implements IUserAccessService {
     // PERFIL: Obtener los cursos accesibles desde "Mis cursos"
     @Override
     public List<CourseCardProgressDTO> getAccessibleCoursesForUser(String clerkId) {
-        // 1. cursos completos (full access)
+        // 0) Traer TODAS las UMAs del usuario de una vez
+        List<UserModuleAccess> allUserUMAs = userModuleAccessRepo.findByUserProfile_ClerkId(clerkId);
+
+        // Agrupar UMAs por courseId (solo las que están ligadas a un curso)
+        Map<Long, List<UserModuleAccess>> umaByCourseId = allUserUMAs.stream()
+                .filter(uma -> uma.getModule() != null && uma.getModule().getCourse() != null)
+                .collect(Collectors.groupingBy(uma -> uma.getModule().getCourse().getCourseId()));
+
+        // 1) cursos completos (full access)
         List<UserCourseAccess> fullAccess = userCourseAccessRepo.findByUserProfile_ClerkId(clerkId);
         Set<Long> fullCourseIds = fullAccess.stream()
                 .map(a -> a.getCourse().getCourseId())
@@ -97,43 +104,55 @@ public class UserAccessServiceImpl implements IUserAccessService {
         List<CourseCardProgressDTO> fullAccessCards = fullAccess.stream().map(uca -> {
             Course c = uca.getCourse();
             List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(c.getCourseId());
-            List<CourseUnitDTO> units = buildUnitsForCourse(c, allModules, Collections.emptyList(), true);
+
+            // usar UMAs de este curso para marcar completados
+            List<UserModuleAccess> userUMAsForThisCourse = umaByCourseId.getOrDefault(c.getCourseId(), Collections.emptyList());
+
+            List<CourseUnitDTO> units = buildUnitsForCourse(c, allModules, userUMAsForThisCourse, true);
+
             return CourseCardProgressDTO.builder()
                     .courseId(c.getCourseId())
                     .title(c.getTitle())
                     .principalImage(c.getPrincipalImage())
                     .orderNumber(c.getOrderNumber())
                     .type(c.getType())
-                    .units(units)
+                    .units(units) // todas con hasAccess=true, y completed según UMAs
                     .build();
         }).toList();
 
-        // 2. acceso parcial (por módulos)
-        List<UserModuleAccess> partialAccess = userModuleAccessRepo.findByUserProfile_ClerkId(clerkId);
-        Map<Long, List<UserModuleAccess>> grouped = partialAccess.stream()
-                .filter(uma -> !fullCourseIds.contains(uma.getModule().getCourse().getCourseId()))
-                .collect(Collectors.groupingBy(uma -> uma.getModule().getCourse().getCourseId()));
+        // 2) acceso parcial (por módulos): cursos donde NO tiene acceso total
+        // Filtramos entradas del mapa umaByCourseId excluyendo cursos con full access
+        List<CourseCardProgressDTO> partialAccessCards = umaByCourseId.entrySet().stream()
+                .filter(entry -> !fullCourseIds.contains(entry.getKey()))
+                .map(entry -> {
+                    Long courseId = entry.getKey();
+                    Course course = courseRepo.findById(courseId).orElse(null);
+                    if (course == null) return null;
 
-        List<CourseCardProgressDTO> partialAccessCards = grouped.entrySet().stream().map(entry -> {
-            Course course = courseRepo.findById(entry.getKey()).orElse(null);
-            if (course == null) return null;
-            List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(entry.getKey());
-            List<UserModuleAccess> userModules = entry.getValue();
-            List<CourseUnitDTO> units = buildUnitsForCourse(course, allModules, userModules, false);
-            return CourseCardProgressDTO.builder()
-                    .courseId(course.getCourseId())
-                    .title(course.getTitle())
-                    .principalImage(course.getPrincipalImage())
-                    .orderNumber(course.getOrderNumber())
-                    .type(course.getType())
-                    .units(units)
-                    .build();
-        }).filter(Objects::nonNull).toList();
+                    List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+                    List<UserModuleAccess> userUMAsForThisCourse = entry.getValue();
 
+                    // hasFullAccess=false => marcar hasAccess solo para módulos adquiridos
+                    List<CourseUnitDTO> units = buildUnitsForCourse(course, allModules, userUMAsForThisCourse, false);
+
+                    return CourseCardProgressDTO.builder()
+                            .courseId(course.getCourseId())
+                            .title(course.getTitle())
+                            .principalImage(course.getPrincipalImage())
+                            .orderNumber(course.getOrderNumber())
+                            .type(course.getType())
+                            .units(units)
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        // 3) combinar en un solo resultado
         List<CourseCardProgressDTO> result = new ArrayList<>(fullAccessCards);
         result.addAll(partialAccessCards);
         return result;
     }
+
 
 
     // VALIDACIÓN: ¿El usuario tiene acceso al módulo?
@@ -286,58 +305,67 @@ public class UserAccessServiceImpl implements IUserAccessService {
      * Construye la lista de unidades visibles en el card (módulos o paquetes).
      * @param course        El curso
      * @param allModules    Todos los módulos asociados al curso
-     * @param userModules   Los módulos que el usuario tiene en UserModuleAccess
+     * @param userModulesForThisCourse     Los módulos que el usuario tiene en UserModuleAccess
      * @param hasFullAccess true si el usuario compró el curso completo
      */
     private List<CourseUnitDTO> buildUnitsForCourse(
             Course course,
             List<Module> allModules,
-            List<UserModuleAccess> userModules,
+            List<UserModuleAccess> userModulesForThisCourse,
             boolean hasFullAccess
     ) {
-        List<CourseUnitDTO> units = new ArrayList<>();
-
-        // mapear access por id de módulo
-        Map<Long, Boolean> accessMap = userModules.stream()
+        // Mapa rápido: moduleId -> completed (de lo que el usuario tiene en UserModuleAccess)
+        Map<Long, Boolean> completedByModuleId = userModulesForThisCourse.stream()
+                .filter(uma -> uma.getModule() != null && uma.getModule().getModuleId() != null)
                 .collect(Collectors.toMap(
                         uma -> uma.getModule().getModuleId(),
-                        UserModuleAccess::isCompleted
+                        UserModuleAccess::isCompleted,
+                        (a, b) -> a || b // si por algún motivo hay duplicados, si uno es true queda true
                 ));
+
+        // Conjunto de módulos que el usuario posee (acceso) por compra parcial
+        Set<Long> ownedModuleIds = new HashSet<>(completedByModuleId.keySet());
+
+        List<CourseUnitDTO> units = new ArrayList<>();
 
         for (int i = 0; i < allModules.size(); i++) {
             Module m = allModules.get(i);
+            Long moduleId = m.getModuleId();
 
+            // Nombre visible por tipo
             String displayName;
             if ("modular".equalsIgnoreCase(course.getType())) {
                 displayName = "Módulo " + (i + 1);
             } else if ("diplomado".equalsIgnoreCase(course.getType())) {
-                displayName = (allModules.size() == 1)
-                        ? "Paquete Completo"
-                        : "Paquete " + (i + 1);
+                displayName = (allModules.size() == 1) ? "Paquete Completo" : "Paquete " + (i + 1);
             } else {
-                displayName = m.getProgramTitle() != null ? m.getProgramTitle() : "Unidad " + (i + 1);
+                displayName = (m.getProgramTitle() != null && !m.getProgramTitle().isBlank())
+                        ? m.getProgramTitle()
+                        : "Unidad " + (i + 1);
             }
 
-            boolean completed = false;
+            boolean hasAccess;
+            boolean completed;
+
             if (hasFullAccess) {
-                // si tiene curso completo, mirar si tiene acceso en userModuleAccess, si no, todo en progreso
-                completed = accessMap.getOrDefault(m.getModuleId(), false);
+                // Curso completo: todas las unidades tienen acceso
+                hasAccess = true;
+                // Completado solo si aparece UMA con completed=true
+                completed = completedByModuleId.getOrDefault(moduleId, false);
             } else {
-                // acceso parcial: solo marcar si tiene acceso
-                if (accessMap.containsKey(m.getModuleId())) {
-                    completed = accessMap.get(m.getModuleId());
-                } else {
-                    // módulo no comprado, igual debe aparecer, pero sin progreso
-                    completed = false;
-                }
+                // Acceso parcial: acceso solo si hay UMA para ese módulo
+                hasAccess = ownedModuleIds.contains(moduleId);
+                completed = hasAccess && completedByModuleId.getOrDefault(moduleId, false);
             }
 
             units.add(CourseUnitDTO.builder()
-                    .moduleId(m.getModuleId())
+                    .moduleId(moduleId)
                     .displayName(displayName)
+                    .hasAccess(hasAccess)  // 👈 NUEVO
                     .completed(completed)
                     .build());
         }
+
         return units;
     }
 

@@ -55,9 +55,6 @@ public class UserFavoriteSerImp implements IUserFavoriteService {
     @Transactional
     public void removeFavorite(String clerkId, Long courseId) {
         userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
-        // Si quieres saber si realmente borró algo:
-        // int deleted = userFavoriteRepo.deleteByClerkAndCourse(clerkId, courseId);
-        // if (deleted == 0) { ... opcionalmente loggear o devolver 404 desde controller ... }
     }
 
 

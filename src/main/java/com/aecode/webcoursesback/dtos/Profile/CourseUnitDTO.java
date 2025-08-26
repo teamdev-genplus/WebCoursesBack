@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 public class CourseUnitDTO {
     private Long moduleId;
     private String displayName;  // "Módulo 1" / "Paquete 2" / "Paquete Completo"
+    private boolean hasAccess;
     private boolean completed;
 }
