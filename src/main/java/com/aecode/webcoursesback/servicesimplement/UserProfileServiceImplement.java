@@ -249,6 +249,8 @@ public class UserProfileServiceImplement implements IUserProfileService {
         List<MyCertificateDTO> certificateDTOs = userCerts.stream()
                 .map(uc -> MyCertificateDTO.builder()
                         .certificateName(uc.getCertificateName())
+                        .certificateImage(uc.getCertificateImage())
+                        .moduleName(uc.getModule() != null ? uc.getModule().getProgramTitle() : null)
                         .certificateUrl(uc.getCertificateUrl())
                         .achieved(moduleCompleted.getOrDefault(
                                 uc.getModule() != null ? uc.getModule().getModuleId() : null,

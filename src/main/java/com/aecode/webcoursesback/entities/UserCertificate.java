@@ -25,6 +25,9 @@ public class UserCertificate {
     @Column(length = 255, nullable = false)
     private String certificateName;
 
+    @Column(length = 255)
+    private String certificateImage;
+
     @Column(length = 255, nullable = false)
     private String certificateUrl;
 }
