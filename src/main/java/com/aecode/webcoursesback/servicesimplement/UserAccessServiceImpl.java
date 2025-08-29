@@ -117,6 +117,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
             return CourseCardProgressDTO.builder()
                     .courseId(c.getCourseId())
+                    .urlnamecourse(c.getUrlnamecourse())
                     .title(c.getTitle())
                     .principalImage(c.getPrincipalImage())
                     .orderNumber(c.getOrderNumber())
@@ -142,6 +143,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
                     return CourseCardProgressDTO.builder()
                             .courseId(course.getCourseId())
+                            .urlnamecourse(course.getUrlnamecourse())
                             .title(course.getTitle())
                             .principalImage(course.getPrincipalImage())
                             .orderNumber(course.getOrderNumber())

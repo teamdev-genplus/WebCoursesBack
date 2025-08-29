@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class CourseCardProgressDTO {
     private Long courseId;
+    private String urlnamecourse;
     private String principalImage;
     private String title;
     private Integer orderNumber;
