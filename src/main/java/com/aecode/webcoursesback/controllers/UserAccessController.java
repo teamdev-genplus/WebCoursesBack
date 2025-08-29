@@ -49,13 +49,24 @@ public class UserAccessController {
     /**
      * Obtener el primer módulo disponible de un curso al que el usuario tenga acceso.
      */
-    @GetMapping("/courses/{courseId}/first-module")
+    @GetMapping("/courses/id/{courseId}/first-module")
     public ResponseEntity<ModuleProfileDTO> getFirstAccessibleModule(
             @RequestParam String clerkId,
             @PathVariable Long courseId
     ) {
         return ResponseEntity.ok(userAccessService.getFirstAccessibleModuleForUser(clerkId, courseId));
     }
+
+    @GetMapping("/courses/{urlnamecourse}/first-module")
+    public ResponseEntity<ModuleProfileDTO> getFirstAccessibleModuleByurlName(
+            @RequestParam String clerkId,
+            @PathVariable String urlnamecourse
+    ) {
+        return ResponseEntity.ok(
+                userAccessService.getFirstAccessibleModuleForUserBySlug(clerkId, urlnamecourse)
+        );
+    }
+
 
     /**
      * Obtener información de un módulo si el usuario tiene acceso a él.

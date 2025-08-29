@@ -45,6 +45,9 @@ public class Module extends BaseProduct{
     @Column
     private Integer cantHours_asinc;
 
+    @Column
+    private Integer totalHours;
+
     //nuevos atributos de plan de estudio cuando es MODULAR.
 
     @Column

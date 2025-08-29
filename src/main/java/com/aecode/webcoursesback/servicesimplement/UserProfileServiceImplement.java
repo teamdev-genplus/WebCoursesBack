@@ -188,7 +188,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
                 completedModules++;
                 // Sumar horas SOLO de módulos completados
                 if (module != null) {
-                    totalLearningHours += nvl(module.getCantHours_asinc()) + nvl(module.getCantHours_live());
+                    totalLearningHours += nvl(module.getTotalHours());
                 }
             } else {
                 inProgressModules++;

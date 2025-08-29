@@ -22,4 +22,5 @@ public interface IUserCourseRepo extends JpaRepository<UserCourseAccess, Long> {
 
     boolean existsByUserProfile_ClerkIdAndCourse_CourseId(String clerkId, Long courseId);
 
+
 }

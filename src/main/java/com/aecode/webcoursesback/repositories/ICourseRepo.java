@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificationExecutor<Course> {
@@ -50,6 +51,7 @@ public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificatio
     //Favoritos
     Page<Course> findByCourseIdInAndType(List<Long> courseIds, String type, Pageable pageable);
 
+    Optional<Course> findByUrlnamecourse(String urlnamecourse);
 
 
 }

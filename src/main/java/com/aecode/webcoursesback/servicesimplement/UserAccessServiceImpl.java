@@ -12,7 +12,12 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,7 +186,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
         Module firstModule = modules.get(0);
         ModuleProfileDTO dto = modelMapper.map(firstModule, ModuleProfileDTO.class);
 
-        // Aquí agregamos lo que faltaba: calcular acceso módulo por módulo
+        //calcular acceso módulo por módulo
         List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
         Set<Long> userModuleIds = userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
                 .stream().map(Module::getModuleId).collect(Collectors.toSet());
@@ -199,6 +204,16 @@ public class UserAccessServiceImpl implements IUserAccessService {
         dto.setCourseModules(moduleAccessList);
         return dto;
     }
+    @Override
+    public ModuleProfileDTO getFirstAccessibleModuleForUserBySlug(String clerkId, String urlnamecourse) {
+        Course course = courseRepo.findByUrlnamecourse(urlnamecourse)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with urlnamecourse: " + urlnamecourse));
+
+        return getFirstAccessibleModuleForUser(clerkId, course.getCourseId());
+    }
+
+
+
 
     // ACCESO: Obtener un módulo específico si tiene acceso
     @Override
