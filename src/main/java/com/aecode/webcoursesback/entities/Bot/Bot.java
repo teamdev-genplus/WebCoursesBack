@@ -1,5 +1,5 @@
 package com.aecode.webcoursesback.entities.Bot;
-import com.aecode.webcoursesback.entities.Tag;
+import com.aecode.webcoursesback.entities.Category;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -59,14 +59,18 @@ public class Bot {
     @Column(nullable = false)
     private boolean active = true;
 
-    // Tags para filtros y recomendaciones (no mostrados en card AECObots por ahora)
+    // NUEVO: badge superior izquierda (solo se muestra en INTERNAL)
+    private String badge; // FREE, PREMIUM, PROXIMAMENTE, EXCLUSIVO_REVIT, EXCLUSIVO_DYNAMO, etc.
+
+    // NUEVO: categorías (reutilizable para otros dominios)
     @ManyToMany
     @JoinTable(
-            name = "bot_tags",
+            name = "bot_categories",
             joinColumns = @JoinColumn(name = "bot_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private Set<Tag> tags;
+    private Set<Category> categories;
+
 
     public enum BotType {
         INTERNAL, // AECObots de la empresa (free/paid/blocked)

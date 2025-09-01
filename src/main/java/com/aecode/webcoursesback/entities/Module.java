@@ -56,7 +56,7 @@ public class Module extends BaseProduct{
     @Column
     private String descriptionStudyplan;
 
-    //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULOBBBBBBBBBBBBBBBBBBBB
+    //newbottons que veran los usuarios en mis cursos CUANDO HAYAN COMPRADO EL MODULO
     @Column(length = 255)
     private String dmaterial;
 
@@ -67,6 +67,18 @@ public class Module extends BaseProduct{
     @Column
     private String urlInstructors;
 
+    //MODE
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Mode mode;
+
+    public enum Mode {
+        ASINCRONO,
+        ENVIVO,
+        PROXIMO,
+        GRATUITO,
+        MIXTO
+    }
     //Relaciones
     @Builder.Default
     @ManyToMany
@@ -116,5 +128,10 @@ public class Module extends BaseProduct{
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Benefits> benefits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderNumber ASC")
+    @Builder.Default
+    private List<ModuleResourceLink> resourceLinks = new ArrayList<>();
 
 }

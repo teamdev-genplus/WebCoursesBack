@@ -1,8 +1,5 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.Bot.AecobotCardDTO;
-import com.aecode.webcoursesback.dtos.Bot.BotCreateUpdateDTO;
-import com.aecode.webcoursesback.dtos.Bot.BotLinkDTO;
-import com.aecode.webcoursesback.dtos.Bot.ExternalToolCardDTO;
+import com.aecode.webcoursesback.dtos.Bot.*;
 import com.aecode.webcoursesback.services.BotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -16,53 +13,87 @@ import java.util.List;
 public class BotController {
     private final BotService botService;
 
-    // --- Listas para UI ---
+    // ======================= AECOBOTS (INTERNAL) =======================
 
-    // AECObots (INTERNAL) — incluye hasAccess usando clerkId
+    // Paginado (UI: muestra 6 por defecto)
     @GetMapping("/aecobots")
-    public List<AecobotCardDTO> listAecobotsForHome(@RequestParam(required = false) String clerkId) {
-        return botService.listAecobotsForHome(clerkId);
-    }
-
-    // AI Tools (EXTERNAL) — solo cards
-    @GetMapping("/aitools")
-    public List<ExternalToolCardDTO> listExternalToolsForHome() {
-        return botService.listExternalToolsForHome();
-    }
-
-    // Paginados (si los necesitas en alguna vista)
-    @GetMapping("/aecobots/paged")
-    public Page<AecobotCardDTO> listAecobotsPaged(
+    public Page<BotCardDTO> listAecobotsPaged(
             @RequestParam(required = false) String clerkId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        return botService.listAecobotsPaged(clerkId, categoryId, PageRequest.of(page, size, Sort.by("title").ascending()));
+    }
+
+    // "Ver todo"
+    @GetMapping("/aecobots/all")
+    public List<BotCardDTO> listAecobotsAll(
+            @RequestParam(required = false) String clerkId,
+            @RequestParam(required = false) Long categoryId
+    ) {
+        return botService.listAecobotsAll(clerkId, categoryId);
+    }
+
+    // ======================= AI TOOLS (EXTERNAL) =======================
+
+    @GetMapping("/aitools")
+    public Page<BotCardDTO> listExternalToolsPaged(
+            @RequestParam(required = false) String clerkId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ) {
+        return botService.listExternalToolsPaged(clerkId, categoryId, PageRequest.of(page, size, Sort.by("title").ascending()));
+    }
+
+    @GetMapping("/aitools/all")
+    public List<BotCardDTO> listExternalToolsAll(
+            @RequestParam(required = false) String clerkId,
+            @RequestParam(required = false) Long categoryId
+    ) {
+        return botService.listExternalToolsAll(clerkId, categoryId);
+    }
+
+    // ======================= FAVORITOS (MIS BOTS) =======================
+
+    // Mis bots (favorites): type opcional = INTERNAL | EXTERNAL
+    @GetMapping("/favorites")
+    public Page<BotCardDTO> listMyBots(
+            @RequestParam String clerkId,
+            @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size
     ) {
-        return botService.listAecobotsPaged(clerkId, PageRequest.of(page, size, Sort.by("title").ascending()));
+        return botService.listMyBotsPaged(clerkId, type, PageRequest.of(page, size, Sort.by("title").ascending()));
     }
 
-    @GetMapping("/aitools/paged")
-    public Page<ExternalToolCardDTO> listExternalToolsPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-    ) {
-        return botService.listExternalToolsPaged(PageRequest.of(page, size, Sort.by("title").ascending()));
+    // Toggle favorito (ADD)
+    @PostMapping("/{botId}/favorite")
+    public void addFavorite(@PathVariable Long botId, @RequestParam String clerkId) {
+        botService.addFavorite(clerkId, botId);
     }
 
-    // Link seguro para redirigir (no expones la URL en el card)
+    // Toggle favorito (REMOVE)
+    @DeleteMapping("/{botId}/favorite")
+    public void removeFavorite(@PathVariable Long botId, @RequestParam String clerkId) {
+        botService.removeFavorite(clerkId, botId);
+    }
+
+    // ======================= LINK =======================
     @GetMapping("/{botId}/link")
     public BotLinkDTO getBotLink(@PathVariable Long botId) {
         return botService.getBotLink(botId);
     }
 
-    // --- CRUD Admin ---
-
+    // ======================= CRUD ADMIN =======================
     @PostMapping
-    public AecobotCardDTO create(@RequestBody BotCreateUpdateDTO dto) {
+    public BotCardDTO create(@RequestBody BotCreateUpdateDTO dto) {
         return botService.createBot(dto);
     }
 
     @PutMapping("/{botId}")
-    public AecobotCardDTO update(@PathVariable Long botId, @RequestBody BotCreateUpdateDTO dto) {
+    public BotCardDTO update(@PathVariable Long botId, @RequestBody BotCreateUpdateDTO dto) {
         return botService.updateBot(botId, dto);
     }
 

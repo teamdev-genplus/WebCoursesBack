@@ -15,21 +15,30 @@ import java.util.List;
 public class ModuleProfileDTO {
     private Long moduleId;
     private Long courseId;
-    private String programTitle;
-    private String textmode;
-    private String description;
+
+    private String titleStudyplan;
+    private String courseTypeLabel;
+
     @Builder.Default
     private List<StudyPlanDTO> studyPlans = new ArrayList<>();
     private Integer orderNumber;
 
-    //DETALLES DEL CURSO
+    //DETALLES DEL MÓDULO
     private String whatsappGroupLink;
-    private String dmaterial;
 
-    //Horarios
+    // Enlaces de herramientas (dropdown)
+    @Builder.Default
+    private List<ToolLinkDTO> tools = new ArrayList<>();
+
+    // Modo y comportamiento de horarios
+    private String mode;        // "ASINCRONO", "ENVIVO", "PROXIMO", "GRATUITO", "MIXTO"
+    private boolean isLive;     // true si ENVIVO
+    private boolean available247; // true si NO es ENVIVO  => "Disponible 24/7"
+
+    // Horarios (solo si isLive == true)
     @Builder.Default
     private List<ScheduleDTO> schedules = new ArrayList<>();
-    private String urlJoinClass;
+    private String urlJoinClass; // solo live
 
     //CERTIFICADOS
     private List<MyCertificateDTO> certificates;

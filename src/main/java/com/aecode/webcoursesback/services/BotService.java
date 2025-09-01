@@ -1,24 +1,28 @@
 package com.aecode.webcoursesback.services;
-import com.aecode.webcoursesback.dtos.Bot.AecobotCardDTO;
-import com.aecode.webcoursesback.dtos.Bot.BotCreateUpdateDTO;
-import com.aecode.webcoursesback.dtos.Bot.BotLinkDTO;
-import com.aecode.webcoursesback.dtos.Bot.ExternalToolCardDTO;
+import com.aecode.webcoursesback.dtos.Bot.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 public interface BotService {
-    // Listados para UI
-    List<AecobotCardDTO> listAecobotsForHome(String clerkId);        // INTERNAL
-    List<ExternalToolCardDTO> listExternalToolsForHome();            // EXTERNAL
+    // AECOBOTS (INTERNAL)
+    Page<BotCardDTO> listAecobotsPaged(String clerkId, Long categoryId, Pageable pageable);
+    List<BotCardDTO> listAecobotsAll(String clerkId, Long categoryId); // para "ver todo"
+
+    // AI TOOLS (EXTERNAL)
+    Page<BotCardDTO> listExternalToolsPaged(String clerkId, Long categoryId, Pageable pageable);
+    List<BotCardDTO> listExternalToolsAll(String clerkId, Long categoryId);
+
+    // Favoritos (mis bots)
+    Page<BotCardDTO> listMyBotsPaged(String clerkId, String type, Pageable pageable);
+    void addFavorite(String clerkId, Long botId);
+    void removeFavorite(String clerkId, Long botId);
 
     // CRUD admin
-    AecobotCardDTO createBot(BotCreateUpdateDTO dto);                // retorna forma card si INTERNAL
-    AecobotCardDTO updateBot(Long botId, BotCreateUpdateDTO dto);
+    BotCardDTO createBot(BotCreateUpdateDTO dto);
+    BotCardDTO updateBot(Long botId, BotCreateUpdateDTO dto);
     void deleteBot(Long botId);
 
     // Utilidades
-    BotLinkDTO getBotLink(Long botId);                               // redirección segura
-    Page<AecobotCardDTO> listAecobotsPaged(String clerkId, Pageable pageable);
-    Page<ExternalToolCardDTO> listExternalToolsPaged(Pageable pageable);
+    BotLinkDTO getBotLink(Long botId);
 }

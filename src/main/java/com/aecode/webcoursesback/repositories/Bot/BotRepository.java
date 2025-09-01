@@ -15,14 +15,34 @@ public interface BotRepository extends JpaRepository<Bot, Long> {
     // Paginado por tipo
     Page<Bot> findByTypeAndActiveTrue(Bot.BotType type, Pageable pageable);
 
-    // Filtrar por tags
+    // Filtro por categoría (lista completa)
     @Query("""
-           SELECT DISTINCT b FROM Bot b
-           JOIN b.tags t
-           WHERE b.active = true
-             AND b.type = :type
-             AND t.tagId IN :tagIds
-           ORDER BY b.title ASC
-           """)
-    List<Bot> findActiveByTypeAndTagIds(@Param("type") Bot.BotType type, @Param("tagIds") List<Integer> tagIds);
+        SELECT DISTINCT b FROM Bot b
+        JOIN b.categories c
+        WHERE b.active = true
+          AND b.type = :type
+          AND c.categoryId IN :categoryIds
+        ORDER BY b.title ASC
+    """)
+    List<Bot> findActiveByTypeAndCategoryIds(@Param("type") Bot.BotType type,
+                                             @Param("categoryIds") List<Long> categoryIds);
+
+    // Paginado con filtro por categoría
+    @Query(value = """
+        SELECT DISTINCT b FROM Bot b
+        JOIN b.categories c
+        WHERE b.active = true
+          AND b.type = :type
+          AND c.categoryId = :categoryId
+        """,
+            countQuery = """
+        SELECT COUNT(DISTINCT b) FROM Bot b
+        JOIN b.categories c
+        WHERE b.active = true
+          AND b.type = :type
+          AND c.categoryId = :categoryId
+        """)
+    Page<Bot> findActiveByTypeAndCategoryId(@Param("type") Bot.BotType type,
+                                            @Param("categoryId") Long categoryId,
+                                            Pageable pageable);
 }

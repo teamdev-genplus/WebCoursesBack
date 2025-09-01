@@ -4,6 +4,7 @@ import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.dtos.Profile.CourseUnitDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleAccessDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
+import com.aecode.webcoursesback.dtos.Profile.ToolLinkDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.repositories.*;
@@ -30,8 +31,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Autowired private ICourseRepo courseRepo;
     @Autowired private IModuleRepo moduleRepo;
     @Autowired private ModelMapper modelMapper;
-    @Autowired
-    private IShoppingCartRepo shoppingCartRepo;
+    @Autowired private IShoppingCartRepo shoppingCartRepo;
+    // inyecciones nuevas:
+    @Autowired private ModuleResourceLinkRepository moduleResourceLinkRepo;
 
 
     private UserProfile getUserByClerkId(String clerkId) {
@@ -176,24 +178,33 @@ public class UserAccessServiceImpl implements IUserAccessService {
     // ACCESO: Obtener el primer módulo accesible (cuando el usuario entra desde el card del curso)
     @Override
     public ModuleProfileDTO getFirstAccessibleModuleForUser(String clerkId, Long courseId) {
-        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
+        boolean hasFullAccess = userCourseAccessRepo
+                .existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
 
-        List<Module> modules = hasFullAccess
+        // Determina el "primer" módulo accesible según acceso total o parcial
+        List<Module> accessibleModules = hasFullAccess
                 ? moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId)
                 : userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
-                .stream().sorted(Comparator.comparing(Module::getOrderNumber)).toList();
+                .stream()
+                .sorted(Comparator.comparing(Module::getOrderNumber))
+                .toList();
 
-        if (modules.isEmpty()) return null;
+        if (accessibleModules.isEmpty()) return null;
 
-        Module firstModule = modules.get(0);
-        ModuleProfileDTO dto = modelMapper.map(firstModule, ModuleProfileDTO.class);
+        Module firstModule = accessibleModules.get(0);
+        Course course = firstModule.getCourse();
 
-        //calcular acceso módulo por módulo
+        // Lista completa (para tabs)
         List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+        boolean showTabs = allModules.size() > 1;
+
+        // IDs con acceso (cuando es parcial)
         Set<Long> userModuleIds = userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
                 .stream().map(Module::getModuleId).collect(Collectors.toSet());
 
-        List<ModuleAccessDTO> moduleAccessList = allModules.stream().map(m ->
+        // Tabs (solo si hay >1 módulo en el curso)
+        List<ModuleAccessDTO> moduleAccessList = showTabs
+                ? allModules.stream().map(m ->
                 ModuleAccessDTO.builder()
                         .moduleId(m.getModuleId())
                         .courseId(courseId)
@@ -201,11 +212,70 @@ public class UserAccessServiceImpl implements IUserAccessService {
                         .orderNumber(m.getOrderNumber())
                         .hasAccess(hasFullAccess || userModuleIds.contains(m.getModuleId()))
                         .build()
-        ).toList();
+        ).toList()
+                : List.of();
 
-        dto.setCourseModules(moduleAccessList);
-        return dto;
+        // Etiqueta por tipo de curso
+        String courseTypeLabel = null;
+        if ("modular".equalsIgnoreCase(course.getType())) {
+            courseTypeLabel = "Programa especializado";
+        } else if ("diplomado".equalsIgnoreCase(course.getType())) {
+            courseTypeLabel = "Diplomado Internacional";
+        }
+
+        // Título preferente
+        String titleStudyplan = (firstModule.getTitleStudyplan() != null && !firstModule.getTitleStudyplan().isBlank())
+                ? firstModule.getTitleStudyplan()
+                : firstModule.getProgramTitle();
+
+        // Modo / dinámicas de horario
+        String mode = (firstModule.getMode() != null) ? firstModule.getMode().name() : null;
+        boolean isLive = "ENVIVO".equalsIgnoreCase(mode);
+        boolean available247 = !isLive;
+
+        // 👇 ahora usando el helper que decide entre horarios reales o "Disponible 24/7"
+        List<ScheduleDTO> schedulesDto = resolveSchedulesFor(firstModule);
+        String urlJoinClass = isLive ? firstModule.getUrlJoinClass() : null;
+
+        // Herramientas desplegables
+        List<ToolLinkDTO> tools = moduleResourceLinkRepo
+                .findActiveByModuleIdOrderByOrderNumberAsc(firstModule.getModuleId())
+                .stream()
+                .map(l -> ToolLinkDTO.builder().name(l.getName()).url(l.getUrl()).build())
+                .toList();
+
+        // Certificados (solo el nombre)
+        List<MyCertificateDTO> certs = mapCertificates(firstModule.getCertificates());
+
+        // WhatsApp (del módulo)
+        String whatsapp = resolveWhatsapp(course, firstModule);
+
+        // Study Plan
+        List<StudyPlanDTO> studyPlans = mapStudyPlans(firstModule.getStudyPlans());
+
+        return ModuleProfileDTO.builder()
+                .moduleId(firstModule.getModuleId())
+                .courseId(courseId)
+                .titleStudyplan(titleStudyplan)
+                .courseTypeLabel(courseTypeLabel)
+                .studyPlans(studyPlans)
+                .orderNumber(firstModule.getOrderNumber())
+
+                .whatsappGroupLink(whatsapp)
+                .tools(tools)
+
+                .mode(mode)
+                .isLive(isLive)
+                .available247(available247)
+                .schedules(schedulesDto)
+                .urlJoinClass(urlJoinClass)
+
+                .certificates(certs)
+                .courseModules(moduleAccessList)
+                .build();
     }
+
+
     @Override
     public ModuleProfileDTO getFirstAccessibleModuleForUserBySlug(String clerkId, String urlnamecourse) {
         Course course = courseRepo.findByUrlnamecourse(urlnamecourse)
@@ -224,18 +294,27 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
 
         Long courseId = module.getCourse().getCourseId();
-        boolean hasFullAccess = userCourseAccessRepo.existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
-        boolean hasAccess = hasFullAccess || userModuleAccessRepo.existsByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
+        Course course = module.getCourse();
 
-        if (!hasAccess) throw new EntityNotFoundException("No tienes acceso a este Módulo");
+        boolean hasFullAccess = userCourseAccessRepo
+                .existsByUserProfile_ClerkIdAndCourse_CourseId(clerkId, courseId);
+        boolean hasAccess = hasFullAccess || userModuleAccessRepo
+                .existsByUserProfile_ClerkIdAndModule_ModuleId(clerkId, moduleId);
 
-        ModuleProfileDTO dto = modelMapper.map(module, ModuleProfileDTO.class);
+        if (!hasAccess) {
+            throw new EntityNotFoundException("No tienes acceso a este Módulo");
+        }
 
+        // Lista completa (para tabs)
         List<Module> allModules = moduleRepo.findByCourse_CourseIdOrderByOrderNumberAsc(courseId);
+        boolean showTabs = allModules.size() > 1;
+
+        // IDs con acceso (cuando es parcial)
         Set<Long> userModuleIds = userModuleAccessRepo.findModulesByClerkIdAndCourseId(clerkId, courseId)
                 .stream().map(Module::getModuleId).collect(Collectors.toSet());
 
-        List<ModuleAccessDTO> moduleaccess = allModules.stream().map(m ->
+        List<ModuleAccessDTO> moduleAccessList = showTabs
+                ? allModules.stream().map(m ->
                 ModuleAccessDTO.builder()
                         .moduleId(m.getModuleId())
                         .courseId(courseId)
@@ -243,11 +322,69 @@ public class UserAccessServiceImpl implements IUserAccessService {
                         .orderNumber(m.getOrderNumber())
                         .hasAccess(hasFullAccess || userModuleIds.contains(m.getModuleId()))
                         .build()
-        ).toList();
+        ).toList()
+                : List.of();
 
-        dto.setCourseModules(moduleaccess);
-        return dto;
+        // Etiqueta por tipo de curso
+        String courseTypeLabel = null;
+        if ("modular".equalsIgnoreCase(course.getType())) {
+            courseTypeLabel = "Programa especializado";
+        } else if ("diplomado".equalsIgnoreCase(course.getType())) {
+            courseTypeLabel = "Diplomado Internacional";
+        }
+
+        // Título preferente
+        String titleStudyplan = (module.getTitleStudyplan() != null && !module.getTitleStudyplan().isBlank())
+                ? module.getTitleStudyplan()
+                : module.getProgramTitle();
+
+        // Modo / dinámicas de horario
+        String mode = (module.getMode() != null) ? module.getMode().name() : null;
+        boolean isLive = "ENVIVO".equalsIgnoreCase(mode);
+        boolean available247 = !isLive;
+
+        // 👇 helper para horarios o “Disponible 24/7”
+        List<ScheduleDTO> schedulesDto = resolveSchedulesFor(module);
+        String urlJoinClass = isLive ? module.getUrlJoinClass() : null;
+
+        // Herramientas desplegables
+        List<ToolLinkDTO> tools = moduleResourceLinkRepo
+                .findActiveByModuleIdOrderByOrderNumberAsc(module.getModuleId())
+                .stream()
+                .map(l -> ToolLinkDTO.builder().name(l.getName()).url(l.getUrl()).build())
+                .toList();
+
+        // Certificados (solo nombre)
+        List<MyCertificateDTO> certs = mapCertificates(module.getCertificates());
+
+        // WhatsApp (del módulo)
+        String whatsapp = resolveWhatsapp(course, module);
+
+        // Study Plan
+        List<StudyPlanDTO> studyPlans = mapStudyPlans(module.getStudyPlans());
+
+        return ModuleProfileDTO.builder()
+                .moduleId(module.getModuleId())
+                .courseId(courseId)
+                .titleStudyplan(titleStudyplan)
+                .courseTypeLabel(courseTypeLabel)
+                .studyPlans(studyPlans)
+                .orderNumber(module.getOrderNumber())
+
+                .whatsappGroupLink(whatsapp)
+                .tools(tools)
+
+                .mode(mode)
+                .isLive(isLive)
+                .available247(available247)
+                .schedules(schedulesDto)
+                .urlJoinClass(urlJoinClass)
+
+                .certificates(certs)
+                .courseModules(moduleAccessList)
+                .build();
     }
+
 
     // TRACKING: Marcar un módulo como completado
     @Override
@@ -385,5 +522,66 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
         return units;
     }
+    private String resolveWhatsapp(Course course, Module module) {
+        // Siempre usamos el enlace del módulo (heredado de BaseProduct)
+        return module.getWhatsappGroupLink();
+    }
+
+    // Mapea 1:1 desde entidad a DTO; mantiene scheduleName como string libre
+    private List<ScheduleDTO> mapSchedules(List<Schedule> schedules) {
+        if (schedules == null || schedules.isEmpty()) return List.of();
+        return schedules.stream()
+                .map(s -> ScheduleDTO.builder()
+                        .scheduleId(s.getScheduleId())
+                        .scheduleName(s.getScheduleName())       // si está set, el front lo usa tal cual
+                        .startDateTime(s.getStartDateTime())      // opcional
+                        .endDateTime(s.getEndDateTime())          // opcional
+                        .timezone(s.getTimezone())                // opcional
+                        .build())
+                .toList();
+    }
+
+    private List<MyCertificateDTO> mapCertificates(List<Certificate> certificates) {
+        if (certificates == null || certificates.isEmpty()) return List.of();
+        return certificates.stream().map(c ->
+                MyCertificateDTO.builder()
+                        .certificateName(c.getName())   // solo nombre en esta vista
+                        .certificateImage(null)
+                        .certificateUrl(null)
+                        .moduleName(null)
+                        .achieved(false)
+                        .build()
+        ).toList();
+    }
+
+    private List<StudyPlanDTO> mapStudyPlans(List<StudyPlan> plans) {
+        if (plans == null || plans.isEmpty()) return List.of();
+        return plans.stream()
+                .map(p -> modelMapper.map(p, StudyPlanDTO.class))
+                .toList();
+    }
+
+    /**
+     * Si el módulo es ENVIVO => mapea sus schedules reales.
+     * Si NO es ENVIVO => devuelve un único ScheduleDTO con "Disponible 24/7".
+     */
+    private List<ScheduleDTO> resolveSchedulesFor(Module module) {
+        boolean isLive = module.getMode() != null && "ENVIVO".equalsIgnoreCase(module.getMode().name());
+        if (isLive) {
+            return mapSchedules(module.getSchedules()); // usa tu mapper 1:1 ya implementado
+        }
+        // Mensaje calculado (no se persiste en BD)
+        return List.of(
+                ScheduleDTO.builder()
+                        .scheduleId(null)
+                        .scheduleName("Disponible 24/7")
+                        .startDateTime(null)   // opcional, si tu DTO los tiene
+                        .endDateTime(null)     // opcional
+                        .timezone(null)        // opcional
+                        .build()
+        );
+    }
+
+
 
 }
