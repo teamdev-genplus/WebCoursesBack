@@ -67,10 +67,10 @@ public class Bot {
     private String badge; // FREE, PREMIUM, PROXIMAMENTE, EXCLUSIVO_REVIT, EXCLUSIVO_DYNAMO, etc.
 
     // Orden y destacado (para layout de AI Tools y orden general)
-    @Column(nullable = false)
+    @Column()
     private Integer orderNumber = 0;
 
-    @Column(nullable = false)
+    @Column()
     private boolean highlighted = false;
 
     // NUEVO: categorías (reutilizable para otros dominios)
