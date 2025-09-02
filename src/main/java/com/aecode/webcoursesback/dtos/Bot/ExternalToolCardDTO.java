@@ -2,11 +2,17 @@ package com.aecode.webcoursesback.dtos.Bot;
 import lombok.*;
 import java.util.List;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+
+@Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class ExternalToolCardDTO {
     private Long botId;
-    private String imageUrl;
+    private String coverImageUrl;     // portada grande
+    private String logoImageUrl;      // imageUrl
     private String title;
-    private String providerName;
-    private List<String> tagNames; // visible en card (tipo de bot), proviene de Tag
+    private List<String> categories;
+    private String shortDescription;
+    private boolean favorite;
+    private String redirectUrl;       // requerido por UI
+    private boolean highlighted;      // para layout
+    private Integer orderNumber;      // para orden estable
 }

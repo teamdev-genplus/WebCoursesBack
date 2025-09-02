@@ -5,24 +5,29 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 public interface BotService {
-    // AECOBOTS (INTERNAL)
-    Page<BotCardDTO> listAecobotsPaged(String clerkId, Long categoryId, Pageable pageable);
-    List<BotCardDTO> listAecobotsAll(String clerkId, Long categoryId); // para "ver todo"
+    // AECObots (INTERNAL)
+    Page<AecobotCardDTO> listAecobotsPaged(String clerkId, Long categoryId, Pageable pageable);
+    List<AecobotCardDTO> listAecobotsAll(String clerkId, Long categoryId);
 
-    // AI TOOLS (EXTERNAL)
-    Page<BotCardDTO> listExternalToolsPaged(String clerkId, Long categoryId, Pageable pageable);
-    List<BotCardDTO> listExternalToolsAll(String clerkId, Long categoryId);
+    // AI Tools (EXTERNAL)
+    Page<ExternalToolCardDTO> listExternalToolsPaged(String clerkId, Long categoryId, Pageable pageable);
+    List<ExternalToolCardDTO> listExternalToolsAll(String clerkId, Long categoryId);
 
-    // Favoritos (mis bots)
-    Page<BotCardDTO> listMyBotsPaged(String clerkId, String type, Pageable pageable);
-    void addFavorite(String clerkId, Long botId);
-    void removeFavorite(String clerkId, Long botId);
+    // Home (EXTERNAL): 1 destacado + 6
+    ExternalToolsHomeDTO listExternalToolsHome(String clerkId, Long categoryId);
 
-    // CRUD admin
-    BotCardDTO createBot(BotCreateUpdateDTO dto);
-    BotCardDTO updateBot(Long botId, BotCreateUpdateDTO dto);
+    // Favoritos
+    Page<AecobotCardDTO> listMyInternalBotsPaged(String clerkId, Long categoryId, Pageable pageable);
+    Page<ExternalToolCardDTO> listMyExternalBotsPaged(String clerkId, Long categoryId, Pageable pageable);
+
+
+    // CRUD admin (devuelve DTO según type)
+    AecobotCardDTO createOrUpdateInternal(BotCreateUpdateDTO dto, Long botIdOrNull);
+    ExternalToolCardDTO createOrUpdateExternal(BotCreateUpdateDTO dto, Long botIdOrNull);
+
     void deleteBot(Long botId);
 
-    // Utilidades
-    BotLinkDTO getBotLink(Long botId);
+    // Favorito toggle
+    void addFavorite(String clerkId, Long botId);
+    void removeFavorite(String clerkId, Long botId);
 }

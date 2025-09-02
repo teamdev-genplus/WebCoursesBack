@@ -29,9 +29,13 @@ public class Bot {
     @Column(nullable = false, length = 255)
     private String ownerName;
 
-    // Imagen/portada del card
+    // Imagen/logo del card
     @Column(length = 1000)
     private String imageUrl;
+
+    // Portada (principalmente para EXTERNAL)
+    @Column(length = 1000)
+    private String coverImageUrl;
 
     // Descripción corta opcional (para tooltips o futuras vistas)
     @Column(length = 500)
@@ -61,6 +65,13 @@ public class Bot {
 
     // NUEVO: badge superior izquierda (solo se muestra en INTERNAL)
     private String badge; // FREE, PREMIUM, PROXIMAMENTE, EXCLUSIVO_REVIT, EXCLUSIVO_DYNAMO, etc.
+
+    // Orden y destacado (para layout de AI Tools y orden general)
+    @Column(nullable = false)
+    private Integer orderNumber = 0;
+
+    @Column(nullable = false)
+    private boolean highlighted = false;
 
     // NUEVO: categorías (reutilizable para otros dominios)
     @ManyToMany

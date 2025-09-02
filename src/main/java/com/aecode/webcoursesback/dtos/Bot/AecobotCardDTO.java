@@ -1,15 +1,22 @@
 package com.aecode.webcoursesback.dtos.Bot;
 import lombok.*;
 import java.math.BigDecimal;
+import java.util.List;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+
+@Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class AecobotCardDTO {
     private Long botId;
-    private String imageUrl;
+    private String imageUrl;          // puede ser la imagen principal
     private String title;
-    private String developerName;
-    private String planLabel;     // "FREE", "PAID", "BLOCKED"
-    private BigDecimal price;     // solo si PAID
-    private String currency;      // solo si PAID
-    private boolean hasAccess;    // según clerkId
+    private List<String> categories;
+    private String shortDescription;  // 2 líneas máx en UI
+    private String ownerName;         // "By pepito"
+    private boolean favorite;         // corazón
+    private String badge;             // texto libre (solo INTERNAL)
+    private BigDecimal price;         // solo plan=PAID
+    private String currency;
+    private Boolean hasAccess;        // opcional
+    private String redirectUrl;       // requerido por UI
+    private Integer orderNumber;      // para orden estable
 }
