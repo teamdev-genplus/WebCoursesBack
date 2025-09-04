@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Data
-@Component
 @ConfigurationProperties(prefix = "izipay")
 public class IzipayProperties {
     private String apiBaseUrl;     // https://api.micuentaweb.pe
@@ -12,4 +11,5 @@ public class IzipayProperties {
     private String password;       // testpassword_... o prodpassword_...
     private String publicKey;      // 46068555:testpublickey_...
     private String hmacSha256;     // clave para validar retorno del navegador
+
 }
