@@ -36,7 +36,7 @@ public class PaymentOrder {
     @Column(name = "status", length = 20, nullable = false)
     private PaymentStatus status;      // PENDING | PAID | UNPAID | FAILED
 
-    @Column(name = "form_token", length = 2000)
+    @Column(name = "form_token", columnDefinition = "TEXT")
     private String formToken;          // último formToken generado
 
     @Column(name = "mode", length = 20)

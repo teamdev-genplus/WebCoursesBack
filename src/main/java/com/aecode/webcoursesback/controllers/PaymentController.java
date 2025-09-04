@@ -22,6 +22,7 @@ public class PaymentController {
         return paymentService.createFormToken(req);
     }
 
+    /*
     // Paso 4: Validar retorno del navegador (front -> back)
     @PostMapping("/validate")
     public ValidatePaymentResponse validate(@RequestBody ValidatePaymentRequest req) {
@@ -33,4 +34,5 @@ public class PaymentController {
     public String ipn(@RequestParam Map<String, String> formParams) {
         return paymentService.handleIpn(formParams);
     }
+    */
 }
