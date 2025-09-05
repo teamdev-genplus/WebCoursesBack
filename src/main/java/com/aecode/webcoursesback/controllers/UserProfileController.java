@@ -103,6 +103,7 @@ public class UserProfileController {
             boolean hasUserDetailData = dto.getPhoneNumber() != null ||
                     dto.getGender() != null ||
                     dto.getCountry() != null ||
+                    dto.getCity() != null ||
                     dto.getProfession() != null ||
                     dto.getEducation() != null ||
                     dto.getLinkedin() != null ||
@@ -121,6 +122,7 @@ public class UserProfileController {
                 if (dto.getPhoneNumber() != null) existingDetail.setPhoneNumber(dto.getPhoneNumber());
                 if (dto.getGender() != null) existingDetail.setGender(dto.getGender());
                 if (dto.getCountry() != null) existingDetail.setCountry(dto.getCountry());
+                if (dto.getCity() != null) existingDetail.setCity(dto.getCity());
                 if (dto.getProfession() != null) existingDetail.setProfession(dto.getProfession());
                 if (dto.getEducation() != null) existingDetail.setEducation(dto.getEducation());
                 if (dto.getLinkedin() != null) existingDetail.setLinkedin(dto.getLinkedin());

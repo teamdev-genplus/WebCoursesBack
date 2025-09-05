@@ -41,6 +41,8 @@ public class UserDetail {
     @Column(length = 100)
     private String country;
     @Column(length = 100)
+    private String city;
+    @Column(length = 100)
     private String profession;
     @Column(length = 100)
     private String education;
