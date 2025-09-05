@@ -91,7 +91,8 @@ public class Course{
         ENVIVO,
         PROXIMO,
         GRATUITO,
-        MIXTO
+        MIXTO,
+        EXCLUSIVO
     }
 
     // Relaciones

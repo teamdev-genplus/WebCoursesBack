@@ -334,6 +334,7 @@ public class BotServiceImpl implements BotService {
                 .coverImageUrl(b.getCoverImageUrl())
                 .logoImageUrl(b.getImageUrl())
                 .title(b.getTitle())
+                .subtitle(b.getSubtitle())
                 .categories(categories)
                 .shortDescription(b.getShortDescription())
                 .favorite(favorite)

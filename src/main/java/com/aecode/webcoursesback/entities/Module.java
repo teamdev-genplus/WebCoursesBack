@@ -77,7 +77,8 @@ public class Module extends BaseProduct{
         ENVIVO,
         PROXIMO,
         GRATUITO,
-        MIXTO
+        MIXTO,
+        EXCLUSIVO
     }
     //Relaciones
     @Builder.Default

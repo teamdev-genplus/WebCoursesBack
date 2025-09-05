@@ -22,17 +22,15 @@ public class PaymentController {
         return paymentService.createFormToken(req);
     }
 
-    /*
     // Paso 4: Validar retorno del navegador (front -> back)
     @PostMapping("/validate")
     public ValidatePaymentResponse validate(@RequestBody ValidatePaymentRequest req) {
         return paymentService.validateBrowserReturn(req);
     }
 
-    // Paso 5: IPN (Izipay -> back). Contenido: x-www-form-urlencoded
-    @PostMapping(value = "/ipn", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String ipn(@RequestParam Map<String, String> formParams) {
-        return paymentService.handleIpn(formParams);
-    }
-    */
+//    // Paso 5: IPN (Izipay -> back). Contenido: x-www-form-urlencoded
+//    @PostMapping(value = "/ipn", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//    public String ipn(@RequestParam Map<String, String> formParams) {
+//        return paymentService.handleIpn(formParams);
+//    }
 }

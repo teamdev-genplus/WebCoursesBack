@@ -9,6 +9,7 @@ public class ExternalToolCardDTO {
     private String coverImageUrl;     // portada grande
     private String logoImageUrl;      // imageUrl
     private String title;
+    private String subtitle;
     private List<String> categories;
     private String shortDescription;
     private boolean favorite;

@@ -9,6 +9,7 @@ import java.util.Set;
 public class BotCreateUpdateDTO {
     private Bot.BotType type;        // INTERNAL | EXTERNAL
     private String title;
+    private String subtitle;         // EXTERNAL
     private String ownerName;
     private String imageUrl;         // logo
     private String coverImageUrl;    // portada (EXTERNAL)

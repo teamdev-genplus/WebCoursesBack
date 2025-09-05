@@ -25,6 +25,9 @@ public class Bot {
     @Column(nullable = false, length = 255)
     private String title;
 
+    @Column(nullable = false, length = 255)
+    private String subtitle;
+
     // Nombre del creador (INTERNAL) o proveedor (EXTERNAL)
     @Column(nullable = false, length = 255)
     private String ownerName;
