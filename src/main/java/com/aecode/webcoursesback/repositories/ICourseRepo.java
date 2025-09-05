@@ -16,42 +16,79 @@ import java.util.Optional;
 @Repository
 public interface ICourseRepo extends JpaRepository<Course,Long>, JpaSpecificationExecutor<Course> {
 
-    //Encontrar curso por tipo y paginarlo
-    Page<Course> findByType(String type, Pageable pageable);
+    // ====== PÚBLICO (excluye EXCLUSIVO) ======
 
-    //Obtener los cursos destacados
-    List<Course> findByHighlightedTrueOrderByOrderNumberAsc();
+    // Listado general excluyendo EXCLUSIVO
+    Page<Course> findByModeNot(Course.Mode excluded, Pageable pageable);
 
-    // Busca cursos cuyo título contenga el texto dado (ignora mayúsculas/minúsculas)
-    List<Course> findByTitleIgnoreCaseContaining(String title);
+    // Por tipo excluyendo EXCLUSIVO
+    Page<Course> findByTypeAndModeNot(String type, Course.Mode excluded, Pageable pageable);
 
-    //filtro de favoritos
+    // Destacados excluyendo EXCLUSIVO
+    List<Course> findByHighlightedTrueAndModeNotOrderByOrderNumberAsc(Course.Mode excluded);
+
+    // Búsqueda por título excluyendo EXCLUSIVO
+    List<Course> findByTitleIgnoreCaseContainingAndModeNot(String title, Course.Mode excluded);
+
+    // Por tipo + duración (entre) excluyendo EXCLUSIVO
+    @Query("""
+        SELECT c FROM Course c
+        WHERE c.type = :type
+          AND c.mode <> :excluded
+          AND c.cantTotalHours BETWEEN :minHours AND :maxHours
+        """)
+    Page<Course> findByTypeAndDurationBetweenExcludingExclusive(
+            @Param("type") String type,
+            @Param("excluded") Course.Mode excluded,
+            @Param("minHours") Integer minHours,
+            @Param("maxHours") Integer maxHours,
+            Pageable pageable
+    );
+
+    // Por tipo + duración (>=) excluyendo EXCLUSIVO
+    @Query("""
+        SELECT c FROM Course c
+        WHERE c.type = :type
+          AND c.mode <> :excluded
+          AND c.cantTotalHours >= :minHours
+        """)
+    Page<Course> findByTypeAndDurationGteExcludingExclusive(
+            @Param("type") String type,
+            @Param("excluded") Course.Mode excluded,
+            @Param("minHours") Integer minHours,
+            Pageable pageable
+    );
+
+    // Por tipo + tags excluyendo EXCLUSIVO
+    @Query("""
+        SELECT DISTINCT c FROM Course c
+        JOIN c.modules m
+        JOIN m.tags t
+        WHERE c.type = :type
+          AND c.mode <> :excluded
+          AND t.tagId IN :tagIds
+    """)
+    Page<Course> findDistinctByTypeAndModulesTagsInExcludingExclusive(
+            @Param("type") String type,
+            @Param("excluded") Course.Mode excluded,
+            @Param("tagIds") List<Long> tagIds,
+            Pageable pageable
+    );
+
+    // ====== ADMIN (solo EXCLUSIVO) ======
+
+    Page<Course> findByMode(Course.Mode mode, Pageable pageable);
+
+    // Si quieres por tipo exclusivo:
+    Page<Course> findByTypeAndMode(String type, Course.Mode mode, Pageable pageable);
+
+    // ====== existentes (compat / uso puntual) ======
+    // Favoritos por ids (se mantiene para quien lo use)
     Page<Course> findByCourseIdIn(List<Long> courseIds, Pageable pageable);
 
-
-    //Filtros
-    // ✅ Nuevo: Buscar por type y tags (relación many-to-many entre módulos y tags)
-    @Query("""
-        SELECT DISTINCT c FROM Course c 
-        JOIN c.modules m 
-        JOIN m.tags t 
-        WHERE c.type = :type AND t.tagId IN :tagIds
-    """)
-    Page<Course> findDistinctByTypeAndModulesTagsIn(@Param("type") String type, @Param("tagIds") List<Long> tagIds, Pageable pageable);
-
-    // ✅ Nuevo: Buscar por type y modo
-    Page<Course> findByTypeAndMode(String type, Course.Mode mode, Pageable p);
-
-    // ✅ Nuevo: Buscar por type y rango de duración
-    Page<Course> findByTypeAndCantTotalHoursBetween(String type, Integer minHours, Integer maxHours, Pageable pageable);
-
-    // ✅ Nuevo: Buscar por type y duración mayor o igual a cierto número
-    Page<Course> findByTypeAndCantTotalHoursGreaterThanEqual(String type, Integer minHours, Pageable pageable);
-
-    //Favoritos
+    // Favoritos por ids y tipo
     Page<Course> findByCourseIdInAndType(List<Long> courseIds, String type, Pageable pageable);
 
     Optional<Course> findByUrlnamecourse(String urlnamecourse);
-
 
 }

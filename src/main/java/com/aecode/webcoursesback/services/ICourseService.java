@@ -13,24 +13,21 @@ public interface ICourseService {
     List<Course> listAll();
     void delete(Long courseId);
 
-    // (público) sin favoritos
+    // PÚBLICO: excluye EXCLUSIVO
     Page<CourseCardDTO> getAllCourseCards(Pageable pageable);
     Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable);
 
-    // (autenticado) con favoritos
+    // AUTENTICADO (clerkId): excluye EXCLUSIVO
     Page<CourseCardDTO> getAllCourseCards(String clerkId, Pageable pageable);
     Page<CourseCardDTO> getCourseCardsByType(String type, String clerkId, Pageable pageable);
 
-
-    ///////////////////////
-
-
+    // Destacados (excluye EXCLUSIVO)
     List<HighlightedCourseDTO> getAllHighlightedCourses();
 
-    // Service: Servicio para listar cursos filtrados por título
+    // Búsqueda por título (excluye EXCLUSIVO)
     List<CourseCardDTO> findCoursesByTitle(String title);
 
-    // Filtros (te propongo overloads con clerkId)
+    // Filtros:
     Page<CourseCardDTO> getCourseCardsByModeAndType(String mode, String type, Pageable pageable);
     Page<CourseCardDTO> getCourseCardsByModeAndType(String mode, String type, String clerkId, Pageable pageable);
 
@@ -39,4 +36,8 @@ public interface ICourseService {
 
     Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable);
     Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, String clerkId, Pageable pageable);
+
+    // ADMIN: solo EXCLUSIVO
+    Page<CourseCardDTO> getExclusiveCourseCards(Pageable pageable);
+    Page<CourseCardDTO> getExclusiveCourseCards(String clerkId, Pageable pageable);
 }

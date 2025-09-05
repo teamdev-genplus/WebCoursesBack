@@ -27,13 +27,15 @@ public class CourseController {
 
     private final ModelMapper modelMapper = new ModelMapper();
 
+
     // --------------------------------------------------------------------------------------
-    // LISTA SIMPLE (compatibilidad; no marca favoritos)
+    // LISTA SIMPLE (compat) -> EXCLUYE EXCLUSIVO
     // --------------------------------------------------------------------------------------
     @GetMapping("/listallcards")
     public ResponseEntity<List<CourseCardDTO>> listAll() {
         List<Course> courses = cS.listAll();
         List<CourseCardDTO> coursescardDTO = courses.stream()
+                .filter(c -> c.getMode() != Course.Mode.EXCLUSIVO) // excluye
                 .map(c -> CourseCardDTO.builder()
                         .courseId(c.getCourseId())
                         .principalImage(c.getPrincipalImage())
@@ -43,35 +45,33 @@ public class CourseController {
                         .cantModOrHours(c.getCantModOrHours())
                         .mode(c.getMode())
                         .urlnamecourse(c.getUrlnamecourse())
-                        .favorite(false) // este endpoint no usa clerkId
+                        .favorite(false)
                         .build())
                 .collect(Collectors.toList());
         return ResponseEntity.ok(coursescardDTO);
     }
 
     // --------------------------------------------------------------------------------------
-    // CARDS POR TIPO (clerkId opcional: si viene, marcamos favoritos)
-    // Ej.: /courses/cards/type?type=diplomado&clerkId=user_abc&page=0&size=8&sortBy=orderNumber
+    // CARDS POR TIPO (clerkId opcional) -> service ya excluye EXCLUSIVO
     // --------------------------------------------------------------------------------------
     @GetMapping("/cards/type")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCards(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) String clerkId,  // opcional
+            @RequestParam(required = false) String clerkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "orderNumber") String sortBy) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         Page<CourseCardDTO> cardsPage = (type == null || type.isBlank())
-                ? cS.getAllCourseCards(clerkId, pageable)          // con favoritos si clerkId != null
+                ? cS.getAllCourseCards(clerkId, pageable)
                 : cS.getCourseCardsByType(type, clerkId, pageable);
 
         return ResponseEntity.ok(cardsPage);
     }
 
     // --------------------------------------------------------------------------------------
-    // CARDS POR MODALIDAD + TIPO (clerkId opcional)
-    // Ej.: /courses/cards/mode/by-type?type=diplomado&mode=ASINCRONO&clerkId=user_abc
+    // CARDS POR MODALIDAD + TIPO (clerkId opcional) -> service ya excluye EXCLUSIVO
     // --------------------------------------------------------------------------------------
     @GetMapping("/cards/mode/by-type")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByModeAndType(
@@ -90,13 +90,12 @@ public class CourseController {
     }
 
     // --------------------------------------------------------------------------------------
-    // CARDS POR RANGO DE HORAS + TIPO (clerkId opcional)
-    // Ej.: /courses/cards/duration/by-type?type=diplomado&range=10-20&clerkId=user_abc
+    // CARDS POR RANGO DE HORAS + TIPO (clerkId opcional) -> service ya excluye EXCLUSIVO
     // --------------------------------------------------------------------------------------
     @GetMapping("/cards/duration/by-type")
     public ResponseEntity<Page<CourseCardDTO>> getCourseCardsByDurationRangeAndType(
             @RequestParam String type,
-            @RequestParam String range, // valores permitidos: "1-9", "10-20", "+20"
+            @RequestParam String range, // "1-9", "10-20", "+20"
             @RequestParam(required = false) String clerkId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
@@ -111,8 +110,7 @@ public class CourseController {
     }
 
     // --------------------------------------------------------------------------------------
-    // CARDS POR TAGS + TIPO (clerkId opcional)
-    // Ej.: /courses/cards/filterByTags/by-type?type=diplomado&tagIds=1,2,3&clerkId=user_abc
+    // CARDS POR TAGS + TIPO (clerkId opcional) -> service ya excluye EXCLUSIVO
     // --------------------------------------------------------------------------------------
     @GetMapping("/cards/filterByTags/by-type")
     public ResponseEntity<Page<CourseCardDTO>> getCoursesByTagsAndType(
@@ -131,7 +129,7 @@ public class CourseController {
     }
 
     // --------------------------------------------------------------------------------------
-    // CARDS DESTACADOS (no depende de favoritos)
+    // DESTACADOS (excluye EXCLUSIVO en service)
     // --------------------------------------------------------------------------------------
     @GetMapping("/courses/highlighted")
     public ResponseEntity<List<HighlightedCourseDTO>> getAllHighlightedCourses() {
@@ -139,7 +137,7 @@ public class CourseController {
     }
 
     // --------------------------------------------------------------------------------------
-    // BÚSQUEDA POR TÍTULO (listado simple; si quieres marcar favoritos, crea overload con clerkId)
+    // BÚSQUEDA POR TÍTULO (excluye EXCLUSIVO en service)
     // --------------------------------------------------------------------------------------
     @GetMapping("/courses/search")
     public ResponseEntity<List<CourseCardDTO>> searchCoursesByTitle(@RequestParam String title) {
@@ -147,8 +145,7 @@ public class CourseController {
     }
 
     // --------------------------------------------------------------------------------------
-    // FAVORITOS PAGINADOS (solo favoritos del usuario por tipo)
-    // Ej.: /courses/cards/favorites?clerkId=user_abc&type=diplomado
+    // FAVORITOS PAGINADOS -> filtro en memoria EXCLUSIVO por si el servicio no lo hace
     // --------------------------------------------------------------------------------------
     @GetMapping("/cards/favorites")
     public ResponseEntity<Page<CourseCardDTO>> getFavoriteCourseCards(
@@ -161,7 +158,35 @@ public class CourseController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         Page<CourseCardDTO> favoriteCourses =
                 userFavoriteService.getFavoriteCoursesByUserAndType(clerkId, type, pageable);
-        return ResponseEntity.ok(favoriteCourses);
+
+        // Filtro EXCLUSIVO en memoria (porque este endpoint depende de otro service)
+        List<CourseCardDTO> filtered = favoriteCourses.getContent().stream()
+                .filter(c -> c.getMode() != Course.Mode.EXCLUSIVO)
+                .toList();
+
+        Page<CourseCardDTO> result = new PageImpl<>(
+                filtered,
+                pageable,
+                filtered.size() // total filtrado. Si quieres el total original, usa favoriteCourses.getTotalElements()
+        );
+        return ResponseEntity.ok(result);
+    }
+
+    // --------------------------------------------------------------------------------------
+    // ADMIN: SOLO EXCLUSIVO (proteger con seguridad/roles en tu proyecto)
+    // --------------------------------------------------------------------------------------
+    @GetMapping("/admin/exclusive/cards")
+    public ResponseEntity<Page<CourseCardDTO>> getExclusiveCardsAdmin(
+            @RequestParam(required = false) String clerkId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(defaultValue = "orderNumber") String sortBy
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<CourseCardDTO> cards = (clerkId == null || clerkId.isBlank())
+                ? cS.getExclusiveCourseCards(pageable)
+                : cS.getExclusiveCourseCards(clerkId, pageable);
+        return ResponseEntity.ok(cards);
     }
 
     // --------------------------------------------------------------------------------------

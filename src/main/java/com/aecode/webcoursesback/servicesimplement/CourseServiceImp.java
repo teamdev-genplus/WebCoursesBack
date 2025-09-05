@@ -50,53 +50,58 @@ public class CourseServiceImp implements ICourseService {
     @Override public List<Course> listAll() { return cR.findAll(); }
     @Override public void delete(Long courseId) { cR.deleteById(courseId); }
 
-    // ----------------- Cards sin favoritos (público) -----------------
+    // ----------------- Cards sin favoritos (público) - EXCLUYE EXCLUSIVO -----------------
     @Override
     public Page<CourseCardDTO> getAllCourseCards(Pageable pageable) {
-        return toCardPage(cR.findAll(pageable), Collections.emptySet());
+        return toCardPage(cR.findByModeNot(Course.Mode.EXCLUSIVO, pageable), Collections.emptySet());
     }
 
     @Override
     public Page<CourseCardDTO> getCourseCardsByType(String type, Pageable pageable) {
-        return toCardPage(cR.findByType(type, pageable), Collections.emptySet());
+        return toCardPage(cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable), Collections.emptySet());
     }
 
-    // ----------------- Cards con favoritos (autenticado) -----------------
+    // ----------------- Cards con favoritos (autenticado) - EXCLUYE EXCLUSIVO -----------------
     @Override
     public Page<CourseCardDTO> getAllCourseCards(String clerkId, Pageable pageable) {
-        return toCardPage(cR.findAll(pageable), favoritesOf(clerkId));
+        return toCardPage(cR.findByModeNot(Course.Mode.EXCLUSIVO, pageable), favoritesOf(clerkId));
     }
 
     @Override
     public Page<CourseCardDTO> getCourseCardsByType(String type, String clerkId, Pageable pageable) {
-        return toCardPage(cR.findByType(type, pageable), favoritesOf(clerkId));
+        return toCardPage(cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable), favoritesOf(clerkId));
     }
 
-    // ----------------- Destacados y búsquedas -----------------
+    // ----------------- Destacados (excluye EXCLUSIVO) -----------------
     @Override
     public List<HighlightedCourseDTO> getAllHighlightedCourses() {
-        return cR.findByHighlightedTrueOrderByOrderNumberAsc()
+        return cR.findByHighlightedTrueAndModeNotOrderByOrderNumberAsc(Course.Mode.EXCLUSIVO)
                 .stream()
                 .map(c -> new HighlightedCourseDTO(c.getCourseId(), c.getTitle(), c.getDescription(), c.getHighlightImage()))
                 .collect(Collectors.toList());
     }
 
+    // ----------------- Búsqueda por título (excluye EXCLUSIVO) -----------------
     @Override
     public List<CourseCardDTO> findCoursesByTitle(String title) {
-        return cR.findByTitleIgnoreCaseContaining(title).stream()
+        return cR.findByTitleIgnoreCaseContainingAndModeNot(title, Course.Mode.EXCLUSIVO).stream()
                 .map(c -> mapToCourseCardDTO(c, false))
                 .collect(Collectors.toList());
     }
 
-    // ----------------- Filtros por modalidad -----------------
+    // ----------------- Filtros por modalidad (excluye EXCLUSIVO salvo admin) -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByModeAndType(String modeStr, String type, Pageable pageable) {
         if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
-            return toCardPage(cR.findByType(type, pageable), Collections.emptySet());
+            return toCardPage(cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable), Collections.emptySet());
         }
         Course.Mode mode;
         try { mode = Course.Mode.valueOf(modeStr.toUpperCase()); }
         catch (IllegalArgumentException e) { return Page.empty(pageable); }
+        if (mode == Course.Mode.EXCLUSIVO) {
+            // Público NO debe ver exclusivos
+            return Page.empty(pageable);
+        }
         return toCardPage(cR.findByTypeAndMode(type, mode, pageable), Collections.emptySet());
     }
 
@@ -104,46 +109,47 @@ public class CourseServiceImp implements ICourseService {
     public Page<CourseCardDTO> getCourseCardsByModeAndType(String modeStr, String type, String clerkId, Pageable pageable) {
         Set<Long> favs = favoritesOf(clerkId);
         if (modeStr == null || modeStr.equalsIgnoreCase("TODOS")) {
-            return toCardPage(cR.findByType(type, pageable), favs);
+            return toCardPage(cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable), favs);
         }
         Course.Mode mode;
         try { mode = Course.Mode.valueOf(modeStr.toUpperCase()); }
         catch (IllegalArgumentException e) { return Page.empty(pageable); }
+        if (mode == Course.Mode.EXCLUSIVO) {
+            return Page.empty(pageable);
+        }
         return toCardPage(cR.findByTypeAndMode(type, mode, pageable), favs);
     }
 
-    // ----------------- Filtro por duración (sin favoritos) -----------------
+    // ----------------- Filtro por duración (excluye EXCLUSIVO) -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, Pageable pageable) {
         Page<Course> courses = switch (range) {
-            case "1-9"   -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 9, pageable);
-            case "10-20" -> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
-            case "+20"   -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 21, pageable);
-            default      -> Page.empty(pageable); // Si llega un valor inesperado, devolver vacío
+            case "1-9"   -> cR.findByTypeAndDurationBetweenExcludingExclusive(type, Course.Mode.EXCLUSIVO, 1, 9, pageable);
+            case "10-20" -> cR.findByTypeAndDurationBetweenExcludingExclusive(type, Course.Mode.EXCLUSIVO, 10, 20, pageable);
+            case "+20"   -> cR.findByTypeAndDurationGteExcludingExclusive(type, Course.Mode.EXCLUSIVO, 21, pageable);
+            default      -> Page.empty(pageable);
         };
         return toCardPage(courses, Collections.emptySet());
     }
 
-    // ----------------- Filtro por duración (con favoritos) -----------------
     @Override
     public Page<CourseCardDTO> getCourseCardsByDurationRangeAndType(String range, String type, String clerkId, Pageable pageable) {
         Set<Long> favs = favoritesOf(clerkId);
         Page<Course> courses = switch (range) {
-            case "1-9"   -> cR.findByTypeAndCantTotalHoursBetween(type, 1, 9, pageable);
-            case "10-20" -> cR.findByTypeAndCantTotalHoursBetween(type, 10, 20, pageable);
-            case "+20"   -> cR.findByTypeAndCantTotalHoursGreaterThanEqual(type, 21, pageable);
+            case "1-9"   -> cR.findByTypeAndDurationBetweenExcludingExclusive(type, Course.Mode.EXCLUSIVO, 1, 9, pageable);
+            case "10-20" -> cR.findByTypeAndDurationBetweenExcludingExclusive(type, Course.Mode.EXCLUSIVO, 10, 20, pageable);
+            case "+20"   -> cR.findByTypeAndDurationGteExcludingExclusive(type, Course.Mode.EXCLUSIVO, 21, pageable);
             default      -> Page.empty(pageable);
         };
         return toCardPage(courses, favs);
     }
 
-
-    // ----------------- Filtro por tags -----------------
+    // ----------------- Filtro por tags (excluye EXCLUSIVO) -----------------
     @Override
     public Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, Pageable pageable) {
         Page<Course> page = (tagIds == null || tagIds.isEmpty())
-                ? cR.findByType(type, pageable)
-                : cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable);
+                ? cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable)
+                : cR.findDistinctByTypeAndModulesTagsInExcludingExclusive(type, Course.Mode.EXCLUSIVO, tagIds, pageable);
         return toCardPage(page, Collections.emptySet());
     }
 
@@ -151,9 +157,20 @@ public class CourseServiceImp implements ICourseService {
     public Page<CourseCardDTO> getCoursesByModuleTagsAndType(String type, List<Long> tagIds, String clerkId, Pageable pageable) {
         Set<Long> favs = favoritesOf(clerkId);
         Page<Course> page = (tagIds == null || tagIds.isEmpty())
-                ? cR.findByType(type, pageable)
-                : cR.findDistinctByTypeAndModulesTagsIn(type, tagIds, pageable);
+                ? cR.findByTypeAndModeNot(type, Course.Mode.EXCLUSIVO, pageable)
+                : cR.findDistinctByTypeAndModulesTagsInExcludingExclusive(type, Course.Mode.EXCLUSIVO, tagIds, pageable);
         return toCardPage(page, favs);
+    }
+
+    // ----------------- ADMIN: solo EXCLUSIVO -----------------
+    @Override
+    public Page<CourseCardDTO> getExclusiveCourseCards(Pageable pageable) {
+        return toCardPage(cR.findByMode(Course.Mode.EXCLUSIVO, pageable), Collections.emptySet());
+    }
+
+    @Override
+    public Page<CourseCardDTO> getExclusiveCourseCards(String clerkId, Pageable pageable) {
+        return toCardPage(cR.findByMode(Course.Mode.EXCLUSIVO, pageable), favoritesOf(clerkId));
     }
 }
 
