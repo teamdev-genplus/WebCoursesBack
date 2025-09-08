@@ -80,6 +80,13 @@ public class Module extends BaseProduct{
         MIXTO,
         EXCLUSIVO
     }
+
+    //NUEVOS ATRIBUTOS PARA EL MODO EXCLUSIVO
+    @Column(length = 255)
+    private String urlimagelogo1;
+    @Column(length = 255)
+    private String urlimagelogo2;
+
     //Relaciones
     @Builder.Default
     @ManyToMany

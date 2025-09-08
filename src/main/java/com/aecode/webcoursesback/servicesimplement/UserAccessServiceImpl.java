@@ -272,6 +272,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
                 .certificates(certs)
                 .courseModules(moduleAccessList)
+
+                .urlimagelogo1(firstModule.getUrlimagelogo1())
+                .urlimagelogo2(firstModule.getUrlimagelogo2())
                 .build();
     }
 
@@ -382,6 +385,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
                 .certificates(certs)
                 .courseModules(moduleAccessList)
+
+                .urlimagelogo1(module.getUrlimagelogo1())
+                .urlimagelogo2(module.getUrlimagelogo2())
                 .build();
     }
 

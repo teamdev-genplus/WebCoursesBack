@@ -46,4 +46,9 @@ public class ModuleProfileDTO {
     //lISTA DE MODULOS
     @Builder.Default
     private List<ModuleAccessDTO> courseModules= new ArrayList<>();
+
+    //campos solo para mode "EXCLUSIVO"
+    private String urlimagelogo1;
+    private String urlimagelogo2;
+
 }
