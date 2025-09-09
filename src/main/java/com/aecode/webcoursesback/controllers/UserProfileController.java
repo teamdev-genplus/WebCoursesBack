@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -77,6 +78,7 @@ public class UserProfileController {
 
 
     @PatchMapping("/update/{id}")
+    @Transactional
     public ResponseEntity<String> update(@PathVariable("id") Long id, @RequestBody String jsonPayload) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -91,9 +93,24 @@ public class UserProfileController {
             if (existingUser == null || existingUser.getUserId() == 0) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
             }
+            // ==== REGLA: fullname solo puede cambiar una vez ====
+            if (dto.getFullname() != null) {
+                String incoming = dto.getFullname().trim();
+                String current  = existingUser.getFullname() == null ? "" : existingUser.getFullname().trim();
 
-            // Actualizar campos de UserProfile si están presentes
-            if (dto.getFullname() != null) existingUser.setFullname(dto.getFullname());
+                boolean isDifferent = !incoming.equals(current);
+                if (isDifferent) {
+                    if (existingUser.isFullnameChangeUsed()) {
+                        // Ya usó su única actualización
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
+                                .body("El nombre completo solo puede cambiarse una vez.");
+                    }
+                    // Primer cambio válido
+                    existingUser.setFullname(incoming);
+                    existingUser.setFullnameChangeUsed(true);
+                }
+                // Si es igual, no cambia nada y no consume el “cupo”
+            }
             if (dto.getEmail() != null) existingUser.setEmail(dto.getEmail());
             if (dto.getPassword() != null) existingUser.setPasswordHash(dto.getPassword());
 

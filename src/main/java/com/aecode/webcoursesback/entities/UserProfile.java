@@ -41,6 +41,9 @@ public class UserProfile {
     @Column(length = 100)
     private String status = "Activo";
 
+    @Column(name = "fullname_change_used", columnDefinition = "boolean default false")
+    private boolean fullnameChangeUsed = false;
+
     @OneToOne(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
 
