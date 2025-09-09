@@ -33,13 +33,6 @@ public class StudyPlan {
 
     @Column(nullable = true, length = 255)
     private int orderNumber;
-    //NUEVCOS ATRIBUTOS PARA EL ACCESO A CURSO DEL MODULO COMPRADO
-    @Column(length = 255)
-    private String urlrecording;
-    @Column(length = 255)
-    private String downloadmaterial;
-    @Column(length = 255)
-    private String viewpresentation;
 
     @ElementCollection
     @CollectionTable(name = "studyplan_session", joinColumns = @JoinColumn(name = "studyplan_id"))

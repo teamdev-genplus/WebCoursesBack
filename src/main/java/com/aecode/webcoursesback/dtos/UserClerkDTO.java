@@ -13,4 +13,5 @@ public class UserClerkDTO {
     private Long userId;
     private String clerkId;
     private String email;
+    private String fullname;
 }

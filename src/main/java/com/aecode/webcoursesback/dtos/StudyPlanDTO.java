@@ -18,8 +18,5 @@ public class StudyPlanDTO {
     private String unit;
     private int hours;
     private int orderNumber;
-    private String urlrecording;
-    private String downloadmaterial;
-    private String viewpresentation;
     private List<String> sessions;
 }

@@ -59,6 +59,7 @@ public class UserProfileServiceImplement implements IUserProfileService {
         UserProfile userProfile = new UserProfile();
         userProfile.setClerkId(dto.getClerkId());
         userProfile.setEmail(dto.getEmail());
+        userProfile.setFullname(dto.getFullname());
         upR.save(userProfile);
     }
 

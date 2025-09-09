@@ -87,6 +87,16 @@ public class Module extends BaseProduct{
     @Column(length = 255)
     private String urlimagelogo2;
 
+    //NUEVOS ATRIBUTOS PARA ACCESO AL CUROS
+    @Column(length = 255)
+    private String urlviewsyllabus;
+    @Column(length = 255)
+    private String urlviewcontent;
+    @Column(length = 255)
+    private String urlrecording;
+    @Column(length = 255)
+    private String viewpresentation;
+
     //Relaciones
     @Builder.Default
     @ManyToMany

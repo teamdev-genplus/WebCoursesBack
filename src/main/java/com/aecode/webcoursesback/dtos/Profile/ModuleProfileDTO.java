@@ -1,8 +1,6 @@
 package com.aecode.webcoursesback.dtos.Profile;
-import com.aecode.webcoursesback.dtos.ModuleListDTO;
-import com.aecode.webcoursesback.dtos.MyCertificateDTO;
-import com.aecode.webcoursesback.dtos.ScheduleDTO;
-import com.aecode.webcoursesback.dtos.StudyPlanDTO;
+import com.aecode.webcoursesback.dtos.*;
+import jakarta.persistence.Column;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -18,10 +16,13 @@ public class ModuleProfileDTO {
 
     private String titleStudyplan;
     private String courseTypeLabel;
+    private String urlviewsyllabus;
+    private String urlviewcontent;
 
     @Builder.Default
     private List<StudyPlanDTO> studyPlans = new ArrayList<>();
     private Integer orderNumber;
+
 
     //DETALLES DEL MÓDULO
     private String whatsappGroupLink;
@@ -29,6 +30,9 @@ public class ModuleProfileDTO {
     // Enlaces de herramientas (dropdown)
     @Builder.Default
     private List<ToolLinkDTO> tools = new ArrayList<>();
+
+    private String urlrecording;
+    private String viewpresentation;
 
     // Modo y comportamiento de horarios
     private String mode;        // "ASINCRONO", "ENVIVO", "PROXIMO", "GRATUITO", "MIXTO"
