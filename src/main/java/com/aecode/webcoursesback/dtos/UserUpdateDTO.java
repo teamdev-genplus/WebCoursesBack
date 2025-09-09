@@ -16,6 +16,7 @@ public class UserUpdateDTO {
     private Long userId;
     //Informacion personal
     private String clerkId;
+    private boolean fullnameChangeUsed;
     private String fullname;
     private String email;
     private String phoneNumber;
