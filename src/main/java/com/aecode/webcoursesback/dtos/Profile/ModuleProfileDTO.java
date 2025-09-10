@@ -16,6 +16,7 @@ public class ModuleProfileDTO {
 
     private String titleStudyplan;
     private String courseTypeLabel;
+    // NUEVOS BOTONES (migrados a nivel de módulo)
     private String urlviewsyllabus;
     private String urlviewcontent;
 
@@ -23,14 +24,17 @@ public class ModuleProfileDTO {
     private List<StudyPlanDTO> studyPlans = new ArrayList<>();
     private Integer orderNumber;
 
+    // NUEVO: LOGOS de herramientas relacionadas al módulo (solo imagen, sin nombre)
+    @Builder.Default
+    private List<String> toolPictures = new ArrayList<>();
 
     //DETALLES DEL MÓDULO
     private String whatsappGroupLink;
-
     // Enlaces de herramientas (dropdown)
     @Builder.Default
     private List<ToolLinkDTO> tools = new ArrayList<>();
 
+    // NUEVOS BOTONES (migrados a nivel de módulo)
     private String urlrecording;
     private String viewpresentation;
 

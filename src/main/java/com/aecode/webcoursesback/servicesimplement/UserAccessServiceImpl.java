@@ -238,11 +238,14 @@ public class UserAccessServiceImpl implements IUserAccessService {
         String urlJoinClass = isLive ? firstModule.getUrlJoinClass() : null;
 
         // Herramientas desplegables
-        List<ToolLinkDTO> tools = moduleResourceLinkRepo
+        List<ToolLinkDTO> toolLinks  = moduleResourceLinkRepo
                 .findActiveByModuleIdOrderByOrderNumberAsc(firstModule.getModuleId())
                 .stream()
                 .map(l -> ToolLinkDTO.builder().name(l.getName()).url(l.getUrl()).build())
                 .toList();
+
+        // NUEVO: toolPictures (solo si no es EXCLUSIVO)
+        List<String> toolPictures = resolveToolPictures(firstModule);
 
         // Certificados (solo el nombre)
         List<MyCertificateDTO> certs = mapCertificates(firstModule.getCertificates());
@@ -258,11 +261,19 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .courseId(courseId)
                 .titleStudyplan(titleStudyplan)
                 .courseTypeLabel(courseTypeLabel)
+
+                // NUEVOS botones de módulo
+                .urlviewsyllabus(firstModule.getUrlviewsyllabus())
+                .urlviewcontent(firstModule.getUrlviewcontent())
+                .urlrecording(firstModule.getUrlrecording())
+                .viewpresentation(firstModule.getViewpresentation())
+
                 .studyPlans(studyPlans)
                 .orderNumber(firstModule.getOrderNumber())
 
                 .whatsappGroupLink(whatsapp)
-                .tools(tools)
+                .tools(toolLinks)            // dropdown
+                .toolPictures(toolPictures)  // solo imágenes de Tool (si no es EXCLUSIVO)
 
                 .mode(mode)
                 .isLive(isLive)
@@ -351,11 +362,14 @@ public class UserAccessServiceImpl implements IUserAccessService {
         String urlJoinClass = isLive ? module.getUrlJoinClass() : null;
 
         // Herramientas desplegables
-        List<ToolLinkDTO> tools = moduleResourceLinkRepo
+        List<ToolLinkDTO> toolLinks  = moduleResourceLinkRepo
                 .findActiveByModuleIdOrderByOrderNumberAsc(module.getModuleId())
                 .stream()
                 .map(l -> ToolLinkDTO.builder().name(l.getName()).url(l.getUrl()).build())
                 .toList();
+
+        // NUEVO: toolPictures (solo si no es EXCLUSIVO)
+        List<String> toolPictures = resolveToolPictures(module);
 
         // Certificados (solo nombre)
         List<MyCertificateDTO> certs = mapCertificates(module.getCertificates());
@@ -371,11 +385,19 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .courseId(courseId)
                 .titleStudyplan(titleStudyplan)
                 .courseTypeLabel(courseTypeLabel)
+
+                // NUEVOS botones de módulo
+                .urlviewsyllabus(module.getUrlviewsyllabus())
+                .urlviewcontent(module.getUrlviewcontent())
+                .urlrecording(module.getUrlrecording())
+                .viewpresentation(module.getViewpresentation())
+
                 .studyPlans(studyPlans)
                 .orderNumber(module.getOrderNumber())
 
                 .whatsappGroupLink(whatsapp)
-                .tools(tools)
+                .tools(toolLinks)            // dropdown
+                .toolPictures(toolPictures)  // solo imágenes de Tool (si no es EXCLUSIVO)
 
                 .mode(mode)
                 .isLive(isLive)
@@ -586,6 +608,26 @@ public class UserAccessServiceImpl implements IUserAccessService {
                         .timezone(null)        // opcional
                         .build()
         );
+    }
+
+    /**
+     * Devuelve la lista de URLs de los logos de herramientas (Tool.picture)
+     * SOLO si el módulo NO es EXCLUSIVO. En EXCLUSIVO => lista vacía.
+     */
+    private List<String> resolveToolPictures(Module module) {
+        boolean isExclusive = module.getMode() != null && "EXCLUSIVO".equalsIgnoreCase(module.getMode().name());
+        if (isExclusive) return List.of();
+
+        List<Tool> tools = module.getTools();
+        if (tools == null || tools.isEmpty()) return List.of();
+
+        return tools.stream()
+                .map(Tool::getPicture)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .toList();
     }
 
 
