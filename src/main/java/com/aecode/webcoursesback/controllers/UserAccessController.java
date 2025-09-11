@@ -46,6 +46,8 @@ public class UserAccessController {
      * IMPORTANTE: Esto también guarda accesos en usermoduleaccess, porque
      * internamente llama a userAccessService.grantMultipleModuleAccess(...).
      */
+
+    /*
     @PostMapping("/modules/access/purchase")
     public ResponseEntity<AccessPurchaseResponseDTO> grantModulesWithFrontAssertedPurchase(
             @Valid @RequestBody AccessPurchaseRequestDTO request
@@ -53,7 +55,7 @@ public class UserAccessController {
         // Si ya usas el filtro de consistencia, aquí no necesitas más validación del clerkId.
         AccessPurchaseResponseDTO res = purchaseAccessService.processFrontAssertedPurchase(request);
         return ResponseEntity.ok(res);
-    }
+    }*/
 
 
     // ======================

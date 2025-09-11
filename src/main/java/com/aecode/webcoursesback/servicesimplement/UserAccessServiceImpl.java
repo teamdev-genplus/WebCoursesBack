@@ -227,10 +227,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
         // Modo / dinámicas de horario
         String mode = (firstModule.getMode() != null) ? firstModule.getMode().name() : null;
-        boolean isLive = "ENVIVO".equalsIgnoreCase(mode);
+        boolean isLive = isLiveOrExclusiveMode(firstModule);  // ENVIVO o EXCLUSIVO => true
         boolean available247 = !isLive;
 
-        // 👇 ahora usando el helper que decide entre horarios reales o "Disponible 24/7"
         List<ScheduleDTO> schedulesDto = resolveSchedulesFor(firstModule);
         String urlJoinClass = isLive ? firstModule.getUrlJoinClass() : null;
 
@@ -351,7 +350,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
 
         // Modo / dinámicas de horario
         String mode = (module.getMode() != null) ? module.getMode().name() : null;
-        boolean isLive = "ENVIVO".equalsIgnoreCase(mode);
+        boolean isLive = isLiveOrExclusiveMode(module);  // ENVIVO o EXCLUSIVO => true
         boolean available247 = !isLive;
 
         // 👇 helper para horarios o “Disponible 24/7”
@@ -587,12 +586,11 @@ public class UserAccessServiceImpl implements IUserAccessService {
     }
 
     /**
-     * Si el módulo es ENVIVO => mapea sus schedules reales.
-     * Si NO es ENVIVO => devuelve un único ScheduleDTO con "Disponible 24/7".
+     * Si el módulo es ENVIVO o EXCLUSIVO => mapea sus schedules reales.
+     * Si NO es ninguno => devuelve un único ScheduleDTO con "Disponible 24/7".
      */
     private List<ScheduleDTO> resolveSchedulesFor(Module module) {
-        boolean isLive = module.getMode() != null && "ENVIVO".equalsIgnoreCase(module.getMode().name());
-        if (isLive) {
+        if (isLiveOrExclusiveMode(module)) {
             return mapSchedules(module.getSchedules()); // usa tu mapper 1:1 ya implementado
         }
         // Mensaje calculado (no se persiste en BD)
@@ -600,9 +598,9 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 ScheduleDTO.builder()
                         .scheduleId(null)
                         .scheduleName("Disponible 24/7")
-                        .startDateTime(null)   // opcional, si tu DTO los tiene
-                        .endDateTime(null)     // opcional
-                        .timezone(null)        // opcional
+                        .startDateTime(null)
+                        .endDateTime(null)
+                        .timezone(null)
                         .build()
         );
     }
@@ -626,6 +624,14 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .distinct()
                 .toList();
     }
+
+    /** Modo que debe mostrar horarios reales y botón de clase. */
+    private boolean isLiveOrExclusiveMode(Module module) {
+        return module.getMode() != null &&
+                ("ENVIVO".equalsIgnoreCase(module.getMode().name())
+                        || "EXCLUSIVO".equalsIgnoreCase(module.getMode().name()));
+    }
+
 
 
 
