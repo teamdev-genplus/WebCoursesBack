@@ -109,7 +109,7 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
 
         } else {
             // Ya concedido antes (idempotente)
-            granted = userAccessService.getUserModulesByClerkId(req.getClegitId()).stream()
+            granted = userAccessService.getUserModulesByClerkId(req.getClerkId()).stream()
                     .filter(dto -> req.getModuleIds().contains(dto.getModuleId()))
                     .toList();
         }
