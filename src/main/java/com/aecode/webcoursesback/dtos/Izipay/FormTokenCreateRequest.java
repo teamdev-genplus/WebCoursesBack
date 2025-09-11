@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.dtos.Izipay;
 import lombok.*;
 
+import java.util.List;
+
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class FormTokenCreateRequest {
     private String orderId;        // requerido
@@ -22,4 +24,7 @@ public class FormTokenCreateRequest {
     private String city;           // "Lima"
     private String state;          // "Lima"
     private String zipCode;        // "15000"
+
+    // NUEVO: lo que el usuario compra (módulos)
+    private List<Long> moduleIds;
 }

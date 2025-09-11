@@ -3,8 +3,6 @@ package com.aecode.webcoursesback.entities;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

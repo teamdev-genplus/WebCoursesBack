@@ -1,15 +1,18 @@
-package com.aecode.webcoursesback.servicesimplement;
+package com.aecode.webcoursesback.servicesimplement.Izipay;
 import com.aecode.webcoursesback.config.IzipayProperties;
 import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateRequest;
 import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateResponse;
 import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentRequest;
 import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentResponse;
 import com.aecode.webcoursesback.entities.Izipay.PaymentOrder;
+import com.aecode.webcoursesback.entities.Izipay.PaymentOrderItem;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.integrations.IzipayClient;
 import com.aecode.webcoursesback.repositories.IUserProfileRepository;
+import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderItemRepository;
 import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderRepository;
-import com.aecode.webcoursesback.services.PaymentService;
+import com.aecode.webcoursesback.services.Izipay.PaymentEntitlementService;
+import com.aecode.webcoursesback.services.Izipay.PaymentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,10 @@ public class PaymentServiceImpl implements PaymentService {
     private final IzipayClient izipayClient;
     private final IzipayProperties props;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    // NUEVO
+    private final PaymentOrderItemRepository itemRepo;
+    private final PaymentEntitlementService entitlementService;
 
     @Override
     public FormTokenCreateResponse createFormToken(FormTokenCreateRequest req) {
@@ -61,8 +68,21 @@ public class PaymentServiceImpl implements PaymentService {
         order.setCurrency(req.getCurrency());
         order.setStatus(PaymentOrder.PaymentStatus.PENDING);
         order.setMode(resolveModeFromPassword(props.getPassword()));
+        order.setEntitlementsGranted(false);
+        order.setGrantedAt(null);
         order = paymentOrderRepository.save(order);
-
+        // 3b) Guardar líneas de orden (módulos)
+        itemRepo.deleteByOrder(order);
+        if (req.getModuleIds() != null && !req.getModuleIds().isEmpty()) {
+            for (Long mid : req.getModuleIds()) {
+                PaymentOrderItem it = PaymentOrderItem.builder()
+                        .order(order)
+                        .moduleId(mid)
+                        .priceCents(null) // opcional
+                        .build();
+                itemRepo.save(it);
+            }
+        }
         // 4) Armar payload para CreatePayment
         Map<String, Object> payload = new HashMap<>();
         payload.put("amount", order.getAmountCents());
@@ -135,6 +155,11 @@ public class PaymentServiceImpl implements PaymentService {
                 PaymentOrder.PaymentStatus newStatus = mapOrderStatus(orderStatus);
                 po.setStatus(newStatus);
                 paymentOrderRepository.save(po);
+
+                // Si quedó pagado, conceder accesos (idempotente)
+                if (newStatus == PaymentOrder.PaymentStatus.PAID) {
+                    entitlementService.fulfillIfPaid(po);
+                }
             }
         }
 
@@ -166,8 +191,14 @@ public class PaymentServiceImpl implements PaymentService {
 
             if (orderId != null) {
                 paymentOrderRepository.findByOrderId(orderId).ifPresent(po -> {
-                    po.setStatus(mapOrderStatus(orderStatus));
+                    PaymentOrder.PaymentStatus newStatus = mapOrderStatus(orderStatus);
+                    po.setStatus(newStatus);
                     paymentOrderRepository.save(po);
+
+                    // Si quedó pagado, conceder accesos (idempotente)
+                    if (newStatus == PaymentOrder.PaymentStatus.PAID) {
+                        entitlementService.fulfillIfPaid(po);
+                    }
                 });
             }
         } catch (Exception ignored) {}

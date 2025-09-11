@@ -1,4 +1,4 @@
-package com.aecode.webcoursesback.services;
+package com.aecode.webcoursesback.services.Izipay;
 import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateRequest;
 import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateResponse;
 import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentRequest;

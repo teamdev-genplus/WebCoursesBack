@@ -3,7 +3,7 @@ import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateRequest;
 import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateResponse;
 import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentRequest;
 import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentResponse;
-import com.aecode.webcoursesback.services.PaymentService;
+import com.aecode.webcoursesback.services.Izipay.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

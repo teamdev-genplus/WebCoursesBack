@@ -3,6 +3,8 @@ package com.aecode.webcoursesback.entities.Izipay;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
@@ -41,6 +43,13 @@ public class PaymentOrder {
 
     @Column(name = "mode", length = 20)
     private String mode;               // "TEST" o "PROD" (opcional, informativo)
+
+    // ===== NUEVO: idempotencia de concesión =====
+    @Column(name = "entitlements_granted", nullable = false)
+    private boolean entitlementsGranted = false;
+
+    @Column(name = "granted_at")
+    private OffsetDateTime grantedAt;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;

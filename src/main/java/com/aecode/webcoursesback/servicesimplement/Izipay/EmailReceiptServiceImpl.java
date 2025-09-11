@@ -1,247 +1,94 @@
-package com.aecode.webcoursesback.controllers;
-
-import com.aecode.webcoursesback.dtos.*;
-import com.aecode.webcoursesback.dtos.Paid.AccessPurchaseRequestDTO;
-import com.aecode.webcoursesback.dtos.Paid.AccessPurchaseResponseDTO;
-import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
+package com.aecode.webcoursesback.servicesimplement.Izipay;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
-import com.aecode.webcoursesback.repositories.IModuleRepo;
-import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.EmailSenderService;
-import com.aecode.webcoursesback.services.IUserAccessService;
-import com.aecode.webcoursesback.services.Paid.PurchaseAccessService;
+import com.aecode.webcoursesback.services.Izipay.EmailReceiptService;
 import jakarta.mail.MessagingException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-@RestController
-@RequestMapping("/user-access")
-public class UserAccessController {
 
-    @Autowired
-    private IUserAccessService userAccessService;
-    @Autowired
-    private IUserProfileRepository userProfileRepo;
-    @Autowired
-    private IModuleRepo moduleRepo;
-    @Autowired
-    private EmailSenderService emailSenderService;
+@Service
+@RequiredArgsConstructor
+public class EmailReceiptServiceImpl implements EmailReceiptService {
+    private final EmailSenderService emailSenderService;
 
-    // NUEVO: servicio que ya creaste en servicesimplement.Paid.PurchaseAccessServiceImpl
-    @Autowired private PurchaseAccessService purchaseAccessService;
-
-    /**
-     * NUEVO: Otorga acceso por compra "front-asserted" (PayPal / Yape / Plin),
-     * envía email HTML con los datos recibidos y persiste un recibo unificado.
-     * Izipay se maneja aparte (IPN/validate).
-     *
-     * IMPORTANTE: Esto también guarda accesos en usermoduleaccess, porque
-     * internamente llama a userAccessService.grantMultipleModuleAccess(...).
-     */
-    @PostMapping("/modules/access/purchase")
-    public ResponseEntity<AccessPurchaseResponseDTO> grantModulesWithFrontAssertedPurchase(
-            @Valid @RequestBody AccessPurchaseRequestDTO request
-    ) {
-        // Si ya usas el filtro de consistencia, aquí no necesitas más validación del clerkId.
-        AccessPurchaseResponseDTO res = purchaseAccessService.processFrontAssertedPurchase(request);
-        return ResponseEntity.ok(res);
+    private static double nvl(Double d, double def) { return d == null ? def : d; }
+    private static String safe(String s) {
+        if (s == null) return "";
+        return s.replace("&","&amp;").replace("<","&lt;")
+                .replace(">","&gt;").replace("\"","&quot;");
+    }
+    private static String nullSafe(String primary, String fallback) {
+        return (primary == null || primary.isBlank()) ? fallback : primary;
+    }
+    private static String fmt(double amount, String currency) {
+        // 105.18 PEN  /  105.18 USD
+        return String.format(Locale.US, "%.2f %s", amount, currency);
     }
 
+    @Override
+    public void sendIzipayReceipt(UserProfile user,
+                                  List<Module> modules,
+                                  String purchaseNumber,
+                                  OffsetDateTime purchasedAt,
+                                  String currency,
+                                  double amountPaid) {
 
-    // ======================
-    // ACCESO DEL USUARIO
-    // ======================
+        if (purchasedAt == null) purchasedAt = OffsetDateTime.now();
+        if (currency == null || currency.isBlank()) currency = "PEN";
 
-    /**
-     * Obtener cards de los cursos a los que el usuario tiene acceso (completo o parcial).
-     */
-    @GetMapping("/courses/{clerkId}")
-    public ResponseEntity<List<CourseCardProgressDTO>> getUserCourses(@PathVariable String clerkId) {
-        return ResponseEntity.ok(userAccessService.getAccessibleCoursesForUser(clerkId));
-    }
-
-    /**
-     * Obtener el primer módulo disponible de un curso al que el usuario tenga acceso.
-     */
-    @GetMapping("/courses/id/{courseId}/first-module")
-    public ResponseEntity<ModuleProfileDTO> getFirstAccessibleModule(
-            @RequestParam String clerkId,
-            @PathVariable Long courseId
-    ) {
-        return ResponseEntity.ok(userAccessService.getFirstAccessibleModuleForUser(clerkId, courseId));
-    }
-
-    @GetMapping("/courses/{urlnamecourse}/first-module")
-    public ResponseEntity<ModuleProfileDTO> getFirstAccessibleModuleByurlName(
-            @RequestParam String clerkId,
-            @PathVariable String urlnamecourse
-    ) {
-        return ResponseEntity.ok(
-                userAccessService.getFirstAccessibleModuleForUserBySlug(clerkId, urlnamecourse)
-        );
-    }
-
-
-    /**
-     * Obtener información de un módulo si el usuario tiene acceso a él.
-     */
-    @GetMapping("/modules/{moduleId}")
-    public ResponseEntity<?> getModuleIfHasAccess(
-            @RequestParam String clerkId,
-            @PathVariable Long moduleId
-    ) {
-        return ResponseEntity.ok(userAccessService.getModuleById(moduleId, clerkId));
-    }
-
-    /**
-     * Obtener los módulos a los que el usuario tiene acceso.
-     */
-    @GetMapping("/modules")
-    public ResponseEntity<List<UserModuleDTO>> getUserModules(@RequestParam String clerkId) {
-        return ResponseEntity.ok(userAccessService.getUserModulesByClerkId(clerkId));
-    }
-
-    // ======================
-    // ACCESO ADMIN / BACKOFFICE
-    // ======================
-
-    /**
-     * Obtener todos los cursos con acceso registrado.
-     */
-    @GetMapping("/admin/courses")
-    public ResponseEntity<List<UserCourseDTO>> getAllCoursesAccess() {
-        return ResponseEntity.ok(userAccessService.getAllCourses());
-    }
-
-    /**
-     * Obtener todos los módulos con acceso registrado.
-     */
-    @GetMapping("/admin/modules")
-    public ResponseEntity<List<UserModuleDTO>> getAllModulesAccess() {
-        return ResponseEntity.ok(userAccessService.getAllModules());
-    }
-
-    // ======================
-    // GESTIÓN DE ACCESO (COMPRAS / TRACKING)
-    // ======================
-
-    /**
-     * Otorgar acceso completo a un curso al usuario (incluye todos los módulos).
-     */
-    @PostMapping("/courses/access")
-    public ResponseEntity<UserCourseDTO> grantCourseAccess(
-            @RequestParam String clerkId,
-            @RequestParam Long courseId
-    ) {
-        UserCourseDTO result = userAccessService.grantCourseAccess(clerkId, courseId);
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * Otorgar acceso individual a un módulo al usuario.
-     */
-    @PostMapping("/modules/access")
-    public ResponseEntity<UserModuleDTO> grantModuleAccess(
-            @RequestParam String clerkId,
-            @RequestParam Long moduleId
-    ) {
-        UserModuleDTO result = userAccessService.grantModuleAccess(clerkId, moduleId);
-        return ResponseEntity.ok(result);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //ADAPTAR ESTE ENVIO DE CORREOS DE UN ANTERIOR CONTROLLER Y ENDPOINT A grantMultipleModules
-    @PostMapping("/modules/access/multiple")
-    public ResponseEntity<List<UserModuleDTO>> grantMultipleModules(
-            @RequestParam String clerkId,
-            @RequestBody List<Long> moduleIds
-    ) {
-        if (moduleIds == null || moduleIds.isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
-
-        // --- 1) Traer usuario (email / nombre) ---
-        UserProfile user = userProfileRepo.findByClerkId(clerkId)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario con Clerk ID no encontrado: " + clerkId));
-
-        // --- 2) Traer módulos (para precios/títulos) ---
-        List<Module> modules = moduleRepo.findAllById(moduleIds);
-        if (modules.size() != moduleIds.size()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Collections.emptyList()); // alguno no existe
-        }
-
-        // --- 3) Calcular importes y construir contenido para emails ---
+        // ===== 1) Calcular importes (comisión = 0; desc = subtotal - pagado si aplica)
         double subtotal = 0.0;
-        double descuentoTotal = 0.0;
-        double comision = 0.0;
-        double total = 0.0;
-
         StringBuilder cursosHtmlBuilder = new StringBuilder();
         StringBuilder companyCoursesBuilder = new StringBuilder();
 
         for (Module m : modules) {
-            // Título mostrado: "Curso - Nombre del Módulo" (ajusta si prefieres solo el módulo)
             String itemTitle = (m.getCourse() != null && m.getCourse().getTitle() != null)
                     ? m.getCourse().getTitle() + " — " + safe(m.getProgramTitle())
                     : safe(m.getProgramTitle());
 
-            // === PRECIOS ===
-            // Ajusta estos getters si tus nombres de campo difieren
+            // Tomamos el precio "regular" como referencia para subtotal (ajusta si usas otro campo)
             double price = nvl(m.getPriceRegular(), 0.0);
-            Boolean onSale = m.getIsOnSale() != null ? m.getIsOnSale() : Boolean.FALSE;
-            Double prompt = m.getPromptPaymentPrice();
-
-            if (onSale && prompt != null && prompt > 0) {
-                double discount = price - prompt;
-                if (discount > 0) {
-                    descuentoTotal += discount;
-                }
-            }
-
             subtotal += price;
 
-            // Fila para HTML usuario
+            // fila para HTML (usuario)
             cursosHtmlBuilder.append(
                     "<tr>" +
                             "<td align=\"center\" style=\"padding:5px 40px; font-family:verdana, geneva, sans-serif; font-size:14px; color:#333333;\">" +
                             "<strong>" + itemTitle + "</strong></td>" +
                             "<td align=\"center\" style=\"padding:5px 40px; font-family:verdana, geneva, sans-serif; font-size:14px; color:#333333; width:85px;\">" +
-                            String.format(java.util.Locale.US, "%.2f $", price) + "</td>" +
+                            fmt(price, currency) + "</td>" +
                             "</tr>"
             );
 
-            // Texto para email empresa
-            companyCoursesBuilder.append(String.format(java.util.Locale.US, "- %s (%.2f $)%n", itemTitle, price));
+            // texto para email empresa
+            companyCoursesBuilder.append(String.format(Locale.US, "- %s (%s)%n", itemTitle, fmt(price, currency)));
         }
 
-        // Comisión PayPal (5.4% + 0.30) como en tu endpoint anterior
-        comision = (((subtotal - descuentoTotal) + 0.30) * 100) / (100 - 5.4);
-        comision = Math.round(comision * 100.0) / 100.0;
-        comision = comision - (subtotal - descuentoTotal);
+        // comisión Izipay (para el email) = 0
+        double comision = 0.0;
 
-        total = subtotal - descuentoTotal + comision;
+        // descuento: si el total pagado es menor al subtotal calculado => asumimos descuento aplicado
+        double descuentoTotal = subtotal - amountPaid;
+        if (descuentoTotal < 0) descuentoTotal = 0.0;
 
-        // --- 4) Nro/Fecha de compra ---
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String numeroCompra = now.format(formatter);
+        double total = amountPaid;
+
+        // ===== 2) Fechas para el email
+        // número de compra: usa el orderId de Izipay que enviamos desde PaymentEntitlementService
+        String numeroCompra = (purchaseNumber == null || purchaseNumber.isBlank())
+                ? DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(purchasedAt)
+                : purchaseNumber;
 
         java.util.Locale locale = new java.util.Locale("es", "ES");
-        String fechaCompra = LocalDate.now().format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy", locale));
+        String fechaCompra = purchasedAt.toLocalDate().format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy", locale));
 
-        // --- 5) Ejecutar la lógica de otorgar accesos ---
-        List<UserModuleDTO> saved = userAccessService.grantMultipleModuleAccess(clerkId, moduleIds);
-
-        // --- 6) Armar HTML (MISMO DISEÑO) y enviar emails ---
+        // ===== 3) HTML (idéntico al de PayPal; sólo cambia "Método de Pago" y los importes formateados)
         String userHtml =
                 "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
                         "<html dir=\"ltr\" xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" lang=\"es\">\n" +
@@ -252,27 +99,6 @@ public class UserAccessController {
                         "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n" +
                         "  <meta content=\"telephone=no\" name=\"format-detection\">\n" +
                         "  <title>¡Confirmación de Compra! AECODE Training 📚🎉</title>\n" +
-                        "  <!--[if (mso 16)]>\n" +
-                        "    <style type=\"text/css\">\n" +
-                        "    a {text-decoration: none;}\n" +
-                        "    </style>\n" +
-                        "  <![endif]-->\n" +
-                        "  <!--[if gte mso 9]><style>sup { font-size: 100% !important; }</style><![endif]-->\n" +
-                        "  <!--[if gte mso 9]>\n" +
-                        "  <noscript>\n" +
-                        "         <xml>\n" +
-                        "           <o:OfficeDocumentSettings>\n" +
-                        "           <o:AllowPNG></o:AllowPNG>\n" +
-                        "           <o:PixelsPerInch>96</o:PixelsPerInch>\n" +
-                        "           </o:OfficeDocumentSettings>\n" +
-                        "         </xml>\n" +
-                        "      </noscript>\n" +
-                        "  <![endif]-->\n" +
-                        "  <!--[if mso]><xml>\n" +
-                        "    <w:WordDocument xmlns:w=\"urn:schemas-microsoft-com:office:word\">\n" +
-                        "      <w:DontUseAdvancedTypographyReadingMail/>\n" +
-                        "    </w:WordDocument>\n" +
-                        "    </xml><![endif]-->\n" +
                         "  <style type=\"text/css\"></style>\n" +
                         " </head>\n" +
                         " <body class=\"body\" style=\"width:100%;height:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0;background-color:#FAFAFA\">\n" +
@@ -320,12 +146,12 @@ public class UserAccessController {
                         "                     </tr>\n" +
                         "                     <tr>\n" +
                         "                      <td align=\"center\" style=\"padding:10px 0 10px 0; font-family:verdana, geneva, sans-serif; font-size:20px; color:#5C68E2; font-weight:bold;\">\n" +
-                        "                        Nro. Compra <a target=\"_blank\" style=\"text-decoration:underline;color:#5C68E2;\" href=\"#\">#" + numeroCompra + "</a>\n" +
+                        "                        Nro. Compra <a target=\"_blank\" style=\"text-decoration:underline;color:#5C68E2;\" href=\"#\">#" + safe(numeroCompra) + "</a>\n" +
                         "                      </td>\n" +
                         "                     </tr>\n" +
                         "                     <tr>\n" +
                         "                      <td align=\"center\" style=\"padding:0;Margin:0; font-family:verdana, geneva, sans-serif; font-size:14px; color:#333333;\">" +
-                        "                        " + fechaCompra + "\n" +
+                        "                        " + safe(fechaCompra) + "\n" +
                         "                      </td>\n" +
                         "                     </tr>\n" +
                         "                     <tr>\n" +
@@ -362,10 +188,10 @@ public class UserAccessController {
                         "                     <tr>\n" +
                         "                      <td align=\"right\" style=\"padding:0;Margin:0;padding-top:10px;padding-bottom:20px\">\n" +
                         "                       <p style=\"Margin:0;font-family:verdana, geneva, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px\">" +
-                        "Subtotal: <strong>" + String.format(java.util.Locale.US, "%.2f $", subtotal) + "</strong><br>" +
-                        "Descuentos: <strong>" + String.format(java.util.Locale.US, "%.2f $", descuentoTotal) + "</strong><br>" +
-                        "Comisión: <strong>" + String.format(java.util.Locale.US, "%.2f $", comision) + "</strong><br>" +
-                        "Total: <strong>" + String.format(java.util.Locale.US, "%.2f $", total) + "</strong>" +
+                        "Subtotal: <strong>" + fmt(subtotal, currency) + "</strong><br>" +
+                        "Descuentos: <strong>" + fmt(descuentoTotal, currency) + "</strong><br>" +
+                        "Comisión: <strong>" + fmt(0.0, currency) + "</strong><br>" +
+                        "Total: <strong>" + fmt(total, currency) + "</strong>" +
                         "</p>\n" +
                         "                      </td>\n" +
                         "                     </tr>\n" +
@@ -381,10 +207,10 @@ public class UserAccessController {
                         "                         <tr>\n" +
                         "                          <td align=\"left\" style=\"padding:0;Margin:0;font-family:verdana, geneva, sans-serif;font-size:12px;color:#333333;line-height:18px;letter-spacing:0\">\n" +
                         "                           <p>Cliente: <strong>" + safe(user.getEmail()) + "</strong></p>\n" +
-                        "                           <p>Número de Compra: <strong>#" + numeroCompra + "</strong></p>\n" +
-                        "                           <p>Fecha: <strong>" + fechaCompra + "</strong></p>\n" +
-                        "                           <p>Método de Pago: <strong>PayPal</strong></p>\n" +
-                        "                           <p>Moneda: <strong>USD</strong></p>\n" +
+                        "                           <p>Número de Compra: <strong>#" + safe(numeroCompra) + "</strong></p>\n" +
+                        "                           <p>Fecha: <strong>" + safe(fechaCompra) + "</strong></p>\n" +
+                        "                           <p>Método de Pago: <strong>Izipay</strong></p>\n" +
+                        "                           <p>Moneda: <strong>" + safe(currency) + "</strong></p>\n" +
                         "                          </td>\n" +
                         "                         </tr>\n" +
                         "                       </table>\n" +
@@ -424,67 +250,30 @@ public class UserAccessController {
                         " </body>\n" +
                         "</html>";
 
+        // ===== 4) Envíos
         try {
-            // Email HTML al usuario
+            // Usuario
             emailSenderService.sendHtmlEmail(user.getEmail(), "Confirmación de compra", userHtml);
 
-            // Email texto a la empresa
+            // Empresa (texto plano)
             String companyBody = String.format(
-                    java.util.Locale.US,
+                    Locale.US,
                     "El usuario %s (%s) ha comprado los siguientes módulos:%n%s%n" +
-                            "Subtotal: %.2f $%nDescuentos: %.2f $%nComisión: %.2f $%nTotal pagado: %.2f $%nFecha: %s",
+                            "Subtotal: %s%nDescuentos: %s%nComisión: %s%nTotal pagado: %s%nFecha: %s",
                     nullSafe(user.getFullname(), user.getEmail()),
                     user.getEmail(),
                     companyCoursesBuilder.toString(),
-                    subtotal,
-                    descuentoTotal,
-                    comision,
-                    total,
-                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+                    fmt(subtotal, currency),
+                    fmt(descuentoTotal, currency),
+                    fmt(0.0, currency),
+                    fmt(total, currency),
+                    purchasedAt.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
             );
-            emailSenderService.sendEmail("contacto@aecode.ai", "Nueva compra de módulos", companyBody);
+            emailSenderService.sendEmail("contacto@aecode.ai", "Nueva compra de módulos (Izipay)", companyBody);
 
         } catch (MessagingException e) {
-            // Si falla el email, igual devolvemos los accesos otorgados (puedes cambiar el comportamiento si quieres)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(saved);
+            // No bloqueamos el flujo si falla el envío
+            System.err.println("Fallo enviando email de Izipay: " + e.getMessage());
         }
-
-        return ResponseEntity.ok(saved);
     }
-
-    // ======================
-    // TRACKING
-    // ======================
-    /**
-     * Marcar un módulo como completado por el usuario.
-     */
-    @PutMapping("/modules/{moduleId}/complete")
-    public ResponseEntity<?> markModuleAsCompleted(
-            @RequestParam String clerkId,
-            @PathVariable Long moduleId
-    ) {
-        boolean updated = userAccessService.markModuleAsCompleted(clerkId, moduleId);
-        return updated
-                ? ResponseEntity.ok("Módulo marcado como completado")
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
-    }
-    // ======================
-    // Helpers privados
-    // ======================
-
-    private static double nvl(Double d, double def) {
-        return d == null ? def : d;
-    }
-
-    private static String safe(String s) {
-        if (s == null) return "";
-        return s.replace("&","&amp;").replace("<","&lt;")
-                .replace(">","&gt;").replace("\"","&quot;");
-    }
-
-    private static String nullSafe(String primary, String fallback) {
-        return (primary == null || primary.isBlank()) ? fallback : primary;
-    }
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 }
