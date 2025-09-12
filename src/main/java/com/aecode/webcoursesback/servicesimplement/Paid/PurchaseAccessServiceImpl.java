@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +35,23 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
     private final IUserAccessService userAccessService;
     private final EmailSenderService emailSenderService;
 
+    // ===== helpers para precios =====
+    private static BigDecimal unitPrice(Module m) {
+        boolean onSale = Boolean.TRUE.equals(m.getIsOnSale());
+        Double prompt = m.getPromptPaymentPrice();
+        Double regular = m.getPriceRegular();
+        double chosen = onSale && prompt != null && prompt > 0 ? prompt
+                : regular != null ? regular : 0.0;
+        return BigDecimal.valueOf(chosen).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal subtotalFromModules(List<Module> modules) {
+        return modules.stream()
+                .map(PurchaseAccessServiceImpl::unitPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
     @Transactional
     @Override
     public AccessPurchaseResponseDTO processFrontAssertedPurchase(AccessPurchaseRequestDTO req) {
@@ -47,6 +65,26 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
             throw new EntityNotFoundException("Uno o más módulos no existen.");
         }
 
+        // ===== subtotal efectivo (req o cálculo de módulos)
+        BigDecimal effectiveSubtotal = Optional.ofNullable(req.getSubtotal())
+                .orElseGet(() -> subtotalFromModules(modules));
+
+        // ===== comisión efectiva (0 si no llega)
+        BigDecimal effectiveCommission = Optional.ofNullable(req.getCommission())
+                .orElse(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        // ===== descuento efectivo:
+        // Si no llega => descuento = subtotal + comisión - total (>=0)
+        BigDecimal effectiveDiscount = Optional.ofNullable(req.getDiscount())
+                .orElseGet(() -> {
+                    BigDecimal d = effectiveSubtotal.add(effectiveCommission).subtract(req.getTotal());
+                    if (d.compareTo(BigDecimal.ZERO) < 0) d = BigDecimal.ZERO;
+                    return d;
+                })
+                .setScale(2, RoundingMode.HALF_UP);
+
+
         // 3) Buscar o crear recibo (idempotencia por purchaseNumber)
         PaymentReceipt receipt = receiptRepo.findByPurchaseNumber(req.getPurchaseNumber())
                 .orElseGet(() -> {
@@ -59,10 +97,10 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                             .purchaseDateLabel(req.getPurchaseDateLabel())
                             .method(PaymentReceipt.PaymentMethod.valueOf(req.getMethod().name()))
                             .currency(PaymentReceipt.CurrencyCode.valueOf(req.getCurrency().name()))
-                            .subtotal(req.getSubtotal()) // opcional; si viene del front, se usa en el email
-                            .discount(Optional.ofNullable(req.getDiscount()).orElse(BigDecimal.ZERO))
-                            .commission(Optional.ofNullable(req.getCommission()).orElse(BigDecimal.ZERO))
-                            .total(req.getTotal())
+                            .subtotal(effectiveSubtotal.setScale(2, RoundingMode.HALF_UP))
+                            .discount(effectiveDiscount)
+                            .commission(effectiveCommission)
+                            .total(req.getTotal().setScale(2, RoundingMode.HALF_UP))
                             .moduleIdsCsv(req.getModuleIds().stream().map(String::valueOf).collect(Collectors.joining(",")))
                             .entitlementsGranted(false)
                             .build();
@@ -90,23 +128,16 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
             // Primera vez que concedemos
             granted = userAccessService.grantMultipleModuleAccess(req.getClerkId(), req.getModuleIds());
 
-            // 6) Enviar emails (usuario + empresa). Si falla el correo, los accesos ya quedaron.
-            // 6) Enviar emails (usuario + empresa). Si falla el correo, los accesos ya quedaron.
+            // 6) Enviar emails (usuario + empresa). Si falla, no hay rollback de accesos
             try {
-                // ⬇️ ANTES:
-                // String html = EmailReceiptRenderer.renderFrontAsserted(user, modules, receipt);
-
-                // ⬇️ AHORA (mismo diseño que tu endpoint antiguo):
                 String html = EmailReceiptRenderer.renderLegacyExact(user, modules, receipt);
-
                 emailSenderService.sendHtmlEmail(user.getEmail(), "Confirmación de compra", html);
 
                 String plain = EmailReceiptRenderer.renderCompanyPlain(user, modules, receipt);
                 emailSenderService.sendEmail("contacto@aecode.ai", "Nueva compra (front-asserted)", plain);
             } catch (MessagingException me) {
-                // Loggear; no hacer rollback de accesos
+                // loggear
             }
-
         } else {
             // Ya concedido antes (idempotente)
             granted = userAccessService.getUserModulesByClerkId(req.getClerkId()).stream()
@@ -123,4 +154,5 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                 .grantedModules(granted)
                 .build();
     }
+
 }

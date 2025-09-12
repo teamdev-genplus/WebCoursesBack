@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 public class EmailReceiptRenderer {
 
-
     private static String escape(String s) {
         return s == null ? "" : s.replace("&","&amp;")
                 .replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;");
@@ -35,6 +34,27 @@ public class EmailReceiptRenderer {
         return switch (code) { case USD -> "$"; case PEN -> "S/"; default -> code.name(); };
     }
 
+    // ===== nuevos helpers de totales (para consistencia con el service) =====
+    private static BigDecimal effectiveSubtotal(List<Module> modules, PaymentReceipt r) {
+        return Optional.ofNullable(r.getSubtotal()).orElseGet(() -> subtotalFromModules(modules))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal effectiveCommission(PaymentReceipt r) {
+        return Optional.ofNullable(r.getCommission()).orElse(BigDecimal.ZERO)
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal effectiveDiscount(List<Module> modules, PaymentReceipt r) {
+        if (r.getDiscount() != null) return r.getDiscount().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal subtotal = effectiveSubtotal(modules, r);
+        BigDecimal commission = effectiveCommission(r);
+        BigDecimal total = Optional.ofNullable(r.getTotal()).orElse(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal d = subtotal.add(commission).subtract(total);
+        if (d.compareTo(BigDecimal.ZERO) < 0) d = BigDecimal.ZERO;
+        return d.setScale(2, RoundingMode.HALF_UP);
+    }
+
     public static String renderLegacyExact(UserProfile user, List<Module> modules, PaymentReceipt r) {
         // ======= Valores a inyectar
         String numeroCompra = escape(r.getPurchaseNumber());
@@ -51,12 +71,13 @@ public class EmailReceiptRenderer {
         String moneda = r.getCurrency().name();
         String curSuf = currencySuffix(r.getCurrency());
 
-        BigDecimal subtotal = (r.getSubtotal()!=null) ? r.getSubtotal() : subtotalFromModules(modules);
-        BigDecimal descuento = Optional.ofNullable(r.getDiscount()).orElse(BigDecimal.ZERO);
-        BigDecimal comision  = Optional.ofNullable(r.getCommission()).orElse(BigDecimal.ZERO);
-        BigDecimal total     = r.getTotal();
+        // Totales efectivos (respetando la misma regla que en el service)
+        BigDecimal subtotal  = effectiveSubtotal(modules, r);
+        BigDecimal comision  = effectiveCommission(r);
+        BigDecimal descuento = effectiveDiscount(modules, r);
+        BigDecimal total     = Optional.ofNullable(r.getTotal()).orElse(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
 
-        // ======= Filas de módulos (idénticas al diseño original)
+        // ======= Filas de módulos
         StringBuilder cursosHtmlBuilder = new StringBuilder();
         for (Module m : modules) {
             String itemTitle = (m.getCourse()!=null && m.getCourse().getTitle()!=null)
@@ -262,6 +283,7 @@ public class EmailReceiptRenderer {
                 " </body>\n" +
                 "</html>";
     }
+
     public static String renderCompanyPlain(UserProfile user, List<Module> modules, PaymentReceipt r) {
         String suffix = currencySuffix(r.getCurrency());
 
@@ -270,14 +292,14 @@ public class EmailReceiptRenderer {
                     String title = (m.getCourse()!=null ? m.getCourse().getTitle()+" — " : "") +
                             Optional.ofNullable(m.getProgramTitle()).orElse("Módulo");
                     BigDecimal price = unitPrice(m);
-                    return "- " + title + " (" + price.setScale(2, RoundingMode.HALF_UP) + " " + suffix + ")";
+                    return "- " + title + " (" + price + " " + suffix + ")";
                 })
                 .collect(Collectors.joining("\n"));
 
-        BigDecimal subtotal  = Optional.ofNullable(r.getSubtotal()).orElse(subtotalFromModules(modules));
-        BigDecimal discount  = Optional.ofNullable(r.getDiscount()).orElse(BigDecimal.ZERO);
-        BigDecimal commission= Optional.ofNullable(r.getCommission()).orElse(BigDecimal.ZERO);
-        BigDecimal total     = r.getTotal();
+        BigDecimal subtotal   = effectiveSubtotal(modules, r);
+        BigDecimal commission = effectiveCommission(r);
+        BigDecimal discount   = effectiveDiscount(modules, r);
+        BigDecimal total      = Optional.ofNullable(r.getTotal()).orElse(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
 
         return """
 Nueva compra (front-asserted)
@@ -302,15 +324,13 @@ Total: %s %s
                         Optional.ofNullable(r.getPurchaseAt())
                                 .map(dt -> dt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                                 .orElse("")),
-                // Etiquetas tal cual
                 r.getMethod().name(),
                 r.getCurrency().name(),
                 modulesText,
-                subtotal.setScale(2, RoundingMode.HALF_UP),  suffix,
-                discount.setScale(2, RoundingMode.HALF_UP),  suffix,
-                commission.setScale(2, RoundingMode.HALF_UP),suffix,
-                total.setScale(2, RoundingMode.HALF_UP),      suffix
+                subtotal,  suffix,
+                discount,  suffix,
+                commission,suffix,
+                total,     suffix
         );
     }
-
 }
