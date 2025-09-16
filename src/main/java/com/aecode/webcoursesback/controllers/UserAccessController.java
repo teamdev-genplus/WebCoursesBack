@@ -6,6 +6,7 @@ import com.aecode.webcoursesback.dtos.Paid.AccessPurchaseResponseDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserProfile;
+import com.aecode.webcoursesback.entities.VClassroom.MarkVideoCompletedRequest;
 import com.aecode.webcoursesback.repositories.IModuleRepo;
 import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.services.EmailSenderService;
@@ -469,6 +470,33 @@ public class UserAccessController {
                 ? ResponseEntity.ok("Módulo marcado como completado")
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Acceso al módulo no encontrado");
     }
+
+
+    // ===== VER CONTENIDO DEL MÓDULO =====
+// GET /user-access/modules/{moduleId}/content?clerkId=abc&videoId=123 (videoId opcional)
+    @GetMapping("/modules/{moduleId}/content")
+    public ResponseEntity<?> getModuleContent(
+            @RequestParam String clerkId,
+            @PathVariable Long moduleId,
+            @RequestParam(required = false) Long videoId
+    ) {
+        return ResponseEntity.ok(userAccessService.getModuleContent(clerkId, moduleId, videoId));
+    }
+
+    // ===== MARCAR VIDEO COMO COMPLETADO =====
+// PUT /user-access/videos/{videoId}/complete?clerkId=abc   (body opcional: { "completed": true })
+    @PutMapping("/videos/{videoId}/complete")
+    public ResponseEntity<?> markVideoCompleted(
+            @RequestParam String clerkId,
+            @PathVariable Long videoId,
+            @RequestBody(required = false) MarkVideoCompletedRequest body
+    ) {
+        Boolean completed = (body == null) ? Boolean.TRUE : body.getCompleted();
+        return ResponseEntity.ok(userAccessService.markVideoCompleted(clerkId, videoId, completed));
+    }
+
+
+
     // ======================
     // Helpers privados
     // ======================

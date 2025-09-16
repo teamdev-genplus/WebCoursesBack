@@ -77,7 +77,7 @@ public class CourseServiceImp implements ICourseService {
     public List<HighlightedCourseDTO> getAllHighlightedCourses() {
         return cR.findByHighlightedTrueAndModeNotOrderByOrderNumberAsc(Course.Mode.EXCLUSIVO)
                 .stream()
-                .map(c -> new HighlightedCourseDTO(c.getCourseId(), c.getTitle(), c.getDescription(), c.getHighlightImage()))
+                .map(c -> new HighlightedCourseDTO(c.getCourseId(), c.getTitle(), c.getDescription(), c.getHighlightImage(), c.getStartDate()))
                 .collect(Collectors.toList());
     }
 

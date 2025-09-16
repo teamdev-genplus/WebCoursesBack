@@ -1,8 +1,12 @@
 package com.aecode.webcoursesback.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.google.type.DateTime;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +86,10 @@ public class Course{
 
     @Column
     private boolean highlighted = false; // si el curso está destacado
+
+    @Column
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate startDate; // fecha de inicio de cursos desstacados
 
 
     public enum Mode {

@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.services;
 import com.aecode.webcoursesback.dtos.*;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.ModuleContentDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.VideoCompletionDTO;
 
 import java.util.List;
 
@@ -21,4 +23,7 @@ public interface IUserAccessService {
     List<UserModuleDTO> grantMultipleModuleAccess(String clerkId, List<Long> moduleIds);
     List<UserModuleDTO> getUserModulesByClerkId(String clerkId);
 
+
+    ModuleContentDTO getModuleContent(String clerkId, Long moduleId, Long videoIdOrNull);
+    VideoCompletionDTO markVideoCompleted(String clerkId, Long videoId, Boolean completedOrNull);
 }

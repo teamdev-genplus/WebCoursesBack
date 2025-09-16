@@ -5,9 +5,17 @@ import com.aecode.webcoursesback.dtos.Profile.CourseUnitDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleAccessDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
 import com.aecode.webcoursesback.dtos.Profile.ToolLinkDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.ModuleContentDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.VideoCardDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.VideoCompletionDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.VideoPlayDTO;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
+import com.aecode.webcoursesback.entities.VClassroom.ModuleVideo;
+import com.aecode.webcoursesback.entities.VClassroom.UserVideoCompletion;
 import com.aecode.webcoursesback.repositories.*;
+import com.aecode.webcoursesback.repositories.VClassroom.ModuleVideoRepository;
+import com.aecode.webcoursesback.repositories.VClassroom.UserVideoCompletionRepository;
 import com.aecode.webcoursesback.services.IUserAccessService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -31,7 +39,8 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Autowired private IShoppingCartRepo shoppingCartRepo;
     // inyecciones nuevas:
     @Autowired private ModuleResourceLinkRepository moduleResourceLinkRepo;
-
+    @Autowired private ModuleVideoRepository moduleVideoRepository;
+    @Autowired private UserVideoCompletionRepository userVideoCompletionRepository;
 
     private UserProfile getUserByClerkId(String clerkId) {
         return userProfileRepo.findByClerkId(clerkId)
@@ -259,8 +268,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .courseTypeLabel(courseTypeLabel)
 
                 // NUEVOS botones de módulo
-                .urlviewsyllabus(firstModule.getUrlviewsyllabus())
-                .urlviewcontent(firstModule.getUrlviewcontent())
                 .urlrecording(firstModule.getUrlrecording())
                 .viewpresentation(firstModule.getViewpresentation())
 
@@ -383,8 +390,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .courseTypeLabel(courseTypeLabel)
 
                 // NUEVOS botones de módulo
-                .urlviewsyllabus(module.getUrlviewsyllabus())
-                .urlviewcontent(module.getUrlviewcontent())
                 .urlrecording(module.getUrlrecording())
                 .viewpresentation(module.getViewpresentation())
 
@@ -475,6 +480,113 @@ public class UserAccessServiceImpl implements IUserAccessService {
     @Override
     public List<UserModuleDTO> getAllModules() {
         return userModuleAccessRepo.findAllUserModuleDTOs();
+    }
+
+    @Override
+    public ModuleContentDTO getModuleContent(String clerkId, Long moduleId, Long videoIdOrNull) {
+        // 1) Validar acceso
+        if (!hasAccessToModule(clerkId, moduleId)) {
+            throw new EntityNotFoundException("No tienes acceso a este Módulo");
+        }
+
+        // 2) Traer módulo + videos
+        Module module = moduleRepo.findById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
+
+        Long courseId = module.getCourse() != null ? module.getCourse().getCourseId() : null;
+        var videos = moduleVideoRepository.findByModule_ModuleIdOrderByOrderNumberAsc(moduleId);
+
+        // 3) Progreso (completed) del usuario para este módulo
+        var completionMap = userVideoCompletionRepository
+                .findByUserProfile_ClerkIdAndVideo_Module_ModuleId(clerkId, moduleId)
+                .stream().collect(Collectors.toMap(c -> c.getVideo().getId(), c -> c.isCompleted()));
+
+        // 4) Playlist DTO
+        var playlist = videos.stream().map(v -> VideoCardDTO.builder()
+                .videoId(v.getId())
+                .sessionTitle(v.getSessionTitle())
+                .sessionLabel(v.getSessionLabel())
+                .orderNumber(v.getOrderNumber())
+                .thumbnailUrl(v.getThumbnailUrl())
+                .completed(completionMap.getOrDefault(v.getId(), false))
+                .build()
+        ).toList();
+
+        // 5) Elegir video actual (por param o el primero)
+        ModuleVideo current = null;
+        if (videoIdOrNull != null) {
+            Long id = videoIdOrNull;
+            current = videos.stream().filter(v -> v.getId().equals(id)).findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("El video no pertenece a este módulo"));
+        } else if (!videos.isEmpty()) {
+            current = videos.get(0);
+        }
+
+        // 6) Construir headerTitle: "Clase {orden} de {total} - {label}"
+        VideoPlayDTO currentDTO = null;
+        if (current != null) {
+            int total = videos.size();
+            String base = (current.getSessionLabel() != null && !current.getSessionLabel().isBlank())
+                    ? current.getSessionLabel()
+                    : current.getSessionTitle();
+            String headerTitle = String.format("Clase %d de %d - %s",
+                    current.getOrderNumber(), total, base);
+
+            currentDTO = VideoPlayDTO.builder()
+                    .videoId(current.getId())
+                    .headerTitle(headerTitle)
+                    .sessionTitle(current.getSessionTitle())
+                    .sessionLabel(current.getSessionLabel())
+                    .orderNumber(current.getOrderNumber())
+                    .videoUrl(current.getVideoUrl())
+                    .description(current.getDescription())
+                    .materialUrl(current.getMaterialUrl())
+                    .completed(completionMap.getOrDefault(current.getId(), false))
+                    .build();
+        }
+
+        return ModuleContentDTO.builder()
+                .moduleId(moduleId)
+                .courseId(courseId)
+                .moduleTitle(module.getTitleStudyplan())
+                .totalVideos(videos.size())
+                .current(currentDTO)
+                .playlist(playlist)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public VideoCompletionDTO markVideoCompleted(String clerkId, Long videoId, Boolean completedOrNull) {
+        var video = moduleVideoRepository.findById(videoId)
+                .orElseThrow(() -> new EntityNotFoundException("Video no encontrado"));
+
+        // validar acceso por módulo
+        if (!hasAccessToModule(clerkId, video.getModule().getModuleId())) {
+            throw new EntityNotFoundException("No tienes acceso a este Módulo");
+        }
+
+        var user = userProfileRepo.findByClerkId(clerkId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
+
+        var completion = userVideoCompletionRepository
+                .findByUserProfile_ClerkIdAndVideo_Id(clerkId, videoId)
+                .orElseGet(() -> UserVideoCompletion.builder()
+                        .userProfile(user)
+                        .video(video)
+                        .completed(false)
+                        .build());
+
+        boolean newValue = (completedOrNull == null) ? true : completedOrNull;
+        completion.setCompleted(newValue);
+
+        userVideoCompletionRepository.save(completion);
+
+        return VideoCompletionDTO.builder()
+                .videoId(videoId)
+                .clerkId(clerkId)
+                .completed(newValue)
+                .build();
     }
 
 

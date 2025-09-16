@@ -16,9 +16,6 @@ public class ModuleProfileDTO {
 
     private String titleStudyplan;
     private String courseTypeLabel;
-    // NUEVOS BOTONES (migrados a nivel de módulo)
-    private String urlviewsyllabus;
-    private String urlviewcontent;
 
     @Builder.Default
     private List<StudyPlanDTO> studyPlans = new ArrayList<>();
