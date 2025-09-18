@@ -5,10 +5,7 @@ import com.aecode.webcoursesback.dtos.Profile.CourseUnitDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleAccessDTO;
 import com.aecode.webcoursesback.dtos.Profile.ModuleProfileDTO;
 import com.aecode.webcoursesback.dtos.Profile.ToolLinkDTO;
-import com.aecode.webcoursesback.dtos.VClassroom.ModuleContentDTO;
-import com.aecode.webcoursesback.dtos.VClassroom.VideoCardDTO;
-import com.aecode.webcoursesback.dtos.VClassroom.VideoCompletionDTO;
-import com.aecode.webcoursesback.dtos.VClassroom.VideoPlayDTO;
+import com.aecode.webcoursesback.dtos.VClassroom.*;
 import com.aecode.webcoursesback.entities.*;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.VClassroom.ModuleVideo;
@@ -496,12 +493,12 @@ public class UserAccessServiceImpl implements IUserAccessService {
         Long courseId = module.getCourse() != null ? module.getCourse().getCourseId() : null;
         var videos = moduleVideoRepository.findByModule_ModuleIdOrderByOrderNumberAsc(moduleId);
 
-        // 3) Progreso (completed) del usuario para este módulo
+        // 3) Progreso por video
         var completionMap = userVideoCompletionRepository
                 .findByUserProfile_ClerkIdAndVideo_Module_ModuleId(clerkId, moduleId)
                 .stream().collect(Collectors.toMap(c -> c.getVideo().getId(), c -> c.isCompleted()));
 
-        // 4) Playlist DTO
+        // 4) Playlist
         var playlist = videos.stream().map(v -> VideoCardDTO.builder()
                 .videoId(v.getId())
                 .sessionTitle(v.getSessionTitle())
@@ -512,17 +509,16 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .build()
         ).toList();
 
-        // 5) Elegir video actual (por param o el primero)
+        // 5) Video actual
         ModuleVideo current = null;
         if (videoIdOrNull != null) {
-            Long id = videoIdOrNull;
-            current = videos.stream().filter(v -> v.getId().equals(id)).findFirst()
+            current = videos.stream().filter(v -> v.getId().equals(videoIdOrNull)).findFirst()
                     .orElseThrow(() -> new EntityNotFoundException("El video no pertenece a este módulo"));
         } else if (!videos.isEmpty()) {
             current = videos.get(0);
         }
 
-        // 6) Construir headerTitle: "Clase {orden} de {total} - {label}"
+        // 6) Header + materiales
         VideoPlayDTO currentDTO = null;
         if (current != null) {
             int total = videos.size();
@@ -532,6 +528,20 @@ public class UserAccessServiceImpl implements IUserAccessService {
             String headerTitle = String.format("Clase %d de %d - %s",
                     current.getOrderNumber(), total, base);
 
+            // MATERIALES POR VIDEO
+            var materials = moduleResourceLinkRepo
+                    .findActiveByVideoIdOrderByOrderNumberAsc(current.getId())
+                    .stream().map(r ->
+                            VideoResourceDTO.builder()
+                                    .id(r.getId())
+                                    .title(r.getName())
+                                    .subtitle(r.getSubtitle())
+                                    .url(r.getUrl())
+                                    .type(r.getResourceType().name())
+                                    .orderNumber(r.getOrderNumber())
+                                    .build()
+                    ).toList();
+
             currentDTO = VideoPlayDTO.builder()
                     .videoId(current.getId())
                     .headerTitle(headerTitle)
@@ -540,8 +550,8 @@ public class UserAccessServiceImpl implements IUserAccessService {
                     .orderNumber(current.getOrderNumber())
                     .videoUrl(current.getVideoUrl())
                     .description(current.getDescription())
-                    .materialUrl(current.getMaterialUrl())
                     .completed(completionMap.getOrDefault(current.getId(), false))
+                    .materials(materials)
                     .build();
         }
 

@@ -72,6 +72,9 @@ public class Module extends BaseProduct{
     @Column(length = 20)
     private Mode mode;
 
+    @Column(columnDefinition = "TEXT")
+    private String descriptionbyCertificate;
+
     public enum Mode {
         ASINCRONO,
         ENVIVO,

@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.services;
-import com.aecode.webcoursesback.dtos.UserCertificateDTO;
+import com.aecode.webcoursesback.dtos.Certificate.UserCertificateDTO;
 import java.util.List;
+
 
 public interface IUserCertificateService {
 

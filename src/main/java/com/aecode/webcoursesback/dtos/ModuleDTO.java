@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.dtos;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.aecode.webcoursesback.dtos.Certificate.CertificateDTO;
 import com.aecode.webcoursesback.dtos.Coupon.CouponApplyRequestDTO;
 import lombok.*;
 import java.time.LocalDate;

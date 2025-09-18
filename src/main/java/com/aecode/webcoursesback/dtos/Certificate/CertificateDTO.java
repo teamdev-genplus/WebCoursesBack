@@ -1,4 +1,4 @@
-package com.aecode.webcoursesback.dtos;
+package com.aecode.webcoursesback.dtos.Certificate;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -484,7 +484,7 @@ public class UserAccessController {
     }
 
     // ===== MARCAR VIDEO COMO COMPLETADO =====
-// PUT /user-access/videos/{videoId}/complete?clerkId=abc   (body opcional: { "completed": true })
+    // PUT /user-access/videos/{videoId}/complete?clerkId=abc   (body opcional: { "completed": true })
     @PutMapping("/videos/{videoId}/complete")
     public ResponseEntity<?> markVideoCompleted(
             @RequestParam String clerkId,

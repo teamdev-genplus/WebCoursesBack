@@ -1,7 +1,11 @@
 package com.aecode.webcoursesback.entities.VClassroom;
 import com.aecode.webcoursesback.entities.Module;
+import com.aecode.webcoursesback.entities.ModuleResourceLink;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
@@ -42,7 +46,4 @@ public class ModuleVideo {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    /** Enlace único de “Materiales” para este video */
-    @Column(name = "material_url", columnDefinition = "TEXT")
-    private String materialUrl;
 }

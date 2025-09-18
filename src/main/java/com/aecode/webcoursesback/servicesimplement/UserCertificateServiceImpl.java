@@ -1,5 +1,5 @@
 package com.aecode.webcoursesback.servicesimplement;
-import com.aecode.webcoursesback.dtos.UserCertificateDTO;
+import com.aecode.webcoursesback.dtos.Certificate.UserCertificateDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.UserCertificate;
 import com.aecode.webcoursesback.entities.UserProfile;

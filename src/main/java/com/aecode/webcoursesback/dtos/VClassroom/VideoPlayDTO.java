@@ -2,6 +2,9 @@ package com.aecode.webcoursesback.dtos.VClassroom;
 
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class VideoPlayDTO {
     private Long videoId;
@@ -14,7 +17,8 @@ public class VideoPlayDTO {
 
     private String videoUrl;
     private String description;    // resumen grande
-    private String materialUrl;    // enlace único
+    @Builder.Default
+    private List<VideoResourceDTO> materials = new ArrayList<>();
 
     private boolean completed;
 }

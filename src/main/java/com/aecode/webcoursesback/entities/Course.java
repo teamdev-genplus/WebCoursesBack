@@ -91,6 +91,9 @@ public class Course{
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate startDate; // fecha de inicio de cursos desstacados
 
+    @Column(columnDefinition = "TEXT")
+    private String descriptionbyCertificate;
+
 
     public enum Mode {
         ASINCRONO,
