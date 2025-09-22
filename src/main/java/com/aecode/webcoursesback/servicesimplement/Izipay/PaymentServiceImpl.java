@@ -13,6 +13,7 @@ import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderItemRepository;
 import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderRepository;
 import com.aecode.webcoursesback.services.Izipay.PaymentEntitlementService;
 import com.aecode.webcoursesback.services.Izipay.PaymentService;
+import com.aecode.webcoursesback.services.Paid.UnifiedPaidOrderService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,9 @@ public class PaymentServiceImpl implements PaymentService {
     // NUEVO
     private final PaymentOrderItemRepository itemRepo;
     private final PaymentEntitlementService entitlementService;
+
+    // NUEVO
+    private final UnifiedPaidOrderService unifiedPaidOrderService;
 
 
     @Override
@@ -157,13 +161,36 @@ public class PaymentServiceImpl implements PaymentService {
                 po.setStatus(newStatus);
                 paymentOrderRepository.save(po);
 
-                // Si quedó pagado, conceder accesos (idempotente)
+                // Si quedó pagado, conceder accesos (idempotente) + LOG UNIFICADO
                 if (newStatus == PaymentOrder.PaymentStatus.PAID) {
                     entitlementService.fulfillIfPaid(po);
+
+                    // ---- Registrar en la tabla unificada ----
+                    try {
+                        var items = itemRepo.findByOrder(po);
+                        var moduleIds = items.stream()
+                                .map(PaymentOrderItem::getModuleId)
+                                .filter(Objects::nonNull)
+                                .distinct()
+                                .toList();
+
+                        if (!moduleIds.isEmpty()) {
+                            String fullName = userProfileRepository.findByClerkId(po.getClerkId())
+                                    .map(UserProfile::getFullname)
+                                    .orElse("");
+
+                            unifiedPaidOrderService.logPaidOrder(
+                                    Optional.ofNullable(po.getEmail()).orElse(""),
+                                    fullName,
+                                    java.time.OffsetDateTime.now(), // si no tienes fecha exacta del PSP aquí
+                                    moduleIds
+                            );
+                        }
+                    } catch (Exception ignore) { /* log si quieres */ }
+                    // -----------------------------------------
                 }
             }
         }
-
 
         return ValidatePaymentResponse.builder()
                 .valid(true)
@@ -196,9 +223,33 @@ public class PaymentServiceImpl implements PaymentService {
                     po.setStatus(newStatus);
                     paymentOrderRepository.save(po);
 
-                    // Si quedó pagado, conceder accesos (idempotente)
+                    // Si quedó pagado, conceder accesos (idempotente) + LOG UNIFICADO
                     if (newStatus == PaymentOrder.PaymentStatus.PAID) {
                         entitlementService.fulfillIfPaid(po);
+
+                        // ---- Registrar en la tabla unificada ----
+                        try {
+                            var items = itemRepo.findByOrder(po);
+                            var moduleIds = items.stream()
+                                    .map(PaymentOrderItem::getModuleId)
+                                    .filter(Objects::nonNull)
+                                    .distinct()
+                                    .toList();
+
+                            if (!moduleIds.isEmpty()) {
+                                String fullName = userProfileRepository.findByClerkId(po.getClerkId())
+                                        .map(UserProfile::getFullname)
+                                        .orElse("");
+
+                                unifiedPaidOrderService.logPaidOrder(
+                                        Optional.ofNullable(po.getEmail()).orElse(""),
+                                        fullName,
+                                        java.time.OffsetDateTime.now(), // o una fecha del payload si la parseas
+                                        moduleIds
+                                );
+                            }
+                        } catch (Exception ignore) { /* log si quieres */ }
+                        // -----------------------------------------
                     }
                 });
             }
@@ -207,6 +258,7 @@ public class PaymentServiceImpl implements PaymentService {
         // Responder 200/OK con cuerpo "OK" (Izipay lo requiere)
         return "OK";
     }
+
 
     // ================= Helpers =================
 

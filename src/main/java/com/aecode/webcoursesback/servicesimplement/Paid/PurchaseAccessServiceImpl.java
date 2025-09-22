@@ -13,6 +13,7 @@ import com.aecode.webcoursesback.repositories.Paid.PaymentReceiptRepository;
 import com.aecode.webcoursesback.services.EmailSenderService;
 import com.aecode.webcoursesback.services.IUserAccessService;
 import com.aecode.webcoursesback.services.Paid.PurchaseAccessService;
+import com.aecode.webcoursesback.services.Paid.UnifiedPaidOrderService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -34,6 +35,8 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
     private final PaymentReceiptItemRepository receiptItemRepo;
     private final IUserAccessService userAccessService;
     private final EmailSenderService emailSenderService;
+
+    private final UnifiedPaidOrderService unifiedPaidOrderService;
 
     // ===== helpers para precios =====
     private static BigDecimal unitPrice(Module m) {
@@ -83,7 +86,6 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                     return d;
                 })
                 .setScale(2, RoundingMode.HALF_UP);
-
 
         // 3) Buscar o crear recibo (idempotencia por purchaseNumber)
         PaymentReceipt receipt = receiptRepo.findByPurchaseNumber(req.getPurchaseNumber())
@@ -138,6 +140,17 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
             } catch (MessagingException me) {
                 // loggear
             }
+
+            // 7) Registrar en la tabla unificada (solo lo esencial)
+            try {
+                unifiedPaidOrderService.logPaidOrder(
+                        user.getEmail(),
+                        Optional.ofNullable(user.getFullname()).orElse(""),
+                        receipt.getPurchaseAt(), // fecha del recibo
+                        modules.stream().map(Module::getModuleId).distinct().toList()
+                );
+            } catch (Exception ignore) { /* log si quieres */ }
+
         } else {
             // Ya concedido antes (idempotente)
             granted = userAccessService.getUserModulesByClerkId(req.getClerkId()).stream()
