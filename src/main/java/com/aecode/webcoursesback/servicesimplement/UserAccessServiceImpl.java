@@ -714,7 +714,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
         return certificates.stream().map(c ->
                 MyCertificateDTO.builder()
                         .certificateName(c.getName())   // solo nombre en esta vista
-                        .certificateImage(null)
+                        .certificateImage(c.getUrl())
                         .certificateUrl(null)
                         .moduleName(null)
                         .achieved(false)
