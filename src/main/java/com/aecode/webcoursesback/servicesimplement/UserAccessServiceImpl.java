@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 
@@ -498,7 +499,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .findByUserProfile_ClerkIdAndVideo_Module_ModuleId(clerkId, moduleId)
                 .stream().collect(Collectors.toMap(c -> c.getVideo().getId(), c -> c.isCompleted()));
 
-        // 4) Playlist
+        // 4) Playlist (ahora con duration formateado)
         var playlist = videos.stream().map(v -> VideoCardDTO.builder()
                 .videoId(v.getId())
                 .sessionTitle(v.getSessionTitle())
@@ -506,6 +507,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .orderNumber(v.getOrderNumber())
                 .thumbnailUrl(v.getThumbnailUrl())
                 .completed(completionMap.getOrDefault(v.getId(), false))
+                .duration(formatDuration(v.getDuration()))
                 .build()
         ).toList();
 
@@ -518,7 +520,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
             current = videos.get(0);
         }
 
-        // 6) Header + materiales
+        // 6) Header + materiales (sin cambios)
         VideoPlayDTO currentDTO = null;
         if (current != null) {
             int total = videos.size();
@@ -528,7 +530,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
             String headerTitle = String.format("Clase %d de %d - %s",
                     current.getOrderNumber(), total, base);
 
-            // MATERIALES POR VIDEO
             var materials = moduleResourceLinkRepo
                     .findActiveByVideoIdOrderByOrderNumberAsc(current.getId())
                     .stream().map(r ->
@@ -565,13 +566,25 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .build();
     }
 
+    /** Devuelve "mm:ss" o "h:mm:ss" a partir de segundos. null si no hay dato. */
+    private static String formatDuration(Integer seconds) {
+        if (seconds == null || seconds < 0) return null;
+        int h = seconds / 3600;
+        int m = (seconds % 3600) / 60;
+        int s = seconds % 60;
+        if (h > 0) {
+            return String.format("%d:%02d:%02d", h, m, s);
+        } else {
+            return String.format("%02d:%02d", m, s);
+        }
+    }
+
     @Override
     @Transactional
     public VideoCompletionDTO markVideoCompleted(String clerkId, Long videoId, Boolean completedOrNull) {
         var video = moduleVideoRepository.findById(videoId)
                 .orElseThrow(() -> new EntityNotFoundException("Video no encontrado"));
 
-        // validar acceso por módulo
         if (!hasAccessToModule(clerkId, video.getModule().getModuleId())) {
             throw new EntityNotFoundException("No tienes acceso a este Módulo");
         }
@@ -579,18 +592,27 @@ public class UserAccessServiceImpl implements IUserAccessService {
         var user = userProfileRepo.findByClerkId(clerkId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        var completion = userVideoCompletionRepository
-                .findByUserProfile_ClerkIdAndVideo_Id(clerkId, videoId)
-                .orElseGet(() -> UserVideoCompletion.builder()
-                        .userProfile(user)
-                        .video(video)
-                        .completed(false)
-                        .build());
-
         boolean newValue = (completedOrNull == null) ? true : completedOrNull;
-        completion.setCompleted(newValue);
 
-        userVideoCompletionRepository.save(completion);
+        try {
+            var completion = userVideoCompletionRepository
+                    .findByUserProfile_ClerkIdAndVideo_Id(clerkId, videoId)
+                    .orElseGet(() -> UserVideoCompletion.builder()
+                            .userProfile(user)
+                            .video(video)
+                            .completed(false)
+                            .build());
+
+            completion.setCompleted(newValue);
+            userVideoCompletionRepository.saveAndFlush(completion); // flush para forzar la inserción/actualización
+        } catch (DataIntegrityViolationException e) {
+            // otro hilo insertó primero: recupéralo y actualiza
+            var existing = userVideoCompletionRepository
+                    .findByUserProfile_ClerkIdAndVideo_Id(clerkId, videoId)
+                    .orElseThrow(() -> e);
+            existing.setCompleted(newValue);
+            userVideoCompletionRepository.save(existing);
+        }
 
         return VideoCompletionDTO.builder()
                 .videoId(videoId)

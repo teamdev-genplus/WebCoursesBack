@@ -46,4 +46,8 @@ public class ModuleVideo {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    /** Duración en segundos. Se mostrará formateado como mm:ss o h:mm:ss en el card */
+    @Column(name = "duration")
+    private Integer duration;
+
 }

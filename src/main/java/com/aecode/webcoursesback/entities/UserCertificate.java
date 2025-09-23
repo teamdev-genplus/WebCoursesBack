@@ -31,18 +31,18 @@ public class UserCertificate {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @Column(length = 255, nullable = false)
+    @Column(length = 255)
     private String certificateName;
 
     @Column(length = 255)
     private String certificateImage;
 
-    @Column(length = 255, nullable = false)
+    @Column(length = 255)
     private String certificateUrl;
 
-    @Column(name = "certificate_code", length = 64, nullable = false)
+    @Column(name = "certificate_code", length = 64)
     private String certificateCode; // código visible/validable (ej. AEC-2025-0001)
 
-    @Column(name = "issued_at", nullable = false)
+    @Column(name = "issued_at")
     private LocalDate issuedAt; // fecha de emisión
 }

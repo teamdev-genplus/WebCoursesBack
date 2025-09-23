@@ -6,9 +6,12 @@ import lombok.*;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "payment_order_items", indexes = {
-        @Index(name = "idx_pay_items_order_id", columnList = "order_id")
-})
+@Table(
+        name = "payment_order_items",
+        indexes = {
+                @Index(name = "idx_pay_items_order_id", columnList = "order_id_fk")
+        }
+)
 @SequenceGenerator(name = "pay_item_seq", sequenceName = "payment_order_item_seq", allocationSize = 1)
 
 public class PaymentOrderItem {

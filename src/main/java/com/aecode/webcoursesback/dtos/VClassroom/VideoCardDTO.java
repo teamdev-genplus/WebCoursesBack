@@ -10,4 +10,5 @@ public class VideoCardDTO {
     private Integer orderNumber;
     private String thumbnailUrl;
     private boolean completed;     // para el check verde
+    private String duration;
 }
