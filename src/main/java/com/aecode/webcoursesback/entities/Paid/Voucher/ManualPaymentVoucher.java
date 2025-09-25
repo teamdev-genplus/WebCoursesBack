@@ -60,6 +60,7 @@ public class ManualPaymentVoucher {
         if (status == null) status = PaymentStatus.PAID; // normalmente llega como pagado
         // Validated siempre inicia en false:
         validated = false;
+        if (paidAt == null) paidAt = now;
     }
 
     @PreUpdate
