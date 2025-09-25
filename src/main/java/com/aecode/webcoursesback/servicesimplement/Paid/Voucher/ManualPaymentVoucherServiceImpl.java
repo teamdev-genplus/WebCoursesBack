@@ -109,54 +109,91 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
         entity.setValidated(validated);
         repo.save(entity);
 
-        // Si pasa a TRUE recién ahora, disparamos la inserción en UnifiedPaidOrder
+        List<Long> accepted = List.of();
+        List<Long> skippedOwned = List.of();
+        List<Long> skippedMissing = List.of();
+        String info = null;
+
+        // Solo si cambió a TRUE recién ahora, intentamos exportar a la unificada
         if (!wasValidated && validated) {
-            // Reglas: clerkId debe existir, módulos válidos, y NO repetidos
             if (entity.getClerkId() == null || entity.getClerkId().isBlank()) {
-                throw new IllegalStateException("No se puede validar: falta clerkId en el voucher.");
+                // No bloqueamos el cambio de estado, pero informamos que no se pudo exportar
+                info = "Validado, pero sin exportar: falta clerkId en el voucher.";
+            } else {
+                UserProfile user = userProfileRepo.findByClerkId(entity.getClerkId())
+                        .orElseThrow(() -> new EntityNotFoundException("No se puede validar: clerkId no existe en UserProfile."));
+
+                // IDs del voucher (distintos, en el mismo orden de CSV si quieres mantenerlo)
+                List<Long> requested = parseCsv(entity.getModuleIdsCsv());
+                if (requested.isEmpty()) {
+                    info = "Validado, pero sin exportar: el voucher no contiene módulos.";
+                } else {
+                    // Módulos existentes
+                    List<Module> foundModules = moduleRepo.findAllById(requested);
+                    Set<Long> foundIds = foundModules.stream().map(Module::getModuleId).collect(Collectors.toSet());
+                    skippedMissing = requested.stream().filter(mid -> !foundIds.contains(mid)).toList();
+
+                    // Ya comprados por el usuario
+                    List<UserModuleAccess> already = userModuleRepo.findByUserProfile_ClerkId(entity.getClerkId());
+                    Set<Long> alreadyOwned = already.stream()
+                            .filter(a -> a.getModule() != null)
+                            .map(a -> a.getModule().getModuleId())
+                            .collect(Collectors.toSet());
+                    skippedOwned = requested.stream().filter(alreadyOwned::contains).toList();
+
+                    // Aceptados = solicitados - (missing ∪ yaOwned)
+                    Set<Long> skipUnion = new HashSet<>(skippedMissing);
+                    skipUnion.addAll(skippedOwned);
+                    accepted = requested.stream().filter(mid -> !skipUnion.contains(mid)).toList();
+
+                    if (accepted.isEmpty()) {
+                        info = "Validado, pero sin exportar: todos los módulos del voucher eran inexistentes o ya poseídos.";
+                    } else {
+                        // Exportar SOLO aceptados a la tabla unificada
+                        OffsetDateTime paidAt = Optional.ofNullable(entity.getPaidAt()).orElse(OffsetDateTime.now());
+                        unifiedPaidOrderService.logPaidOrder(
+                                user.getEmail(),
+                                Optional.ofNullable(user.getFullname()).orElse(""),
+                                paidAt,
+                                accepted
+                        );
+                        info = buildInfoMessage(accepted, skippedOwned, skippedMissing);
+                    }
+                }
             }
-            UserProfile user = userProfileRepo.findByClerkId(entity.getClerkId())
-                    .orElseThrow(() -> new EntityNotFoundException("No se puede validar: clerkId no existe en UserProfile."));
-
-            List<Long> moduleIds = parseCsv(entity.getModuleIdsCsv());
-            if (moduleIds.isEmpty()) {
-                throw new IllegalStateException("No se puede validar: no hay módulos en el voucher.");
-            }
-
-            // Validar que existan los módulos
-            List<Module> modules = moduleRepo.findAllById(moduleIds);
-            Set<Long> found = modules.stream().map(Module::getModuleId).collect(Collectors.toSet());
-            List<Long> missing = moduleIds.stream().filter(id2 -> !found.contains(id2)).toList();
-            if (!missing.isEmpty()) {
-                throw new IllegalStateException("No se puede validar: módulos inexistentes " + missing);
-            }
-
-            // Validar que el usuario NO los tenga ya
-            List<UserModuleAccess> already = userModuleRepo.findByUserProfile_ClerkId(entity.getClerkId());
-            Set<Long> alreadyOwned = already.stream()
-                    .filter(a -> a.getModule() != null)
-                    .map(a -> a.getModule().getModuleId())
-                    .collect(Collectors.toSet());
-
-            List<Long> duplicates = moduleIds.stream().filter(alreadyOwned::contains).toList();
-            if (!duplicates.isEmpty()) {
-                throw new IllegalStateException("No se puede validar: el usuario ya tiene acceso a módulos " + duplicates);
-            }
-
-            // Fecha pagada: usa la provista o ahora
-            OffsetDateTime paidAt = Optional.ofNullable(entity.getPaidAt()).orElse(OffsetDateTime.now());
-
-            // Insertar al log unificado (solo registra, NO concede acceso académico aquí)
-            unifiedPaidOrderService.logPaidOrder(
-                    user.getEmail(),
-                    Optional.ofNullable(user.getFullname()).orElse(""),
-                    paidAt,
-                    moduleIds
-            );
         }
 
-        return map(entity);
+        // Respuesta con reporte (los nuevos campos van nulos para casos no aplicables)
+        return ManualPaymentVoucherDTO.builder()
+                .id(entity.getId())
+                .clerkId(entity.getClerkId())
+                .voucherUrl(entity.getVoucherUrl())
+                .moduleIds(parseCsv(entity.getModuleIdsCsv()))
+                .paymentMethod(entity.getPaymentMethod())
+                .status(entity.getStatus() != null ? entity.getStatus().name() : null)
+                .paidAt(entity.getPaidAt())
+                .validated(entity.isValidated())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .acceptedModuleIds(accepted.isEmpty() ? null : accepted)
+                .skippedAlreadyOwned(skippedOwned.isEmpty() ? null : skippedOwned)
+                .skippedNotFound(skippedMissing.isEmpty() ? null : skippedMissing)
+                .infoMessage(info)
+                .build();
     }
+
+    private String buildInfoMessage(List<Long> accepted, List<Long> skippedOwned, List<Long> skippedMissing) {
+        StringBuilder sb = new StringBuilder("Exportado a unificada: ");
+        sb.append(accepted);
+        if (!skippedOwned.isEmpty()) {
+            sb.append(" | Omitidos (ya tenía acceso): ").append(skippedOwned);
+        }
+        if (!skippedMissing.isEmpty()) {
+            sb.append(" | Omitidos (inexistentes): ").append(skippedMissing);
+        }
+        return sb.toString();
+    }
+
 
     @Override
     @Transactional(readOnly = true)
