@@ -15,4 +15,7 @@ public interface IModuleService {
     ModuleDTO getModuleDetailById(Long moduleId);
 
     CourseModuleViewDTO getCourseAndFirstModule(Long courseId);
+
+    void setAssistantApiKey(Long moduleId, String rawKeyOrNull);
+    String getAssistantApiKeyMasked(Long moduleId); // opcional, para UI admin
 }

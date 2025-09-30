@@ -11,4 +11,7 @@ public class ModuleContentDTO {
     private VideoPlayDTO current;           // video que se muestra en el player
     @Builder.Default
     private List<VideoCardDTO> playlist = new ArrayList<>(); // cards del lateral
+
+    // === NUEVO: clave desencriptada para el front (solo si el usuario tiene acceso) ===
+    private String assistantApiKey;
 }

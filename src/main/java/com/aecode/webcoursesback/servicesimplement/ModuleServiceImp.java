@@ -7,14 +7,23 @@ import com.aecode.webcoursesback.repositories.IModuleRepo;
 import com.aecode.webcoursesback.repositories.IUserModuleRepo;
 import com.aecode.webcoursesback.services.IModuleService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.jasypt.encryption.StringEncryptor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+// AGREGA este import
+import org.springframework.transaction.annotation.Transactional;
+
+
+
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ModuleServiceImp implements IModuleService {
 
     @Autowired
@@ -27,6 +36,38 @@ public class ModuleServiceImp implements IModuleService {
     private final ModelMapper modelMapper = new ModelMapper();
 
 
+    @Qualifier("encryptorBean")
+    private final StringEncryptor encryptor;
+
+    @Override
+    @Transactional
+    public void setAssistantApiKey(Long moduleId, String rawKeyOrNull) {
+        Module m = mR.findById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
+
+        if (rawKeyOrNull == null || rawKeyOrNull.isBlank()) {
+            // limpiar
+            m.setAssistantApiKeyEnc(null);
+        } else {
+            m.setAssistantApiKeyEnc(encryptor.encrypt(rawKeyOrNull.trim()));
+        }
+        mR.save(m);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getAssistantApiKeyMasked(Long moduleId) {
+        Module m = mR.findById(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException("Módulo no encontrado"));
+        if (m.getAssistantApiKeyEnc() == null || m.getAssistantApiKeyEnc().isBlank()) return null;
+        try {
+            String raw = encryptor.decrypt(m.getAssistantApiKeyEnc());
+            if (raw.length() <= 6) return "***";
+            return raw.substring(0, 3) + "****" + raw.substring(raw.length() - 3);
+        } catch (Exception e) {
+            return "(invalid)";
+        }
+    }
     @Override
     public List<Module> listAll() {
         return mR.findAll();

@@ -100,6 +100,11 @@ public class Module extends BaseProduct{
     @Column(length = 255)
     private String viewpresentation;
 
+    // === APIKEY DE ASISTENTES DE BOT (ENCRIPTADA) ===
+    @Column(name = "assistant_api_key_enc", columnDefinition = "TEXT")
+    private String assistantApiKeyEnc;
+
+
     //Relaciones
     @Builder.Default
     @ManyToMany

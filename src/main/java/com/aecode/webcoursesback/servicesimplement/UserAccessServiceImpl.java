@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -480,9 +481,13 @@ public class UserAccessServiceImpl implements IUserAccessService {
         return userModuleAccessRepo.findAllUserModuleDTOs();
     }
 
+    @Autowired
+    @Qualifier("encryptorBean")
+    private org.jasypt.encryption.StringEncryptor encryptor;
+
     @Override
     public ModuleContentDTO getModuleContent(String clerkId, Long moduleId, Long videoIdOrNull) {
-        // 1) Validar acceso
+        // 1) Validar acceso (ya lo tienes)
         if (!hasAccessToModule(clerkId, moduleId)) {
             throw new EntityNotFoundException("No tienes acceso a este Módulo");
         }
@@ -494,12 +499,11 @@ public class UserAccessServiceImpl implements IUserAccessService {
         Long courseId = module.getCourse() != null ? module.getCourse().getCourseId() : null;
         var videos = moduleVideoRepository.findByModule_ModuleIdOrderByOrderNumberAsc(moduleId);
 
-        // 3) Progreso por video
+        // 3) Progreso y playlist (igual que lo tienes) ...
         var completionMap = userVideoCompletionRepository
                 .findByUserProfile_ClerkIdAndVideo_Module_ModuleId(clerkId, moduleId)
                 .stream().collect(Collectors.toMap(c -> c.getVideo().getId(), c -> c.isCompleted()));
 
-        // 4) Playlist (ahora con duration formateado)
         var playlist = videos.stream().map(v -> VideoCardDTO.builder()
                 .videoId(v.getId())
                 .sessionTitle(v.getSessionTitle())
@@ -511,7 +515,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .build()
         ).toList();
 
-        // 5) Video actual
+        // 4) Video actual (igual que lo tienes) ...
         ModuleVideo current = null;
         if (videoIdOrNull != null) {
             current = videos.stream().filter(v -> v.getId().equals(videoIdOrNull)).findFirst()
@@ -520,7 +524,6 @@ public class UserAccessServiceImpl implements IUserAccessService {
             current = videos.get(0);
         }
 
-        // 6) Header + materiales (sin cambios)
         VideoPlayDTO currentDTO = null;
         if (current != null) {
             int total = videos.size();
@@ -556,6 +559,17 @@ public class UserAccessServiceImpl implements IUserAccessService {
                     .build();
         }
 
+        // 5) Desencriptar la API key SOLO aquí
+        String assistantKey = null;
+        try {
+            if (module.getAssistantApiKeyEnc() != null && !module.getAssistantApiKeyEnc().isBlank()) {
+                assistantKey = encryptor.decrypt(module.getAssistantApiKeyEnc());
+            }
+        } catch (Exception e) {
+            // no rompas la vista por un error de desencriptado: loguea si quieres
+            assistantKey = null;
+        }
+
         return ModuleContentDTO.builder()
                 .moduleId(moduleId)
                 .courseId(courseId)
@@ -563,6 +577,7 @@ public class UserAccessServiceImpl implements IUserAccessService {
                 .totalVideos(videos.size())
                 .current(currentDTO)
                 .playlist(playlist)
+                .assistantApiKey(assistantKey) // 👈 se envía al front
                 .build();
     }
 

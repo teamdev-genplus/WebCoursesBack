@@ -3,6 +3,7 @@ import com.aecode.webcoursesback.dtos.CourseModuleViewDTO;
 import com.aecode.webcoursesback.dtos.ModuleDTO;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.services.IModuleService;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,27 @@ public class ModuleController {
 
     private final ModelMapper modelMapper = new ModelMapper();
 
+    //----------------------------------------------------------ASISTENTEKEY----------------------------------------------------------------
+    @PatchMapping("/{moduleId}/assistant-key")
+    public ResponseEntity<Void> setAssistantKey(
+            @PathVariable Long moduleId,
+            @RequestBody SetAssistantKeyRequest req
+    ) {
+        // req.key puede venir null/blank para limpiar
+        mS.setAssistantApiKey(moduleId, req.getKey());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{moduleId}/assistant-key/masked")
+    public ResponseEntity<String> getAssistantKeyMasked(@PathVariable Long moduleId) {
+        String masked = mS.getAssistantApiKeyMasked(moduleId);
+        return ResponseEntity.ok(masked == null ? "" : masked);
+    }
+
+    @Data
+    public static class SetAssistantKeyRequest {
+        private String key; // raw; se encripta en el servicio
+    }
     //----------------------------------------------------------GET----------------------------------------------------------------
 
     @GetMapping("/listall")
