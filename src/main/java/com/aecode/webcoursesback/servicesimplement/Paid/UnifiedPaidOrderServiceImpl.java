@@ -22,16 +22,28 @@ public class UnifiedPaidOrderServiceImpl implements UnifiedPaidOrderService{
     @Override
     public UnifiedPaidOrderDTO logPaidOrder(String email, String fullName, OffsetDateTime paidAt, List<Long> moduleIds) {
         if (email == null || email.isBlank()) throw new IllegalArgumentException("email requerido");
-        if (fullName == null || fullName.isBlank()) fullName = ""; // por si acaso
+        if (fullName == null) fullName = "";
         if (paidAt == null) paidAt = OffsetDateTime.now();
         if (moduleIds == null || moduleIds.isEmpty()) throw new IllegalArgumentException("moduleIds requerido");
 
-        String csv = moduleIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+        // Dedupe + orden estable (para comparar duplicados)
+        String csv = moduleIds.stream()
+                .filter(Objects::nonNull)
+                .map(String::valueOf)
+                .distinct()
+                .sorted(Comparator.comparingLong(Long::parseLong))
+                .collect(Collectors.joining(","));
+
+        // Si ya existe un registro idéntico (email + paidAt + csv), no reinsertar
+        Optional<UnifiedPaidOrder> existing = repo.findByEmailAndPaidAtAndModuleIdsCsv(email, paidAt, csv);
+        if (existing.isPresent()) {
+            return map(existing.get());
+        }
 
         UnifiedPaidOrder entity = UnifiedPaidOrder.builder()
                 .email(email)
                 .fullName(fullName)
-                .status(UnifiedPaidOrder.PaymentStatus.PAID) // este log guarda solo pagados
+                .status(UnifiedPaidOrder.PaymentStatus.PAID)
                 .paidAt(paidAt)
                 .moduleIdsCsv(csv)
                 .build();
@@ -51,9 +63,7 @@ public class UnifiedPaidOrderServiceImpl implements UnifiedPaidOrderService{
 
     private UnifiedPaidOrderDTO map(UnifiedPaidOrder e) {
         List<Long> ids = parseCsv(e.getModuleIdsCsv());
-        // Enriquecemos con títulos (para la vista admin)
         List<Module> modules = ids.isEmpty() ? List.of() : moduleRepo.findAllById(ids);
-        // Conserva el orden por orderNumber si quisieras; aquí mantenemos el del CSV
         Map<Long, String> titleById = modules.stream()
                 .collect(Collectors.toMap(Module::getModuleId,
                         m -> Optional.ofNullable(m.getProgramTitle()).orElse("Módulo " + m.getModuleId())));

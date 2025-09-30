@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,61 +35,73 @@ public class PaymentEntitlementServiceImpl implements PaymentEntitlementService 
 
     @Override
     @Transactional
-    public void fulfillIfPaid(PaymentOrder order) {
-        // Sólo para órdenes pagadas y no concedidas
-        if (order == null || order.getStatus() != PaymentOrder.PaymentStatus.PAID) return;
-        if (order.isEntitlementsGranted()) return;
+    public GrantResult fulfillIfPaid(PaymentOrder order) {
+        // Solo órdenes pagadas y aún no concedidas
+        if (order == null || order.getStatus() != PaymentOrder.PaymentStatus.PAID) {
+            return new GrantResult(List.of(), List.of());
+        }
+        if (order.isEntitlementsGranted()) {
+            return new GrantResult(List.of(), List.of());
+        }
 
-        // Validamos datos mínimos
         if (order.getClerkId() == null || order.getClerkId().isBlank()) {
             throw new EntityNotFoundException("Orden sin clerkId; no se puede conceder acceso");
         }
 
-        // Cargamos items (módulos)
+        // Items de la orden
         List<PaymentOrderItem> items = itemRepo.findByOrder(order);
         if (items.isEmpty()) {
-            // No hay qué conceder; marcamos concedido para no intentar indefinidamente
             order.setEntitlementsGranted(true);
             order.setGrantedAt(OffsetDateTime.now());
             orderRepo.save(order);
-            return;
+            return new GrantResult(List.of(), List.of());
         }
 
-        // Tomamos los módulos a conceder
-        List<Long> moduleIds = items.stream()
+        // Distinct módulos de la orden
+        List<Long> requestedIds = items.stream()
                 .map(PaymentOrderItem::getModuleId)
+                .filter(Objects::nonNull)
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        // 1) Concedemos accesos
-        userAccessService.grantMultipleModuleAccess(order.getClerkId(), moduleIds);
+        // Conjunto de módulos ya poseídos
+        Set<Long> owned = userAccessService.getUserModulesByClerkId(order.getClerkId()).stream()
+                .map(m -> m.getModuleId())
+                .collect(Collectors.toSet());
 
-        // 2) Enviamos email con el MISMO diseño
-        try {
-            UserProfile user = userProfileRepo.findByClerkId(order.getClerkId())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado para clerkId: " + order.getClerkId()));
+        // Particionar
+        List<Long> toGrant = requestedIds.stream().filter(id -> !owned.contains(id)).toList();
+        List<Long> skipped = requestedIds.stream().filter(owned::contains).toList();
 
-            List<Module> modules = moduleRepo.findAllById(moduleIds);
+        // Conceder solo los nuevos
+        if (!toGrant.isEmpty()) {
+            userAccessService.grantMultipleModuleAccess(order.getClerkId(), toGrant);
 
-            double amountPaid = (order.getAmountCents() == null ? 0 : order.getAmountCents()) / 100.0;
+            // Email
+            try {
+                UserProfile user = userProfileRepo.findByClerkId(order.getClerkId())
+                        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado para clerkId: " + order.getClerkId()));
+                List<Module> modules = moduleRepo.findAllById(toGrant);
+                double amountPaid = (order.getAmountCents() == null ? 0 : order.getAmountCents()) / 100.0;
 
-            emailReceiptService.sendIzipayReceipt(
-                    user,
-                    modules,
-                    order.getOrderId(),            // Nro de compra
-                    OffsetDateTime.now(),          // o order.getGrantedAt() si quieres la marca exacta
-                    order.getCurrency(),           // "PEN" / "USD"
-                    amountPaid
-            );
-
-        } catch (Exception e) {
-            // No bloquear el flujo por el email, sólo registrar
-            System.err.println("Fallo preparando o enviando email Izipay: " + e.getMessage());
+                emailReceiptService.sendIzipayReceipt(
+                        user,
+                        modules,
+                        order.getOrderId(),
+                        OffsetDateTime.now(),
+                        order.getCurrency(),
+                        amountPaid
+                );
+            } catch (Exception e) {
+                System.err.println("Fallo preparando/enviando email Izipay: " + e.getMessage());
+            }
         }
 
-        // 3) Marcamos concedido (idempotencia)
+        // Marcar concedido SIEMPRE (para no reintentar), aunque todo haya sido duplicado
         order.setEntitlementsGranted(true);
         order.setGrantedAt(OffsetDateTime.now());
         orderRepo.save(order);
+
+        return new GrantResult(toGrant, skipped);
     }
 }

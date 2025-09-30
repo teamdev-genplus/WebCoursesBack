@@ -12,4 +12,6 @@ public class AccessPurchaseResponseDTO {
     private String fullName;
     private OffsetDateTime purchaseAt;
     private List<UserModuleDTO> grantedModules;
+    /** NUEVO: IDs de módulos que se omitieron por ya existir en UserModuleAccess */
+    private List<Long> skippedModuleIds;
 }

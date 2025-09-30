@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 @Service
@@ -148,11 +149,13 @@ public class PaymentServiceImpl implements PaymentService {
             JsonNode statusNode = root.get("orderStatus");
             if (statusNode != null) orderStatus = statusNode.asText();
         } catch (Exception e) {
-            // no rompas, pero marca no válido
             return ValidatePaymentResponse.builder().valid(false).build();
         }
 
-        // Actualizar estado del pedido
+        List<Long> granted = List.of();
+        List<Long> skipped = List.of();
+
+        // Actualizar estado del pedido y, si procede, conceder accesos
         if (orderId != null) {
             var opt = paymentOrderRepository.findByOrderId(orderId);
             if (opt.isPresent()) {
@@ -161,33 +164,27 @@ public class PaymentServiceImpl implements PaymentService {
                 po.setStatus(newStatus);
                 paymentOrderRepository.save(po);
 
-                // Si quedó pagado, conceder accesos (idempotente) + LOG UNIFICADO
                 if (newStatus == PaymentOrder.PaymentStatus.PAID) {
-                    entitlementService.fulfillIfPaid(po);
+                    // Conceder solo lo que el usuario no tiene (idempotente)
+                    var result = entitlementService.fulfillIfPaid(po);
+                    granted = result.getGrantedModuleIds();
+                    skipped = result.getSkippedModuleIds();
 
-                    // ---- Registrar en la tabla unificada ----
+                    // Registrar en unificada SOLO lo concedido (evita duplicados)
                     try {
-                        var items = itemRepo.findByOrder(po);
-                        var moduleIds = items.stream()
-                                .map(PaymentOrderItem::getModuleId)
-                                .filter(Objects::nonNull)
-                                .distinct()
-                                .toList();
-
-                        if (!moduleIds.isEmpty()) {
+                        if (granted != null && !granted.isEmpty()) {
                             String fullName = userProfileRepository.findByClerkId(po.getClerkId())
                                     .map(UserProfile::getFullname)
                                     .orElse("");
-
+                            // Si extraes fecha exacta del PSP, úsala; si no, now()
                             unifiedPaidOrderService.logPaidOrder(
                                     Optional.ofNullable(po.getEmail()).orElse(""),
                                     fullName,
-                                    java.time.OffsetDateTime.now(), // si no tienes fecha exacta del PSP aquí
-                                    moduleIds
+                                    OffsetDateTime.now(),
+                                    granted
                             );
                         }
-                    } catch (Exception ignore) { /* log si quieres */ }
-                    // -----------------------------------------
+                    } catch (Exception ignore) { /* log si deseas */ }
                 }
             }
         }
@@ -196,6 +193,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .valid(true)
                 .orderId(orderId)
                 .orderStatus(orderStatus)
+                .grantedModuleIds(granted)
+                .skippedModuleIds(skipped)
                 .build();
     }
 
@@ -223,20 +222,12 @@ public class PaymentServiceImpl implements PaymentService {
                     po.setStatus(newStatus);
                     paymentOrderRepository.save(po);
 
-                    // Si quedó pagado, conceder accesos (idempotente) + LOG UNIFICADO
                     if (newStatus == PaymentOrder.PaymentStatus.PAID) {
-                        entitlementService.fulfillIfPaid(po);
+                        var result = entitlementService.fulfillIfPaid(po);
 
-                        // ---- Registrar en la tabla unificada ----
                         try {
-                            var items = itemRepo.findByOrder(po);
-                            var moduleIds = items.stream()
-                                    .map(PaymentOrderItem::getModuleId)
-                                    .filter(Objects::nonNull)
-                                    .distinct()
-                                    .toList();
-
-                            if (!moduleIds.isEmpty()) {
+                            var granted = result.getGrantedModuleIds();
+                            if (granted != null && !granted.isEmpty()) {
                                 String fullName = userProfileRepository.findByClerkId(po.getClerkId())
                                         .map(UserProfile::getFullname)
                                         .orElse("");
@@ -244,18 +235,17 @@ public class PaymentServiceImpl implements PaymentService {
                                 unifiedPaidOrderService.logPaidOrder(
                                         Optional.ofNullable(po.getEmail()).orElse(""),
                                         fullName,
-                                        java.time.OffsetDateTime.now(), // o una fecha del payload si la parseas
-                                        moduleIds
+                                        OffsetDateTime.now(), // Si parseas fecha PSP, úsala aquí
+                                        granted
                                 );
                             }
-                        } catch (Exception ignore) { /* log si quieres */ }
-                        // -----------------------------------------
+                        } catch (Exception ignore) { /* log si deseas */ }
                     }
                 });
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) { }
 
-        // Responder 200/OK con cuerpo "OK" (Izipay lo requiere)
+        // Responder 200/OK (Izipay lo requiere)
         return "OK";
     }
 

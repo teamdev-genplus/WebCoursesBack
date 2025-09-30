@@ -37,6 +37,8 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
     private final EmailSenderService emailSenderService;
 
     private final UnifiedPaidOrderService unifiedPaidOrderService;
+    // NUEVO
+    private final IUserModuleRepo userModuleRepo;
 
     // ===== helpers para precios =====
     private static BigDecimal unitPrice(Module m) {
@@ -62,23 +64,40 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
         UserProfile user = userProfileRepo.findByClerkId(req.getClerkId())
                 .orElseThrow(() -> new EntityNotFoundException("Usuario con ClerkId no encontrado: " + req.getClerkId()));
 
-        // 2) Validar módulos
-        List<Module> modules = moduleRepo.findAllById(req.getModuleIds());
-        if (modules.size() != req.getModuleIds().size()) {
-            throw new EntityNotFoundException("Uno o más módulos no existen.");
+        // 2) Pedidos originales (distinct para evitar repetidos en input)
+        List<Long> requestedIds = req.getModuleIds().stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (requestedIds.isEmpty()) {
+            throw new EntityNotFoundException("No se recibieron módulos a comprar.");
         }
 
-        // ===== subtotal efectivo (req o cálculo de módulos)
-        BigDecimal effectiveSubtotal = Optional.ofNullable(req.getSubtotal())
-                .orElseGet(() -> subtotalFromModules(modules));
+        // 3) Módulos ya poseídos por el usuario
+        Set<Long> ownedIds = userModuleRepo.findByUserProfile_ClerkId(req.getClerkId()).stream()
+                .filter(a -> a.getModule() != null)
+                .map(a -> a.getModule().getModuleId())
+                .collect(Collectors.toSet());
 
-        // ===== comisión efectiva (0 si no llega)
+        // 4) Particionar: a conceder vs a omitir
+        List<Long> toGrantIds = requestedIds.stream().filter(id -> !ownedIds.contains(id)).toList();
+        List<Long> skippedIds = requestedIds.stream().filter(ownedIds::contains).toList();
+
+        // 5) Validar existencia solo de los a conceder
+        List<Module> modulesToGrant = moduleRepo.findAllById(toGrantIds);
+        if (modulesToGrant.size() != toGrantIds.size()) {
+            throw new EntityNotFoundException("Uno o más módulos no existen (entre los no poseídos).");
+        }
+
+        // ===== precios (sobre los que se conceden, para consistencia) =====
+        BigDecimal effectiveSubtotal = Optional.ofNullable(req.getSubtotal())
+                .orElseGet(() -> subtotalFromModules(modulesToGrant));
+
         BigDecimal effectiveCommission = Optional.ofNullable(req.getCommission())
                 .orElse(BigDecimal.ZERO)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        // ===== descuento efectivo:
-        // Si no llega => descuento = subtotal + comisión - total (>=0)
         BigDecimal effectiveDiscount = Optional.ofNullable(req.getDiscount())
                 .orElseGet(() -> {
                     BigDecimal d = effectiveSubtotal.add(effectiveCommission).subtract(req.getTotal());
@@ -87,7 +106,7 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                 })
                 .setScale(2, RoundingMode.HALF_UP);
 
-        // 3) Buscar o crear recibo (idempotencia por purchaseNumber)
+        // 6) Buscar o crear recibo (idempotencia por purchaseNumber)
         PaymentReceipt receipt = receiptRepo.findByPurchaseNumber(req.getPurchaseNumber())
                 .orElseGet(() -> {
                     PaymentReceipt r = PaymentReceipt.builder()
@@ -103,16 +122,16 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                             .discount(effectiveDiscount)
                             .commission(effectiveCommission)
                             .total(req.getTotal().setScale(2, RoundingMode.HALF_UP))
-                            .moduleIdsCsv(req.getModuleIds().stream().map(String::valueOf).collect(Collectors.joining(",")))
+                            .moduleIdsCsv(toGrantIds.stream().map(String::valueOf).collect(Collectors.joining(",")))
                             .entitlementsGranted(false)
                             .build();
                     return receiptRepo.save(r);
                 });
 
-        // 4) Insertar items si es nuevo (o asegurar items existan)
+        // 7) Items del recibo (solo de los concedibles)
         if (receiptItemRepo.findByReceipt_Id(receipt.getId()).isEmpty()) {
             List<PaymentReceiptItem> items = new ArrayList<>();
-            for (Module m : modules) {
+            for (Module m : modulesToGrant) {
                 items.add(PaymentReceiptItem.builder()
                         .receipt(receipt)
                         .moduleId(m.getModuleId())
@@ -123,39 +142,40 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
             receiptItemRepo.saveAll(items);
         }
 
-        // 5) Conceder accesos (race-safe con markGrantedIfNotGranted)
-        int updated = receiptRepo.markGrantedIfNotGranted(receipt.getId());
+        // 8) Conceder accesos SOLO a los no poseídos (idempotente del recibo)
         List<UserModuleDTO> granted;
-        if (updated == 1) {
-            // Primera vez que concedemos
-            granted = userAccessService.grantMultipleModuleAccess(req.getClerkId(), req.getModuleIds());
+        if (!toGrantIds.isEmpty()) {
+            int updated = receiptRepo.markGrantedIfNotGranted(receipt.getId());
+            if (updated == 1) {
+                // Primera vez
+                granted = userAccessService.grantMultipleModuleAccess(req.getClerkId(), toGrantIds);
 
-            // 6) Enviar emails (usuario + empresa). Si falla, no hay rollback de accesos
-            try {
-                String html = EmailReceiptRenderer.renderLegacyExact(user, modules, receipt);
-                emailSenderService.sendHtmlEmail(user.getEmail(), "Confirmación de compra", html);
+                // Enviar emails
+                try {
+                    String html = EmailReceiptRenderer.renderLegacyExact(user, modulesToGrant, receipt);
+                    emailSenderService.sendHtmlEmail(user.getEmail(), "Confirmación de compra", html);
+                    String plain = EmailReceiptRenderer.renderCompanyPlain(user, modulesToGrant, receipt);
+                    emailSenderService.sendEmail("contacto@aecode.ai", "Nueva compra (front-asserted)", plain);
+                } catch (MessagingException ignore) {}
 
-                String plain = EmailReceiptRenderer.renderCompanyPlain(user, modules, receipt);
-                emailSenderService.sendEmail("contacto@aecode.ai", "Nueva compra (front-asserted)", plain);
-            } catch (MessagingException me) {
-                // loggear
+                // Registrar en unificada (evita duplicados y solo módulos concedidos)
+                try {
+                    unifiedPaidOrderService.logPaidOrder(
+                            user.getEmail(),
+                            Optional.ofNullable(user.getFullname()).orElse(""),
+                            receipt.getPurchaseAt(),
+                            toGrantIds
+                    );
+                } catch (Exception ignore) {}
+            } else {
+                // Ya marcado: devolver los concedidos que intersectan con toGrantIds
+                granted = userAccessService.getUserModulesByClerkId(req.getClerkId()).stream()
+                        .filter(dto -> toGrantIds.contains(dto.getModuleId()))
+                        .toList();
             }
-
-            // 7) Registrar en la tabla unificada (solo lo esencial)
-            try {
-                unifiedPaidOrderService.logPaidOrder(
-                        user.getEmail(),
-                        Optional.ofNullable(user.getFullname()).orElse(""),
-                        receipt.getPurchaseAt(), // fecha del recibo
-                        modules.stream().map(Module::getModuleId).distinct().toList()
-                );
-            } catch (Exception ignore) { /* log si quieres */ }
-
         } else {
-            // Ya concedido antes (idempotente)
-            granted = userAccessService.getUserModulesByClerkId(req.getClerkId()).stream()
-                    .filter(dto -> req.getModuleIds().contains(dto.getModuleId()))
-                    .toList();
+            // No hay nada que conceder (todo era duplicado)
+            granted = List.of();
         }
 
         return AccessPurchaseResponseDTO.builder()
@@ -165,7 +185,9 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
                 .fullName(user.getFullname())
                 .purchaseAt(receipt.getPurchaseAt())
                 .grantedModules(granted)
+                .skippedModuleIds(skippedIds) // 👈 NUEVO: informar omitidos
                 .build();
     }
+
 
 }
