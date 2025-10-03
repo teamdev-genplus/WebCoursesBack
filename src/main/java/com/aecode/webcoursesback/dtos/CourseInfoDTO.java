@@ -20,4 +20,5 @@ public class CourseInfoDTO {
     private String type;
     private Double fullprice;
     private Double pricewithdiscount;
+    private Integer discountPercentage;
 }

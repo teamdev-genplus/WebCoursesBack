@@ -128,6 +128,7 @@ public class ModuleServiceImp implements IModuleService {
                 .type(course.getType())
                 .fullprice(course.getFullprice())
                 .pricewithdiscount(course.getPricewithdiscount())
+                .discountPercentage(course.getDiscountPercentage())
                 .build();
 
         ModuleDTO moduleDTO = modelMapper.map(firstModule, ModuleDTO.class);
