@@ -1,12 +1,10 @@
 package com.aecode.webcoursesback.entities.Landing;
-
-import com.google.type.DateTime;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
-
 import java.time.OffsetDateTime;
+
 import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -83,7 +81,7 @@ public class LandingPage {
         private String downloadBrochure; //Enlace para descargar el brochure
         private String whattsappurl;
         //fecha para contador
-        private DateTime startDate;
+        private OffsetDateTime startDate;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
