@@ -132,6 +132,8 @@ public class LandingPage {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class PricingPlan {
+        /** Clave estable para el plan: p.ej. "regular", "comunidad", "corporativo" */
+        private String key;
         private String title;              // “Corporativo”
         private String subtitle;           // breve (<= 6 palabras)
         private String currency;           // “USD” / “PEN”
@@ -141,6 +143,15 @@ public class LandingPage {
         private String ctaText;            // “Comprar”
         private String ctaUrl;             // link de compra
         private String note;               // “Válido hasta el 19/10/25”, etc (opcional)
+
+        /* ======== NUEVO: beneficios para la vista Inversión ======== */
+        /** Párrafo entero que se muestra bajo "Antes del evento" */
+        @Column(columnDefinition = "TEXT")
+        private String beforeEventText;
+
+        /** Párrafo entero que se muestra bajo "Durante el evento" */
+        @Column(columnDefinition = "TEXT")
+        private String duringEventText;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

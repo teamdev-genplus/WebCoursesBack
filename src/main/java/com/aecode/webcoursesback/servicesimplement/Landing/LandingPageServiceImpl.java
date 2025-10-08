@@ -1,5 +1,8 @@
 package com.aecode.webcoursesback.servicesimplement.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.PlanTitleDTO;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.SelectedPlanBenefitsDTO;
 import com.aecode.webcoursesback.entities.Landing.LandingPage;
 import com.aecode.webcoursesback.repositories.Landing.LandingPageRepository;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
@@ -9,6 +12,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +74,79 @@ public class LandingPageServiceImpl implements LandingPageService {
                         .dateLabel(firstPrincipalDateLabel(e))
                         .build())
                 .toList();
+    }
+
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public LandingInvestmentDTO getInvestmentDetail(String slug, String planKey, Double taxRate, Boolean priceIncludesTax) {
+        LandingPage e = repo.findBySlug(slug)
+                .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada: " + slug));
+
+        if (e.getPricing() == null || e.getPricing().isEmpty()) {
+            throw new EntityNotFoundException("La landing no tiene planes configurados.");
+        }
+
+        // 1) Títulos para "Tipo de tarifa"
+        List<PlanTitleDTO> titles = e.getPricing().stream()
+                .sorted(Comparator.comparing(LandingPage.PricingPlan::getTitle, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .map(p -> PlanTitleDTO.builder()
+                        .key(p.getKey())
+                        .title(p.getTitle())
+                        .build())
+                .toList();
+
+        // 2) Plan seleccionado por key (o primero si no llega)
+        LandingPage.PricingPlan sel = null;
+        if (planKey != null && !planKey.isBlank()) {
+            sel = e.getPricing().stream()
+                    .filter(p -> planKey.equalsIgnoreCase(p.getKey()))
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (sel == null) sel = e.getPricing().get(0);
+
+        // 3) Cálculo de importes
+        double rate = Optional.ofNullable(taxRate).orElse(0.18d);
+        boolean includesTax = Optional.ofNullable(priceIncludesTax).orElse(false);
+
+        BigDecimal base = BigDecimal.valueOf(Optional.ofNullable(sel.getPriceAmount()).orElse(0d));
+        BigDecimal r = BigDecimal.valueOf(rate);
+
+        BigDecimal subtotal, igv, total;
+
+        if (includesTax) {
+            // priceAmount YA incluye IGV
+            BigDecimal divisor = BigDecimal.ONE.add(r);
+            subtotal = base.divide(divisor, 2, RoundingMode.HALF_UP);
+            igv = base.subtract(subtotal);
+            total = base;
+        } else {
+            // priceAmount NO incluye IGV
+            subtotal = base.setScale(2, RoundingMode.HALF_UP);
+            igv = subtotal.multiply(r).setScale(2, RoundingMode.HALF_UP);
+            total = subtotal.add(igv).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        SelectedPlanBenefitsDTO selected = SelectedPlanBenefitsDTO.builder()
+                .key(sel.getKey())
+                .title(sel.getTitle())
+                .beforeEventText(sel.getBeforeEventText())
+                .duringEventText(sel.getDuringEventText())
+                .currency(sel.getCurrency())
+                .priceAmount(sel.getPriceAmount())
+                .subtotal(subtotal)
+                .taxAmount(igv)
+                .total(total)
+                .taxRate(rate)
+                .priceIncludesTax(includesTax)
+                .build();
+
+        return LandingInvestmentDTO.builder()
+                .plans(titles)
+                .selected(selected)
+                .build();
     }
 
     /* ==================== ADMIN ==================== */

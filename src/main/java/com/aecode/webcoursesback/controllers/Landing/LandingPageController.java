@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.controllers.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,18 @@ public class LandingPageController {
     @GetMapping("/{slug}")
     public ResponseEntity<LandingPageDTO> get(@PathVariable String slug) {
         return ResponseEntity.ok(service.getBySlug(slug));
+    }
+
+
+    /** NUEVO — Vista "Inversión": titles + párrafos de beneficios + importes */
+    @GetMapping("/{slug}/investment")
+    public ResponseEntity<LandingInvestmentDTO> getInvestment(
+            @PathVariable String slug,
+            @RequestParam(required = false) String planKey,          // ej: "regular"
+            @RequestParam(required = false) Double taxRate,          // ej: 0.18
+            @RequestParam(required = false) Boolean priceIncludesTax // default false
+    ) {
+        return ResponseEntity.ok(service.getInvestmentDetail(slug, planKey, taxRate, priceIncludesTax));
     }
 
     /* ==================== ADMIN ==================== */

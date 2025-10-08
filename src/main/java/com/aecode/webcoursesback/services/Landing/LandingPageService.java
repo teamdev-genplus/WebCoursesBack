@@ -1,5 +1,6 @@
 package com.aecode.webcoursesback.services.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 
 import java.util.List;
 
@@ -22,5 +23,16 @@ public interface LandingPageService {
     LandingPageDTO patchBenefitsById(Long id, UpdateBenefitsDTO dto);
     LandingPageDTO patchPricingById(Long id, UpdatePricingDTO dto);
     LandingPageDTO patchSocialById(Long id, UpdateSocialDTO dto);
+
+    /**
+     * Vista "Inversión": devuelve títulos de planes y, para el plan seleccionado,
+     * los dos párrafos de beneficios + importes calculados.
+     */
+    LandingInvestmentDTO getInvestmentDetail(
+            String slug,
+            String planKey,            // si es null, toma el primero
+            Double taxRate,            // si es null, usa 0.18
+            Boolean priceIncludesTax   // si es null, usa false
+    );
 
 }
