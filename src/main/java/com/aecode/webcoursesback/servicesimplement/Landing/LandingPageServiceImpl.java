@@ -107,23 +107,32 @@ public class LandingPageServiceImpl implements LandingPageService {
         }
         if (sel == null) sel = e.getPricing().get(0);
 
-        // 3) Cálculo de importes
+        // === NUEVO: elegir precio efectivo (pronto pago vs regular) ===
+        Double effectivePrice = null;
+        if (Boolean.TRUE.equals(sel.getPromptPaymentEnabled()) && sel.getPromptPaymentPrice() != null) {
+            effectivePrice = sel.getPromptPaymentPrice();
+        } else {
+            effectivePrice = sel.getPriceAmount();
+        }
+        if (effectivePrice == null) effectivePrice = 0d;
+
+        // 3) Cálculo de importes con el precio efectivo
         double rate = Optional.ofNullable(taxRate).orElse(0.18d);
         boolean includesTax = Optional.ofNullable(priceIncludesTax).orElse(false);
 
-        BigDecimal base = BigDecimal.valueOf(Optional.ofNullable(sel.getPriceAmount()).orElse(0d));
+        BigDecimal base = BigDecimal.valueOf(effectivePrice);
         BigDecimal r = BigDecimal.valueOf(rate);
 
         BigDecimal subtotal, igv, total;
 
         if (includesTax) {
-            // priceAmount YA incluye IGV
+            // effectivePrice YA incluye IGV
             BigDecimal divisor = BigDecimal.ONE.add(r);
             subtotal = base.divide(divisor, 2, RoundingMode.HALF_UP);
             igv = base.subtract(subtotal);
             total = base;
         } else {
-            // priceAmount NO incluye IGV
+            // effectivePrice NO incluye IGV
             subtotal = base.setScale(2, RoundingMode.HALF_UP);
             igv = subtotal.multiply(r).setScale(2, RoundingMode.HALF_UP);
             total = subtotal.add(igv).setScale(2, RoundingMode.HALF_UP);
@@ -135,10 +144,21 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .beforeEventText(sel.getBeforeEventText())
                 .duringEventText(sel.getDuringEventText())
                 .currency(sel.getCurrency())
+
+                // precios expuestos
                 .priceAmount(sel.getPriceAmount())
+                .promptPaymentPrice(sel.getPromptPaymentPrice())
+                .promptPaymentEnabled(Boolean.TRUE.equals(sel.getPromptPaymentEnabled()))
+
+                // precio usado en el cálculo
+                .effectiveUnitPrice(effectivePrice)
+
+                // totales
                 .subtotal(subtotal)
                 .taxAmount(igv)
                 .total(total)
+
+                // parámetros de cálculo
                 .taxRate(rate)
                 .priceIncludesTax(includesTax)
                 .build();
@@ -148,6 +168,7 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .selected(selected)
                 .build();
     }
+
 
     /* ==================== ADMIN ==================== */
 

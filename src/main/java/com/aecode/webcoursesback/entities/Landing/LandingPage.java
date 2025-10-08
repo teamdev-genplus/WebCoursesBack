@@ -139,6 +139,8 @@ public class LandingPage {
         private String currency;           // “USD” / “PEN”
         private String priceLabel;         // “$299.72 USD” (si prefieres formateado)
         private Double priceAmount;        // o como número si harán formato en front
+        private Double promptPaymentPrice;      // precio pero con pago anticipado
+        private Boolean promptPaymentEnabled; //bool que activa el pronto pago
         private String badgeText;          // “Cupos limitados”/“Pronto Pago”
         private String ctaText;            // “Comprar”
         private String ctaUrl;             // link de compra
