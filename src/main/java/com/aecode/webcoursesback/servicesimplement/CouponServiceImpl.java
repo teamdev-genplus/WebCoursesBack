@@ -209,6 +209,7 @@ public class CouponServiceImpl implements ICouponService {
                 .collect(Collectors.toList());
     }
 
+    // CouponServiceImpl#createCoupon
     @Override
     @Transactional
     public CouponResponseDTO createCoupon(CouponCreateRequestDTO request) {
@@ -221,20 +222,31 @@ public class CouponServiceImpl implements ICouponService {
                 .endDate(request.getEndDate())
                 .usageLimit(request.getUsageLimit())
                 .usageCount(0)
-                .singleUsePerUser(request.getSingleUsePerUser())
-                .courseSpecific(request.getCourseSpecific())
+                .singleUsePerUser(Boolean.TRUE.equals(request.getSingleUsePerUser()))
+                .courseSpecific(Boolean.TRUE.equals(request.getCourseSpecific()))
                 .active(request.getActive() != null ? request.getActive() : true)
+
+                // ===== NUEVO: landing =====
+                .landingSpecific(Boolean.TRUE.equals(request.getLandingSpecific()))
+                .landingSlug(request.getLandingSlug())
                 .build();
 
-        if (request.getCourseSpecific() && request.getApplicableCourseIds() != null) {
+        // Cursos (sólo si es específico por curso)
+        if (Boolean.TRUE.equals(request.getCourseSpecific()) && request.getApplicableCourseIds() != null) {
             List<Course> courses = courseRepository.findAllById(request.getApplicableCourseIds());
             coupon.setApplicableCourses(courses);
+        }
+
+        // Validaciones suaves (opcionales, pero útiles):
+        if (Boolean.TRUE.equals(coupon.getLandingSpecific()) && (coupon.getLandingSlug() == null || coupon.getLandingSlug().isBlank())) {
+            throw new IllegalArgumentException("landingSlug es requerido cuando landingSpecific = true");
         }
 
         Coupon saved = couponRepository.save(coupon);
         return mapToResponseDTO(saved);
     }
 
+    // CouponServiceImpl#mapToResponseDTO
     private CouponResponseDTO mapToResponseDTO(Coupon coupon) {
         return CouponResponseDTO.builder()
                 .couponId(coupon.getCouponId())
@@ -253,11 +265,15 @@ public class CouponServiceImpl implements ICouponService {
                         coupon.getApplicableCourses() != null
                                 ? coupon.getApplicableCourses().stream()
                                 .map(Course::getTitle)
-                                .collect(Collectors.toList())
+                                .collect(java.util.stream.Collectors.toList())
                                 : null
                 )
+                // ===== NUEVO: landing =====
+                .landingSpecific(coupon.getLandingSpecific())
+                .landingSlug(coupon.getLandingSlug())
                 .build();
     }
+
 
 
 }

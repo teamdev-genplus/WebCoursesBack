@@ -21,4 +21,8 @@ public class CouponResponseDTO {
     private Boolean courseSpecific;
     private Boolean active;
     private List<String> applicableCourseNames;
+
+    // ===== NUEVO: Landing =====
+    private Boolean landingSpecific;
+    private String landingSlug;
 }

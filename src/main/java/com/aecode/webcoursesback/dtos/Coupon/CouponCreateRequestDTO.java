@@ -14,9 +14,15 @@ public class CouponCreateRequestDTO {
     private Double discountAmount;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer usageLimit;
-    private Boolean singleUsePerUser;
-    private Boolean courseSpecific;
-    private Boolean active;
-    private List<Long> applicableCourseIds;
+    private Integer usageLimit;          // null = ilimitado
+    private Boolean singleUsePerUser;    // null = false
+    private Boolean active;              // null = true
+
+    // ===== Cursos (legacy) =====
+    private Boolean courseSpecific;            // null/false = general
+    private List<Long> applicableCourseIds;    // requerido si courseSpecific = true
+
+    // ===== NUEVO: Landing =====
+    private Boolean landingSpecific;     // true => aplica sólo a una landing
+    private String landingSlug;          // requerido si landingSpecific = true
 }
