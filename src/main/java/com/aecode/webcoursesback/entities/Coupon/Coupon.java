@@ -32,29 +32,28 @@ public class Coupon {
     @Column
     private Double discountAmount; // Si no es null, aplica monto fijo
 
-    @Column(nullable = false)
+    @Column
     private LocalDate startDate;
-
-    @Column(nullable = false)
+    @Column
     private LocalDate endDate;
 
     // Límite de usos global para este cupón
-    @Column(nullable = false)
+    @Column
     private Integer usageLimit;
 
     // Contador de usos actual
-    @Column(nullable = false)
+    @Column
     private Integer usageCount = 0;
 
     // Si true, un usuario solo puede usar el cupón una vez
-    @Column(nullable = false)
+    @Column
     private Boolean singleUsePerUser;
 
     // Si true, aplica solo para cursos específicos (si no, es general)
-    @Column(nullable = false)
+    @Column
     private Boolean courseSpecific;
 
-    @Column(nullable = false)
+    @Column
     private Boolean active = true;  // Por defecto activo
 
 
@@ -64,5 +63,10 @@ public class Coupon {
             joinColumns = @JoinColumn(name = "coupon_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     private List<Course> applicableCourses;
+
+    // ===== NUEVO: cupones de landing específica =====
+    // NUEVO: especificidad para landing
+    @Column private Boolean landingSpecific;        // true = aplica sólo a una landing
+    @Column(length = 150) private String landingSlug;              // requerido si landingSpecific = true
 
 }

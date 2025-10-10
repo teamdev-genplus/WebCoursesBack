@@ -24,15 +24,15 @@ public class SelectedPlanBenefitsDTO {
     private Double promptPaymentPrice;    // precio pronto pago (si aplica)
     private Boolean promptPaymentEnabled; // flag de pronto pago
 
-    // Precio que realmente se usó para cálculos (según flag)
-    private Double effectiveUnitPrice;
 
-    // Totales calculados:
-    private BigDecimal subtotal;
-    private BigDecimal taxAmount;
-    private BigDecimal total;
+    // Entrada/estado:
+    private Integer quantity;              // cantidad considerada en el cálculo
+    private String couponCodeApplied;      // cupón válido aplicado (si hubo)
 
-    // Parámetros de cálculo:
-    private Double taxRate;           // ej. 0.18
-    private Boolean priceIncludesTax; // true si el precio ya incluye IGV
+    // Desglose:
+    private BigDecimal subtotal;               // priceAmount * qty
+    private BigDecimal discountPromptPayment;  // (priceAmount - promptPaymentPrice) * qty si está activo
+    private BigDecimal discountCoupon;         // descuento por cupón aplicado al subtotal
+    private BigDecimal discountTotal;          // suma de todos los descuentos
+    private BigDecimal total;                  // subtotal - discountTotal
 }

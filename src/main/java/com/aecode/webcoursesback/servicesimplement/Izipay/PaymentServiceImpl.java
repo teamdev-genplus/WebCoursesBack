@@ -11,6 +11,9 @@ import com.aecode.webcoursesback.integrations.IzipayClient;
 import com.aecode.webcoursesback.repositories.IUserProfileRepository;
 import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderItemRepository;
 import com.aecode.webcoursesback.repositories.Izipay.PaymentOrderRepository;
+import com.aecode.webcoursesback.entities.Landing.LandingPage;
+import com.aecode.webcoursesback.repositories.Landing.LandingPageRepository;
+import com.aecode.webcoursesback.services.Izipay.EmailReceiptService;
 import com.aecode.webcoursesback.services.Izipay.PaymentEntitlementService;
 import com.aecode.webcoursesback.services.Izipay.PaymentService;
 import com.aecode.webcoursesback.services.Paid.UnifiedPaidOrderService;
@@ -41,8 +44,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentOrderItemRepository itemRepo;
     private final PaymentEntitlementService entitlementService;
 
-    // NUEVO
+    // NUEVO PARA UNIFICAR TABLA
     private final UnifiedPaidOrderService unifiedPaidOrderService;
+
+    //NUEVO PARA LANDING
+    private final LandingPageRepository landingRepo; // NUEVO
+    private final EmailReceiptService emailReceiptService;
 
 
     @Override
@@ -67,6 +74,10 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentOrder order = paymentOrderRepository.findByOrderId(req.getOrderId())
                 .orElseGet(PaymentOrder::new);
 
+        // ===== NUEVO: dominio =====
+        PaymentOrder.OrderDomain domain = parseDomain(req.getDomain());
+        order.setDomain(domain);
+
         order.setOrderId(req.getOrderId());
         order.setClerkId(req.getClerkId());
         order.setEmail(req.getEmail());
@@ -76,20 +87,35 @@ public class PaymentServiceImpl implements PaymentService {
         order.setMode(resolveModeFromPassword(props.getPassword()));
         order.setEntitlementsGranted(false);
         order.setGrantedAt(null);
+
+        // ===== NUEVO: datos de EVENT =====
+        if (domain == PaymentOrder.OrderDomain.EVENT) {
+            if (req.getLandingSlug() == null || req.getLandingSlug().isBlank())
+                throw new IllegalArgumentException("landingSlug requerido para domain=EVENT");
+            if (req.getLandingPlanKey() == null || req.getLandingPlanKey().isBlank())
+                throw new IllegalArgumentException("landingPlanKey requerido para domain=EVENT");
+            order.setLandingSlug(req.getLandingSlug());
+            order.setLandingPlanKey(req.getLandingPlanKey());
+        } else {
+            order.setLandingSlug(null);
+            order.setLandingPlanKey(null);
+        }
+
         order = paymentOrderRepository.save(order);
-        // 3b) Guardar líneas de orden (módulos)
-        itemRepo.deleteByOrder(order);
-        if (req.getModuleIds() != null && !req.getModuleIds().isEmpty()) {
-            for (Long mid : req.getModuleIds()) {
-                PaymentOrderItem it = PaymentOrderItem.builder()
-                        .order(order)
-                        .moduleId(mid)
-                        .priceCents(null) // opcional
-                        .build();
-                itemRepo.save(it);
+
+        // 3b) LÍNEAS SOLO SI MODULES
+        if (domain == PaymentOrder.OrderDomain.MODULES) {
+            itemRepo.deleteByOrder(order);
+            if (req.getModuleIds() != null && !req.getModuleIds().isEmpty()) {
+                for (Long mid : req.getModuleIds()) {
+                    PaymentOrderItem it = PaymentOrderItem.builder()
+                            .order(order).moduleId(mid).priceCents(null).build();
+                    itemRepo.save(it);
+                }
             }
         }
-        // 4) Armar payload para CreatePayment
+
+        // 4) Payload a Izipay
         Map<String, Object> payload = new HashMap<>();
         payload.put("amount", order.getAmountCents());
         payload.put("currency", order.getCurrency());
@@ -111,14 +137,14 @@ public class PaymentServiceImpl implements PaymentService {
         if (!billing.isEmpty()) customer.put("billingDetails", billing);
         if (!customer.isEmpty()) payload.put("customer", customer);
 
-        // 5) Llamar a Izipay -> formToken
+        // 5) Izipay -> formToken
         String formToken = izipayClient.createPaymentAndGetFormToken(payload);
 
         // 6) Guardar formToken
         order.setFormToken(formToken);
         paymentOrderRepository.save(order);
 
-        // 7) Devolver formToken + publicKey para que el front dibuje la pasarela
+        // 7) Respuesta
         return FormTokenCreateResponse.builder()
                 .formToken(formToken)
                 .publicKey(izipayClient.getPublicKey())
@@ -165,27 +191,28 @@ public class PaymentServiceImpl implements PaymentService {
                 paymentOrderRepository.save(po);
 
                 if (newStatus == PaymentOrder.PaymentStatus.PAID) {
-                    // Conceder solo lo que el usuario no tiene (idempotente)
-                    var result = entitlementService.fulfillIfPaid(po);
-                    granted = result.getGrantedModuleIds();
-                    skipped = result.getSkippedModuleIds();
+                    if (po.getDomain() == PaymentOrder.OrderDomain.MODULES) {
+                        var result = entitlementService.fulfillIfPaid(po);
+                        granted = result.getGrantedModuleIds();
+                        skipped = result.getSkippedModuleIds();
 
-                    // Registrar en unificada SOLO lo concedido (evita duplicados)
-                    try {
-                        if (granted != null && !granted.isEmpty()) {
-                            String fullName = userProfileRepository.findByClerkId(po.getClerkId())
-                                    .map(UserProfile::getFullname)
-                                    .orElse("");
-                            // Si extraes fecha exacta del PSP, úsala; si no, now()
-                            unifiedPaidOrderService.logPaidOrder(
-                                    Optional.ofNullable(po.getEmail()).orElse(""),
-                                    fullName,
-                                    OffsetDateTime.now(),
-                                    granted
-                            );
-                        }
-                    } catch (Exception ignore) { /* log si deseas */ }
+                        try {
+                            if (granted != null && !granted.isEmpty()) {
+                                String fullName = userProfileRepository.findByClerkId(po.getClerkId())
+                                        .map(UserProfile::getFullname).orElse("");
+                                unifiedPaidOrderService.logPaidOrder(
+                                        Optional.ofNullable(po.getEmail()).orElse(""),
+                                        fullName,
+                                        OffsetDateTime.now(),
+                                        granted
+                                );
+                            }
+                        } catch (Exception ignore) {}
+                    } else if (po.getDomain() == PaymentOrder.OrderDomain.EVENT) {
+                        handleEventPaid(po); // NUEVO
+                    }
                 }
+
             }
         }
 
@@ -223,23 +250,24 @@ public class PaymentServiceImpl implements PaymentService {
                     paymentOrderRepository.save(po);
 
                     if (newStatus == PaymentOrder.PaymentStatus.PAID) {
-                        var result = entitlementService.fulfillIfPaid(po);
-
-                        try {
-                            var granted = result.getGrantedModuleIds();
-                            if (granted != null && !granted.isEmpty()) {
-                                String fullName = userProfileRepository.findByClerkId(po.getClerkId())
-                                        .map(UserProfile::getFullname)
-                                        .orElse("");
-
-                                unifiedPaidOrderService.logPaidOrder(
-                                        Optional.ofNullable(po.getEmail()).orElse(""),
-                                        fullName,
-                                        OffsetDateTime.now(), // Si parseas fecha PSP, úsala aquí
-                                        granted
-                                );
-                            }
-                        } catch (Exception ignore) { /* log si deseas */ }
+                        if (po.getDomain() == PaymentOrder.OrderDomain.MODULES) {
+                            var result = entitlementService.fulfillIfPaid(po);
+                            try {
+                                var granted = result.getGrantedModuleIds();
+                                if (granted != null && !granted.isEmpty()) {
+                                    String fullName = userProfileRepository.findByClerkId(po.getClerkId())
+                                            .map(UserProfile::getFullname).orElse("");
+                                    unifiedPaidOrderService.logPaidOrder(
+                                            Optional.ofNullable(po.getEmail()).orElse(""),
+                                            fullName,
+                                            OffsetDateTime.now(),
+                                            granted
+                                    );
+                                }
+                            } catch (Exception ignore) {}
+                        } else if (po.getDomain() == PaymentOrder.OrderDomain.EVENT) {
+                            handleEventPaid(po); // NUEVO
+                        }
                     }
                 });
             }
@@ -284,4 +312,75 @@ public class PaymentServiceImpl implements PaymentService {
     private String optText(JsonNode n) {
         return (n == null || n.isNull()) ? null : n.asText();
     }
+
+
+    //=================NUEVOS HELPERS PARA LANDING=================
+
+    private PaymentOrder.OrderDomain parseDomain(String domainRaw) {
+        if (domainRaw == null) return PaymentOrder.OrderDomain.MODULES;
+        try { return PaymentOrder.OrderDomain.valueOf(domainRaw.trim().toUpperCase()); }
+        catch (Exception ignore) { return PaymentOrder.OrderDomain.MODULES; }
+    }
+
+    private String resolveEventTitle(String slug) {
+        if (slug == null || slug.isBlank()) return "";
+        return landingRepo.findBySlug(slug)
+                .map(lp -> {
+                    // usamos el primer título de principal si existe
+                    if (lp.getPrincipal() != null && !lp.getPrincipal().isEmpty()) {
+                        String t = lp.getPrincipal().get(0).getTitle();
+                        if (t != null && !t.isBlank()) return t;
+                    }
+                    return slug;
+                })
+                .orElse(slug);
+    }
+
+    private String resolvePlanTitle(String slug, String planKey) {
+        if (slug == null || planKey == null) return planKey;
+        return landingRepo.findBySlug(slug)
+                .map(lp -> {
+                    if (lp.getPricing() == null) return planKey;
+                    return lp.getPricing().stream()
+                            .filter(p -> planKey.equalsIgnoreCase(p.getKey()))
+                            .map(LandingPage.PricingPlan::getTitle)
+                            .findFirst().orElse(planKey);
+                }).orElse(planKey);
+    }
+
+    private void handleEventPaid(PaymentOrder po) {
+        if (po.isEntitlementsGranted()) return; // idempotencia: ya enviado email
+
+        // datos
+        double amountPaid = (po.getAmountCents() == null ? 0 : po.getAmountCents()) / 100.0;
+        String eventTitle = resolveEventTitle(po.getLandingSlug());
+        String planTitle  = resolvePlanTitle(po.getLandingSlug(), po.getLandingPlanKey());
+
+        // buscar usuario
+        UserProfile user = userProfileRepository.findByClerkId(po.getClerkId())
+                .orElse(UserProfile.builder().email(
+                        Optional.ofNullable(po.getEmail()).orElse("")).build());
+
+        // enviar email de evento
+        try {
+            emailReceiptService.sendIzipayEventReceipt(
+                    user,
+                    eventTitle,
+                    planTitle,
+                    po.getOrderId(),
+                    OffsetDateTime.now(),
+                    po.getCurrency(),
+                    amountPaid
+            );
+        } catch (Exception ex) {
+            System.err.println("Fallo enviando email EVENT: " + ex.getMessage());
+        }
+
+        // marcar como "procesado" para no repetir
+        po.setEntitlementsGranted(true);
+        po.setGrantedAt(OffsetDateTime.now());
+        paymentOrderRepository.save(po);
+    }
+
+
 }

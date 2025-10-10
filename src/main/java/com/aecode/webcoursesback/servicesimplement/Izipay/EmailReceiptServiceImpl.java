@@ -276,4 +276,83 @@ public class EmailReceiptServiceImpl implements EmailReceiptService {
             System.err.println("Fallo enviando email de Izipay: " + e.getMessage());
         }
     }
+
+    @Override
+    public void sendIzipayEventReceipt(UserProfile user,
+                                       String eventTitle,
+                                       String planTitle,
+                                       String purchaseNumber,
+                                       OffsetDateTime purchasedAt,
+                                       String currency,
+                                       double amountPaid) {
+        if (purchasedAt == null) purchasedAt = OffsetDateTime.now();
+        if (currency == null || currency.isBlank()) currency = "PEN";
+        if (eventTitle == null || eventTitle.isBlank()) eventTitle = "Evento";
+        if (planTitle == null || planTitle.isBlank()) planTitle = "Plan";
+
+        String numeroCompra = (purchaseNumber == null || purchaseNumber.isBlank())
+                ? DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(purchasedAt)
+                : purchaseNumber;
+
+        Locale locale = new Locale("es", "ES");
+        String fechaCompra = purchasedAt.toLocalDate().format(DateTimeFormatter.ofPattern("dd 'de' MMMM 'del' yyyy", locale));
+
+        // HTML simple (mismo look & feel general, sin tabla de módulos)
+        String html = """
+      <!DOCTYPE html>
+      <html lang="es"><head><meta charset="UTF-8"><title>Confirmación de compra</title></head>
+      <body style="font-family:Verdana,Arial,sans-serif;background:#FAFAFA;margin:0;padding:0">
+        <div style="max-width:600px;margin:0 auto;background:#fff;padding:20px">
+          <h2 style="text-align:center;margin:0 0 10px 0">Confirmación de Compra</h2>
+          <p style="text-align:center;margin:0 0 20px 0">¡Tu compra se procesó correctamente!</p>
+          <p style="text-align:center;color:#5C68E2;margin:0 0 6px 0">Nro. Compra <strong>#%s</strong></p>
+          <p style="text-align:center;margin:0 0 20px 0">%s</p>
+
+          <h3 style="margin:20px 0 10px 0">Detalle</h3>
+          <p style="margin:0">Evento: <strong>%s</strong></p>
+          <p style="margin:0 0 10px 0">Plan: <strong>%s</strong></p>
+
+          <hr style="border:none;border-top:1px solid #eee;margin:15px 0" />
+          <p style="text-align:right;margin:0 0 4px 0">Total pagado: <strong>%.2f %s</strong></p>
+
+          <hr style="border:none;border-top:1px solid #eee;margin:15px 0" />
+          <p style="font-size:12px;color:#333;margin:0">
+            Cliente: <strong>%s</strong><br/>
+            Método de Pago: <strong>Izipay</strong><br/>
+            Fecha: <strong>%s</strong><br/>
+            Moneda: <strong>%s</strong>
+          </p>
+
+          <div style="text-align:center;margin:20px 0 0 0">
+            <a href="https://aecode.ai/training" 
+               style="background:#1f1748;color:#fff;text-decoration:none;padding:10px 20px;border-radius:5px;display:inline-block">
+               Ver mis compras
+            </a>
+          </div>
+        </div>
+      </body></html>
+    """.formatted(
+                safe(numeroCompra),
+                safe(fechaCompra),
+                safe(eventTitle),
+                safe(planTitle),
+                amountPaid, currency,
+                safe(user.getEmail()),
+                safe(fechaCompra),
+                safe(currency)
+        );
+
+        try {
+            emailSenderService.sendHtmlEmail(user.getEmail(), "Confirmación de compra - " + eventTitle, html);
+            // correo interno opcional
+            emailSenderService.sendEmail("contacto@aecode.ai",
+                    "Nueva compra evento (Izipay)",
+                    "Usuario: " + user.getEmail() + "\nEvento: " + eventTitle +
+                            "\nPlan: " + planTitle + "\nTotal: " + String.format(Locale.US,"%.2f %s", amountPaid, currency) +
+                            "\nFecha: " + purchasedAt.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+        } catch (MessagingException e) {
+            System.err.println("Fallo enviando email de Izipay EVENT: " + e.getMessage());
+        }
+    }
+
 }

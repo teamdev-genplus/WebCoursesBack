@@ -59,12 +59,26 @@ public class PaymentOrder {
         PENDING, PAID, UNPAID, FAILED
     }
 
+    //NUevo
+    public enum OrderDomain { MODULES, EVENT }
+    // ===== NUEVO: dominio e info de evento =====
+    @Enumerated(EnumType.STRING)
+    @Column(name = "domain", length = 20, nullable = false)
+    private OrderDomain domain = OrderDomain.MODULES;
+
+    @Column(name = "landing_slug", length = 150)
+    private String landingSlug;        // ej: "ai-construction-summit-2025"
+
+    @Column(name = "landing_plan_key", length = 80)
+    private String landingPlanKey;     // ej: "regular" | "comunidad" | "corporativo"
+
     @PrePersist
     public void prePersist() {
         OffsetDateTime now = OffsetDateTime.now();
         createdAt = now;
         updatedAt = now;
         if (status == null) status = PaymentStatus.PENDING;
+        if (domain == null) domain = OrderDomain.MODULES;
     }
 
     @PreUpdate

@@ -27,4 +27,11 @@ public class FormTokenCreateRequest {
 
     // NUEVO: lo que el usuario compra (módulos)
     private List<Long> moduleIds;
+
+    // ===== NUEVO: dominio de orden =====
+    // "MODULES" (por defecto si no envían) o "EVENT"
+    private String domain;
+    // ===== NUEVO: para EVENT =====
+    private String landingSlug;    // ej. "ai-construction-summit-2025"
+    private String landingPlanKey; // ej. "regular" | "comunidad" | "corporativo"
 }

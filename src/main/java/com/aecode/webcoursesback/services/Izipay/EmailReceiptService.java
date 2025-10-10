@@ -22,4 +22,13 @@ public interface EmailReceiptService {
                            OffsetDateTime purchasedAt,
                            String currency,
                            double amountPaid);
+    // ===== NUEVO: recibo para evento (sin lista de módulos) =====
+    void sendIzipayEventReceipt(UserProfile user,
+                                String eventTitle,     // ej: "AI Construction Summit 2025"
+                                String planTitle,      // ej: "Inversión Regular"
+                                String purchaseNumber, // orderId
+                                OffsetDateTime purchasedAt,
+                                String currency,
+                                double amountPaid);
+
 }

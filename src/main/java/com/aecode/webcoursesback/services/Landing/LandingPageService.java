@@ -30,9 +30,11 @@ public interface LandingPageService {
      */
     LandingInvestmentDTO getInvestmentDetail(
             String slug,
-            String planKey,            // si es null, toma el primero
-            Double taxRate,            // si es null, usa 0.18
-            Boolean priceIncludesTax   // si es null, usa false
+            String planKey,
+            Integer quantity,
+            String couponCode,
+            String clerkId
     );
+
 
 }
