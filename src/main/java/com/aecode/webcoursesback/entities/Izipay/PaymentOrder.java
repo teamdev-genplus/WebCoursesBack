@@ -26,14 +26,14 @@ public class PaymentOrder {
     @Column(name = "email", length = 255)
     private String email;              // redundante (de UserProfile o de request)
 
-    @Column(name = "amount_cents", nullable = false)
+    @Column(name = "amount_cents")
     private Integer amountCents;       // monto en centavos (PEN)
 
-    @Column(name = "currency", length = 10, nullable = false)
+    @Column(name = "currency", length = 10)
     private String currency;           // "PEN" | "USD"
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(name = "status", length = 20)
     private PaymentStatus status;      // PENDING | PAID | UNPAID | FAILED
 
     @Column(name = "form_token", columnDefinition = "TEXT")
@@ -43,16 +43,16 @@ public class PaymentOrder {
     private String mode;               // "TEST" o "PROD" (opcional, informativo)
 
     // ===== NUEVO: idempotencia de concesión =====
-    @Column(name = "entitlements_granted", nullable = false)
+    @Column(name = "entitlements_granted")
     private boolean entitlementsGranted = false;
 
     @Column(name = "granted_at")
     private OffsetDateTime grantedAt;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
     public enum PaymentStatus {
@@ -63,7 +63,7 @@ public class PaymentOrder {
     public enum OrderDomain { MODULES, EVENT }
     // ===== NUEVO: dominio e info de evento =====
     @Enumerated(EnumType.STRING)
-    @Column(name = "domain", length = 20, nullable = false)
+    @Column(name = "domain", length = 20)
     private OrderDomain domain = OrderDomain.MODULES;
 
     @Column(name = "landing_slug", length = 150)
@@ -71,6 +71,12 @@ public class PaymentOrder {
 
     @Column(name = "landing_plan_key", length = 80)
     private String landingPlanKey;     // ej: "regular" | "comunidad" | "corporativo"
+    // NUEVOS (ambos opcionales)
+    @Column
+    private Integer landingQuantity;     // null => se usa default por plan
+
+    @Column(length = 60)
+    private String landingCouponCode;    // null => sin cupón
 
     @PrePersist
     public void prePersist() {

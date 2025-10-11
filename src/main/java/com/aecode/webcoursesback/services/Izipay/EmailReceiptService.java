@@ -22,13 +22,17 @@ public interface EmailReceiptService {
                            OffsetDateTime purchasedAt,
                            String currency,
                            double amountPaid);
-    // ===== NUEVO: recibo para evento (sin lista de módulos) =====
+    /* ===== NUEVO: recibo para EVENT/LANDING con mismo template base ===== */
     void sendIzipayEventReceipt(UserProfile user,
-                                String eventTitle,     // ej: "AI Construction Summit 2025"
-                                String planTitle,      // ej: "Inversión Regular"
-                                String purchaseNumber, // orderId
-                                OffsetDateTime purchasedAt,
+                                String eventTitle,
+                                String planTitle,
+                                int quantity,
                                 String currency,
-                                double amountPaid);
+                                double unitPriceShown,   // priceAmount (lo que se muestra como unitario)
+                                double subtotal,         // selected.getSubtotal()
+                                double discountTotal,    // selected.getDiscountTotal()
+                                double total,            // selected.getTotal()
+                                String purchaseNumber,
+                                OffsetDateTime purchasedAt);
 
 }

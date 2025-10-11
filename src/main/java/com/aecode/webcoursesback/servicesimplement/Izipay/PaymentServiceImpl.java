@@ -16,6 +16,7 @@ import com.aecode.webcoursesback.repositories.Landing.LandingPageRepository;
 import com.aecode.webcoursesback.services.Izipay.EmailReceiptService;
 import com.aecode.webcoursesback.services.Izipay.PaymentEntitlementService;
 import com.aecode.webcoursesback.services.Izipay.PaymentService;
+import com.aecode.webcoursesback.services.Landing.LandingPageService;
 import com.aecode.webcoursesback.services.Paid.UnifiedPaidOrderService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,7 @@ public class PaymentServiceImpl implements PaymentService {
     //NUEVO PARA LANDING
     private final LandingPageRepository landingRepo; // NUEVO
     private final EmailReceiptService emailReceiptService;
+    private final LandingPageService landingService;   // NUEVO
 
 
     @Override
@@ -94,11 +96,18 @@ public class PaymentServiceImpl implements PaymentService {
                 throw new IllegalArgumentException("landingSlug requerido para domain=EVENT");
             if (req.getLandingPlanKey() == null || req.getLandingPlanKey().isBlank())
                 throw new IllegalArgumentException("landingPlanKey requerido para domain=EVENT");
+
             order.setLandingSlug(req.getLandingSlug());
             order.setLandingPlanKey(req.getLandingPlanKey());
+
+            // NUEVO: persistir cantidad y cupón ingresados por el usuario
+            order.setLandingQuantity(req.getLandingQuantity());     // puede ser null
+            order.setLandingCouponCode(req.getLandingCouponCode()); // puede ser null
         } else {
             order.setLandingSlug(null);
             order.setLandingPlanKey(null);
+            order.setLandingQuantity(null);
+            order.setLandingCouponCode(null);
         }
 
         order = paymentOrderRepository.save(order);
@@ -349,38 +358,64 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void handleEventPaid(PaymentOrder po) {
-        if (po.isEntitlementsGranted()) return; // idempotencia: ya enviado email
+        if (po.isEntitlementsGranted()) return; // idempotencia
 
-        // datos
-        double amountPaid = (po.getAmountCents() == null ? 0 : po.getAmountCents()) / 100.0;
+        // 1) Resolver títulos
         String eventTitle = resolveEventTitle(po.getLandingSlug());
         String planTitle  = resolvePlanTitle(po.getLandingSlug(), po.getLandingPlanKey());
 
-        // buscar usuario
+        // 2) Usuario
         UserProfile user = userProfileRepository.findByClerkId(po.getClerkId())
                 .orElse(UserProfile.builder().email(
                         Optional.ofNullable(po.getEmail()).orElse("")).build());
 
-        // enviar email de evento
         try {
+            // 3) Recalcular importes con la misma lógica de "Investment"
+            //    (usa cantidad/cupón guardados en la orden; si son null, Investment aplica defaults)
+            var investment = landingService.getInvestmentDetail(
+                    po.getLandingSlug(),
+                    po.getLandingPlanKey(),
+                    po.getLandingQuantity(),      // puede ser null
+                    po.getLandingCouponCode(),    // puede ser null
+                    po.getClerkId()               // para validar singleUsePerUser si aplica
+            );
+            var sel = investment.getSelected();
+
+            int quantity = Optional.ofNullable(sel.getQuantity()).orElse(1);
+            String currency = Optional.ofNullable(sel.getCurrency()).orElse(
+                    Optional.ofNullable(po.getCurrency()).orElse("PEN")
+            );
+
+            double unitPriceShown = Optional.ofNullable(sel.getPriceAmount()).orElse(0.0);
+            double subtotal       = sel.getSubtotal()       != null ? sel.getSubtotal().doubleValue()       : 0.0;
+            double discountTotal  = sel.getDiscountTotal()  != null ? sel.getDiscountTotal().doubleValue()  : 0.0;
+            double total          = sel.getTotal()          != null ? sel.getTotal().doubleValue()          : 0.0;
+
+            // 4) Enviar email con el MISMO template
             emailReceiptService.sendIzipayEventReceipt(
                     user,
                     eventTitle,
                     planTitle,
+                    quantity,
+                    currency,
+                    unitPriceShown,
+                    subtotal,
+                    discountTotal,
+                    total,
                     po.getOrderId(),
-                    OffsetDateTime.now(),
-                    po.getCurrency(),
-                    amountPaid
+                    OffsetDateTime.now()
             );
+
         } catch (Exception ex) {
-            System.err.println("Fallo enviando email EVENT: " + ex.getMessage());
+            System.err.println("Fallo recalculando/enviando email EVENT: " + ex.getMessage());
         }
 
-        // marcar como "procesado" para no repetir
+        // 5) Marcar como "procesado" para no repetir envíos
         po.setEntitlementsGranted(true);
         po.setGrantedAt(OffsetDateTime.now());
         paymentOrderRepository.save(po);
     }
+
 
 
 }

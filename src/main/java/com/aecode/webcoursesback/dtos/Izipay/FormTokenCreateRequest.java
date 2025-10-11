@@ -34,4 +34,6 @@ public class FormTokenCreateRequest {
     // ===== NUEVO: para EVENT =====
     private String landingSlug;    // ej. "ai-construction-summit-2025"
     private String landingPlanKey; // ej. "regular" | "comunidad" | "corporativo"
+    private Integer landingQuantity;   // opcional (usa default por plan si null)
+    private String  landingCouponCode; // opcional
 }
