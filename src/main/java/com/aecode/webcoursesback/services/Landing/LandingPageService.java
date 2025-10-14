@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.services.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 
 import java.util.List;
 
@@ -23,6 +25,8 @@ public interface LandingPageService {
     LandingPageDTO patchBenefitsById(Long id, UpdateBenefitsDTO dto);
     LandingPageDTO patchPricingById(Long id, UpdatePricingDTO dto);
     LandingPageDTO patchSocialById(Long id, UpdateSocialDTO dto);
+    /** NUEVO */
+    LandingPageDTO patchCallForPresentationById(Long id, UpdateCallForPresentationDTO dto);
 
     /**
      * Vista "Inversión": devuelve títulos de planes y, para el plan seleccionado,
@@ -36,5 +40,8 @@ public interface LandingPageService {
             String clerkId
     );
 
+    /** NUEVO: creación de solicitud */
+    CallForPresentationSubmissionDTO submitCallForPresentation(
+            String slug, SubmitCallForPresentationDTO dto);
 
 }

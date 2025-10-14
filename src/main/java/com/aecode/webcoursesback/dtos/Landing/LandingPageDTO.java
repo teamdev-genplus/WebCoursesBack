@@ -13,6 +13,9 @@ public class LandingPageDTO {
     private List<Collaborator> collaborators;
     private AboutSection about;
     private List<Speaker> speakers;
+    /** NUEVO */
+    private CallForPresentationSection callForPresentation;
+
     private List<Benefit> benefits;
     private List<PricingPlan> pricing;
     private SocialSection social;

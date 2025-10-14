@@ -40,6 +40,11 @@ public class LandingPage {
     @Column(columnDefinition = "jsonb")
     private List<Speaker> speakers;
 
+    /** ------ 3.5) Call for Presentation ------ */
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private CallForPresentationSection callForPresentation;
+
     /** ------ 4) Beneficios ------ */
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
@@ -80,8 +85,7 @@ public class LandingPage {
         private String backgroundimage;     // imagen
         private String downloadBrochure; //Enlace para descargar el brochure
         private String whattsappurl;
-        //fecha para contador
-        private OffsetDateTime startDate;
+        private OffsetDateTime startDate; //fecha para contador
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -113,6 +117,14 @@ public class LandingPage {
         private String headline;     // “UX-UI / Arquitecta…”
         private String photoUrl;     // imagen de fondo/card
         private String linkedinUrl;  // botón a LinkedIn
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CallForPresentationSection {
+        private String title;        // Ej: "Call for Presentation"
+        private String description;  // Texto corto bajo el título
+        private String basesUrl;     // URL para el botón fijo: "Consultar bases"
+        // El segundo botón abre modal en front; no requiere atributo.
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

@@ -3,11 +3,16 @@ import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.PlanTitleDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.SelectedPlanBenefitsDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 import com.aecode.webcoursesback.entities.Coupon.Coupon;
+import com.aecode.webcoursesback.entities.Landing.CallForPresentationSubmission;
 import com.aecode.webcoursesback.entities.Landing.LandingPage;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRedemptionRepository;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRepository;
+import com.aecode.webcoursesback.repositories.Landing.CallForPresentationSubmissionRepository;
 import com.aecode.webcoursesback.repositories.Landing.LandingPageRepository;
+import com.aecode.webcoursesback.services.EmailSenderService;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +32,19 @@ import java.util.Optional;
 public class LandingPageServiceImpl implements LandingPageService {
 
     private final LandingPageRepository repo;
-    private final CouponRepository couponRepo;                   // NUEVO
-    private final CouponRedemptionRepository redemptionRepo;     // NUEVO
+    private final CouponRepository couponRepo;
+    private final CouponRedemptionRepository redemptionRepo;
     private final ModelMapper mapper = new ModelMapper();
+
+
+    private final CallForPresentationSubmissionRepository submissionRepo; // NUEVO
+    private final EmailSenderService emailSenderService;                 // NUEVO
+    // ===== Helpers de seguridad HTML simples (reuso de tu plantilla de emails)
+    private static String safe(String s) {
+        if (s == null) return "";
+        return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;");
+    }
+
 
     private LandingPageDTO map(LandingPage e) {
         return mapper.map(e, LandingPageDTO.class);
@@ -301,5 +316,206 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada (id=" + id + ")"));
         e.setSocial(dto.getSocial());
         return map(repo.save(e));
+    }
+    /** ADMIN — PATCH Call for Presentation */
+    @Override
+    public LandingPageDTO patchCallForPresentationById(Long id, UpdateCallForPresentationDTO dto) {
+        LandingPage e = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada (id=" + id + ")"));
+        e.setCallForPresentation(dto.getCallForPresentation());
+        return mapper.map(repo.save(e), LandingPageDTO.class);
+    }
+
+    /** PUBLIC — create submission */
+    @Override
+    public CallForPresentationSubmissionDTO submitCallForPresentation(String slug, SubmitCallForPresentationDTO dto) {
+        // 1) Valida landing
+        LandingPage e = repo.findBySlug(slug)
+                .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada: " + slug));
+
+        // 2) Validaciones mínimas
+        if (dto.getFullName() == null || dto.getFullName().isBlank())
+            throw new IllegalArgumentException("fullName es requerido");
+        if (dto.getEmail() == null || dto.getEmail().isBlank())
+            throw new IllegalArgumentException("email es requerido");
+        if (dto.getCountryCode() == null || dto.getCountryCode().isBlank())
+            throw new IllegalArgumentException("countryCode es requerido");
+        if (dto.getPhoneNumber() == null || dto.getPhoneNumber().isBlank())
+            throw new IllegalArgumentException("phoneNumber es requerido");
+        if (dto.getIdeaText() == null || dto.getIdeaText().isBlank())
+            throw new IllegalArgumentException("ideaText es requerido");
+
+        // 3) Persiste
+        CallForPresentationSubmission s = CallForPresentationSubmission.builder()
+                .landingSlug(slug)
+                .fullName(dto.getFullName().trim())
+                .email(dto.getEmail().trim())
+                .countryCode(dto.getCountryCode().trim())
+                .phoneNumber(dto.getPhoneNumber().trim())
+                .ideaText(dto.getIdeaText().trim())
+                .clerkId(dto.getClerkId())
+                .status(CallForPresentationSubmission.Status.PENDING)
+                .build();
+
+        s = submissionRepo.save(s);
+
+        // 4) Emails (HTML al usuario, simple a empresa)
+        sendUserConfirmEmail(s, e);
+        sendCompanyNotifyEmail(s, e);
+
+        // 5) Respuesta
+        return CallForPresentationSubmissionDTO.builder()
+                .id(s.getId())
+                .landingSlug(s.getLandingSlug())
+                .fullName(s.getFullName())
+                .email(s.getEmail())
+                .countryCode(s.getCountryCode())
+                .phoneNumber(s.getPhoneNumber())
+                .ideaText(s.getIdeaText())
+                .status(s.getStatus().name())
+                .createdAt(s.getCreatedAt() != null ? s.getCreatedAt().toString() : null)
+                .build();
+    }
+
+    /* ================= Emails ================= */
+
+    private void sendUserConfirmEmail(CallForPresentationSubmission s, LandingPage landing) {
+        String title = (landing.getCallForPresentation() != null &&
+                landing.getCallForPresentation().getTitle() != null)
+                ? landing.getCallForPresentation().getTitle()
+                : "Call for Presentation";
+
+        String subject = "¡Solicitud recibida! " + title + " — AECODE";
+        String html = buildUserHtml(s, title);
+        try {
+            emailSenderService.sendHtmlEmail(s.getEmail(), subject, html);
+        } catch (Exception ex) {
+            System.err.println("Fallo enviando email al usuario: " + ex.getMessage());
+        }
+    }
+
+    private void sendCompanyNotifyEmail(CallForPresentationSubmission s, LandingPage landing) {
+        String companyEmail = "contacto@aecode.ai"; // ajusta si lo necesitas
+        String subject = "Nueva solicitud — " + s.getLandingSlug();
+
+        String body = String.format(
+                java.util.Locale.US,
+                "Nueva solicitud de 'Call for Presentation'\n\n" +
+                        "Landing: %s\n" +
+                        "Nombre: %s\n" +
+                        "Email: %s\n" +
+                        "Teléfono: %s %s\n\n" +
+                        "Idea:\n%s\n\n" +
+                        "Estado: %s\n" +
+                        "Creado: %s\n",
+                s.getLandingSlug(),
+                s.getFullName(),
+                s.getEmail(),
+                s.getCountryCode(), s.getPhoneNumber(),
+                s.getIdeaText(),
+                s.getStatus().name(),
+                s.getCreatedAt() != null ? s.getCreatedAt().toString() : "(ahora)"
+        );
+        try {
+            emailSenderService.sendEmail(companyEmail, subject, body);
+        } catch (Exception ex) {
+            System.err.println("Fallo enviando email a la empresa: " + ex.getMessage());
+        }
+    }
+
+    private String buildUserHtml(CallForPresentationSubmission s, String sectionTitle) {
+        String fullPhone = safe(s.getCountryCode()) + " " + safe(s.getPhoneNumber());
+        String niceDate = java.time.OffsetDateTime.now()
+                .toLocalDate()
+                .format(java.time.format.DateTimeFormatter.ofPattern(
+                        "dd 'de' MMMM 'del' yyyy", new java.util.Locale("es","ES")));
+
+        String template = """
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solicitud recibida</title>
+</head>
+<body style="background:#FAFAFA;margin:0;padding:0;font-family:Verdana, Geneva, sans-serif;">
+  <table role="presentation" width="100%%" cellpadding="0" cellspacing="0" style="background:#FAFAFA;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;box-shadow:0 2px 10px rgba(0,0,0,.06);">
+          <tr>
+            <td style="padding:0;" align="center">
+              <img src="https://euqtuhd.stripocdn.email/content/guids/CABINET_d1422edc264bd643c8af51440e8995acef2448ffb48805c1983bece0ea0a568e/images/channels4_banner.jpg" width="600" style="display:block;border:0;max-width:100%%;height:auto;" alt="AECODE">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:22px 24px 8px 24px;" align="center">
+              <h1 style="Margin:0;color:#333;font-size:28px;line-height:1.2;">¡Tu solicitud fue recibida!</h1>
+              <p style="Margin:10px 0 0 0;color:#333;font-size:14px;line-height:1.6;">
+                Gracias, <strong>%s</strong>. Hemos recibido tu solicitud a
+                <strong>%s</strong>.
+              </p>
+              <p style="Margin:6px 0 14px 0;color:#333;font-size:13px;">Fecha: %s</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 24px 0 24px;">
+              <table role="presentation" width="100%%" cellpadding="0" cellspacing="0" style="border-top:2px solid #efefef;border-bottom:2px solid #efefef;">
+                <tr>
+                  <td style="padding:12px 0;color:#333;font-size:14px;">
+                    <strong>Correo:</strong> %s
+                  </td>
+                  <td style="padding:12px 0;color:#333;font-size:14px;" align="right">
+                    <strong>Teléfono:</strong> %s
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:16px 24px 6px 24px;">
+              <p style="Margin:0 0 8px 0;color:#333;font-size:14px;"><strong>Resumen de tu idea</strong></p>
+              <div style="padding:14px 16px;background:#F7F7FF;border-left:4px solid #5C68E2;border-radius:6px;color:#333;font-size:14px;line-height:1.6;">
+                %s
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 24px 24px 24px;color:#333;font-size:13px;line-height:1.6;" align="center">
+              Nuestro equipo revisará tu propuesta y nos pondremos en contacto a tu correo.<br>
+              Si tienes preguntas, escríbenos a
+              <a href="mailto:contacto@aecode.ai" style="color:#5C68E2;text-decoration:underline;">contacto@aecode.ai</a>.
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 24px 24px 24px;">
+              <div style="display:inline-block;background:#1f1748;color:#FFFFFF;padding:10px 20px;border-radius:6px;font-weight:bold;font-size:14px;">
+                AECODE Training
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+""";
+
+        // Usa String.format (o template.formatted(...)) — recuerda que %% arriba es para los % literales.
+        return String.format(
+                template,
+                safe(s.getFullName()),
+                safe(sectionTitle),
+                safe(niceDate),
+                safe(s.getEmail()),
+                fullPhone,
+                safe(s.getIdeaText())
+        );
     }
 }

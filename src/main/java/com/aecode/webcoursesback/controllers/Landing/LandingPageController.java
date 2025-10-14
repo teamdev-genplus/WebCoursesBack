@@ -1,6 +1,8 @@
 package com.aecode.webcoursesback.controllers.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
+import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,14 @@ public class LandingPageController {
             @RequestParam(required = false) String clerkId    // para validar single-use del cupón
     ) {
         return ResponseEntity.ok(service.getInvestmentDetail(slug, planKey, quantity, couponCode, clerkId));
+    }
+
+    /** NUEVO — Enviar solicitud (sin login obligatorio) */
+    @PostMapping("/{slug}/call-for-presentation/submissions")
+    public ResponseEntity<CallForPresentationSubmissionDTO> submit(
+            @PathVariable String slug,
+            @RequestBody SubmitCallForPresentationDTO dto) {
+        return ResponseEntity.ok(service.submitCallForPresentation(slug, dto));
     }
 
     /* ==================== ADMIN ==================== */
@@ -82,6 +92,13 @@ public class LandingPageController {
     public ResponseEntity<LandingPageDTO> patchSpeakers(
             @PathVariable Long id, @RequestBody UpdateSpeakersDTO dto) {
         return ResponseEntity.ok(service.patchSpeakersById(id, dto));
+    }
+
+    /** NUEVO — PATCH Call for Presentation por ID */
+    @PatchMapping("/admin/{id}/call-for-presentation")
+    public ResponseEntity<LandingPageDTO> patchCallForPresentation(
+            @PathVariable Long id, @RequestBody UpdateCallForPresentationDTO dto) {
+        return ResponseEntity.ok(service.patchCallForPresentationById(id, dto));
     }
 
     /** PATCH (admin): Beneficios por ID */

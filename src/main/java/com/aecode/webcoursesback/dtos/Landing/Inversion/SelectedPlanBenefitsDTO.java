@@ -13,8 +13,8 @@ public class SelectedPlanBenefitsDTO {
     private String title;
 
     // Beneficios como párrafos:
-    private String beforeEventText;   // texto largo
-    private String duringEventText;   // texto largo
+    private String beforeEventText;
+    private String duringEventText;
 
     // Datos de importe:
     private String currency;
