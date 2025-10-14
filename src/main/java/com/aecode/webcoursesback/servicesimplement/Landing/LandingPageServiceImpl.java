@@ -491,14 +491,6 @@ public class LandingPageServiceImpl implements LandingPageService {
               <a href="mailto:contacto@aecode.ai" style="color:#5C68E2;text-decoration:underline;">contacto@aecode.ai</a>.
             </td>
           </tr>
-
-          <tr>
-            <td align="center" style="padding:0 24px 24px 24px;">
-              <div style="display:inline-block;background:#1f1748;color:#FFFFFF;padding:10px 20px;border-radius:6px;font-weight:bold;font-size:14px;">
-                AECODE Training
-              </div>
-            </td>
-          </tr>
         </table>
       </td>
     </tr>
