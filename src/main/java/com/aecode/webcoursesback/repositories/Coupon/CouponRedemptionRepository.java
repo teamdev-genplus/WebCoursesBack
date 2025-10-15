@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CouponRedemptionRepository extends JpaRepository<CouponRedemption, Long>{
     boolean existsByCouponAndClerkId(Coupon coupon, String clerkId);
+
 }

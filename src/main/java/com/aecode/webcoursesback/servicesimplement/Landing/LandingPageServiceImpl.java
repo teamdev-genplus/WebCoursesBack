@@ -150,19 +150,20 @@ public class LandingPageServiceImpl implements LandingPageService {
             }
         }
 
-        // 6) Descuento por cupón (sólo si plan "aecoder" y cupón válido)
+        // 6) Descuento por cupón (sólo si plan "aecoder" y cupón válido para PREVIEW)
         BigDecimal discountCoupon = BigDecimal.ZERO;
         String couponApplied = null;
         if ("aecoder".equals(key) && couponCode != null && !couponCode.isBlank()) {
             var cup = couponRepo.findByCode(couponCode.trim()).orElse(null);
-            if (isValidLandingCoupon(cup, slug, clerkId)) {
+            // Para PREVIEW en /investment no exigimos clerkId ni single-use-per-user
+            if (isValidLandingCouponPreview(cup, slug)) {
                 discountCoupon = calcCouponDiscount(cup, subtotal); // se aplica sobre el subtotal
                 if (discountCoupon.compareTo(BigDecimal.ZERO) < 0) discountCoupon = BigDecimal.ZERO;
-                // no permitir que el descuento cupón exceda el saldo restante (no necesario ahora, pero seguro):
                 if (discountCoupon.compareTo(subtotal) > 0) discountCoupon = subtotal;
                 couponApplied = cup.getCode();
             }
         }
+
 
         BigDecimal discountTotal = discountPrompt.add(discountCoupon);
         // 7) Total: subtotal - (prompt + coupon)
@@ -194,6 +195,31 @@ public class LandingPageServiceImpl implements LandingPageService {
     }
 
     /* ===== Helpers de cupón ===== */
+
+    /** Validación para PREVISUALIZAR descuentos en /investment:
+     *  - Aplica reglas de vigencia, uso y landingSlug
+     *  - NO exige clerkId ni verifica single-use-per-user
+     */
+    private boolean isValidLandingCouponPreview(Coupon c, String slug) {
+        if (c == null) return false;
+        if (Boolean.FALSE.equals(c.getActive())) return false;
+
+        var today = java.time.LocalDate.now();
+        if (c.getStartDate() != null && today.isBefore(c.getStartDate())) return false;
+        if (c.getEndDate() != null && today.isAfter(c.getEndDate())) return false;
+
+        if (c.getUsageLimit() != null && c.getUsageCount() != null
+                && c.getUsageCount() >= c.getUsageLimit()) return false;
+
+        // Si es específico de landing, debe coincidir
+        if (Boolean.TRUE.equals(c.getLandingSpecific())) {
+            return c.getLandingSlug() != null && c.getLandingSlug().equalsIgnoreCase(slug);
+        }
+
+        // Si no es landingSpecific, lo consideramos cupón "global" válido también para landing
+        return true;
+    }
+
 
     private boolean isValidLandingCoupon(Coupon c, String slug, String clerkId) {
         if (c == null) return false;
