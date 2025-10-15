@@ -248,20 +248,26 @@ public class LandingPageServiceImpl implements LandingPageService {
     }
 
     private BigDecimal calcCouponDiscount(Coupon c, BigDecimal base) {
-        // base = subtotal
         if (c == null || base == null) return BigDecimal.ZERO;
-        if (c.getDiscountPercentage() != null) {
-            double pct = c.getDiscountPercentage() / 100.0;
-            if (pct < 0) pct = 0;
-            if (pct > 1) pct = 1;
-            return base.multiply(BigDecimal.valueOf(pct));
-        }
-        if (c.getDiscountAmount() != null) {
-            double amt = Math.max(0, c.getDiscountAmount());
+
+        // 1) Monto fijo tiene prioridad SI es > 0
+        Double amount = c.getDiscountAmount();
+        if (amount != null && amount > 0.0) {
+            double amt = Math.max(0.0, amount);
             return BigDecimal.valueOf(amt);
         }
+
+        // 2) Si no hay monto fijo, usar % sólo si > 0
+        Double percentage = c.getDiscountPercentage();
+        if (percentage != null && percentage > 0.0) {
+            double pct = Math.min(1.0, Math.max(0.0, percentage / 100.0));
+            return base.multiply(BigDecimal.valueOf(pct));
+        }
+
+        // 3) Ningún descuento válido
         return BigDecimal.ZERO;
     }
+
 
 
     /* ==================== ADMIN ==================== */
