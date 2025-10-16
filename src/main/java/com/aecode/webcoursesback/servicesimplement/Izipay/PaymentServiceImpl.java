@@ -1,9 +1,6 @@
 package com.aecode.webcoursesback.servicesimplement.Izipay;
 import com.aecode.webcoursesback.config.IzipayProperties;
-import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateRequest;
-import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateResponse;
-import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentRequest;
-import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentResponse;
+import com.aecode.webcoursesback.dtos.Izipay.*;
 import com.aecode.webcoursesback.entities.Izipay.PaymentOrder;
 import com.aecode.webcoursesback.entities.Izipay.PaymentOrderItem;
 import com.aecode.webcoursesback.entities.UserProfile;
@@ -30,6 +27,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -285,6 +283,69 @@ public class PaymentServiceImpl implements PaymentService {
         // Responder 200/OK (Izipay lo requiere)
         return "OK";
     }
+
+
+
+
+    // ========================GET FORMULARIO=========================
+    // ===================== NUEVOS MÉTODOS DE LISTADO POR DOMINIO =====================
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PaymentOrderExportDTO> listModuleOrders() {
+        var orders = paymentOrderRepository
+                .findAllByDomainOrderByCreatedAtDesc(PaymentOrder.OrderDomain.MODULES);
+
+        return orders.stream()
+                .map(this::toExportDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PaymentOrderExportDTO> listEventOrders() {
+        var orders = paymentOrderRepository
+                .findAllByDomainOrderByCreatedAtDesc(PaymentOrder.OrderDomain.EVENT);
+
+        return orders.stream()
+                .map(this::toExportDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Mapea PaymentOrder -> PaymentOrderExportDTO (incluye moduleIds para MODULES)
+    private PaymentOrderExportDTO toExportDTO(PaymentOrder po) {
+        List<Long> moduleIds = Collections.emptyList();
+        if (po.getDomain() == PaymentOrder.OrderDomain.MODULES) {
+            moduleIds = itemRepo.findByOrder(po).stream()
+                    .map(PaymentOrderItem::getModuleId)
+                    .collect(Collectors.toList());
+        }
+
+        return PaymentOrderExportDTO.builder()
+                .orderId(po.getOrderId())
+                .domain(po.getDomain() != null ? po.getDomain().name() : null)
+                .status(po.getStatus() != null ? po.getStatus().name() : null)
+                .mode(po.getMode())
+                .amountCents(po.getAmountCents())
+                .currency(po.getCurrency())
+                .clerkId(po.getClerkId())
+                .email(po.getEmail())
+                .entitlementsGranted(po.isEntitlementsGranted())
+                .grantedAt(po.getGrantedAt())
+                .createdAt(po.getCreatedAt())
+                .updatedAt(po.getUpdatedAt())
+
+                // EVENT
+                .landingSlug(po.getLandingSlug())
+                .landingPlanKey(po.getLandingPlanKey())
+                .landingQuantity(po.getLandingQuantity())
+                .landingCouponCode(po.getLandingCouponCode())
+
+                // MODULES
+                .moduleIds(moduleIds)
+                .build();
+    }
+
 
 
     // ================= Helpers =================

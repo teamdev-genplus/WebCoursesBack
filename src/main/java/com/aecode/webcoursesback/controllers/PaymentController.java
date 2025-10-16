@@ -1,13 +1,11 @@
 package com.aecode.webcoursesback.controllers;
-import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateRequest;
-import com.aecode.webcoursesback.dtos.Izipay.FormTokenCreateResponse;
-import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentRequest;
-import com.aecode.webcoursesback.dtos.Izipay.ValidatePaymentResponse;
+import com.aecode.webcoursesback.dtos.Izipay.*;
 import com.aecode.webcoursesback.services.Izipay.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -33,4 +31,18 @@ public class PaymentController {
     public String ipn(@RequestParam Map<String, String> formParams) {
         return paymentService.handleIpn(formParams);
     }
+
+
+    // ==== NUEVO: Listado para Excel - dominio MODULES ====
+    @GetMapping("/orders/modules")
+    public List<PaymentOrderExportDTO> listModuleOrders() {
+        return paymentService.listModuleOrders();
+    }
+
+    // ==== NUEVO: Listado para Excel - dominio EVENT ====
+    @GetMapping("/orders/events")
+    public List<PaymentOrderExportDTO> listEventOrders() {
+        return paymentService.listEventOrders();
+    }
+
 }
