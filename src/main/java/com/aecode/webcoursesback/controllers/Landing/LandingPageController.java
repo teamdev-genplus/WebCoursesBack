@@ -3,7 +3,11 @@ import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
+import com.aecode.webcoursesback.dtos.Paid.Event.AccessEventPurchaseRequestDTO;
+import com.aecode.webcoursesback.dtos.Paid.Event.AccessEventPurchaseResponseDTO;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
+import com.aecode.webcoursesback.services.Paid.PurchaseAccessService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +20,7 @@ import java.util.List;
 public class LandingPageController {
 
     private final LandingPageService service;
+    private final PurchaseAccessService purchaseAccessService;
 
     /* ==================== PÚBLICO (Front) ==================== */
 
@@ -50,6 +55,16 @@ public class LandingPageController {
             @PathVariable String slug,
             @RequestBody SubmitCallForPresentationDTO dto) {
         return ResponseEntity.ok(service.submitCallForPresentation(slug, dto));
+    }
+
+    /* ==================== NUEVO: COMPRA FRONT-ASSERTED (EVENT) ==================== */
+    @PostMapping("/{slug}/access/purchase")
+    public ResponseEntity<AccessEventPurchaseResponseDTO> grantEventWithFrontAssertedPurchase(
+            @PathVariable String slug,
+            @Valid @RequestBody AccessEventPurchaseRequestDTO request
+    ) {
+        var res = purchaseAccessService.processFrontAssertedEventPurchase(slug, request);
+        return ResponseEntity.ok(res);
     }
 
     /* ==================== ADMIN ==================== */

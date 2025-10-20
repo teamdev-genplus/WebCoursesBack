@@ -63,7 +63,7 @@ public class UserAccessController {
     public ResponseEntity<AccessPurchaseResponseDTO> grantModulesWithFrontAssertedPurchase(
             @Valid @RequestBody AccessPurchaseRequestDTO request
     ) {
-        // Si ya usas el filtro de consistencia, aquí no necesitas más validación del clerkId.
+
         AccessPurchaseResponseDTO res = purchaseAccessService.processFrontAssertedPurchase(request);
         return ResponseEntity.ok(res);
     }

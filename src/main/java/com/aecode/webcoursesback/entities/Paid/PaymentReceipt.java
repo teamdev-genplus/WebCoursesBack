@@ -52,8 +52,28 @@ public class PaymentReceipt {
     @Column(name = "total", precision = 12, scale = 2, nullable = false)
     private BigDecimal total;
 
-    @Column(name = "module_ids_csv", length = 1024) // para reporteo rápido
+    // ====== PARA MODULES (se conserva para reporteo) ======
+    @Column(name = "module_ids_csv", length = 1024)
     private String moduleIdsCsv;
+
+    // ====== NUEVO: SOPORTE DE DOMINIO ======
+    @Enumerated(EnumType.STRING)
+    @Column(name = "domain", nullable = false, length = 16)
+    private PaymentDomain domain; // MODULES | EVENT
+
+    // ====== NUEVO: CAMPOS EVENT ======
+    @Column(name = "event_slug", length = 200)
+    private String eventSlug;       // landing slug
+
+    @Column(name = "event_plan_key", length = 80)
+    private String eventPlanKey;    // key del plan
+
+    @Column(name = "event_quantity")
+    private Integer eventQuantity;  // cantidad de boletos
+
+    @Column(name = "event_coupon_code", length = 60)
+    private String eventCouponCode; // opcional (solo para referencia)
+
 
     @Column(name = "entitlements_granted", nullable = false)
     private boolean entitlementsGranted;
@@ -61,6 +81,7 @@ public class PaymentReceipt {
     @Column(name = "granted_at")
     private OffsetDateTime grantedAt;
 
-    public enum PaymentMethod { PAYPAL, YAPE, PLIN }
+    public enum PaymentMethod { PAYPAL, YAPE, PLIN, TRANSFER }
     public enum CurrencyCode { PEN, USD }
+    public enum PaymentDomain { MODULES, EVENT }
 }
