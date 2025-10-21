@@ -2,6 +2,7 @@ package com.aecode.webcoursesback.controllers;
 
 import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentValidateRequest;
 import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherDTO;
+import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherPayload;
 import com.aecode.webcoursesback.services.Paid.Voucher.ManualPaymentVoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,37 +21,28 @@ public class ManualPaymentVoucherController {
     private final ManualPaymentVoucherService service;
 
     /**
-     * Cargar voucher + datos. Ningún campo es obligatorio.
-     * Form-data (multipart):
-     *  - file: (opcional) pdf/jpg/png
-     *  - clerkId: (opcional)
-     *  - moduleIds: (opcional) puede venir repetido => &moduleIds=1&moduleIds=2...
-     *  - paymentMethod: (opcional) texto libre
-     *  - paidAt: (opcional) ISO-8601 p.ej. 2025-09-23T12:34:56Z
-     *  - status: (opcional) "PENDING" | "PAID" (default PAID)
+     * Sube voucher + metadatos en 2 partes:
+     *  - file (opcional): PDF/JPG/PNG
+     *  - payload (obligatorio): JSON con los campos (clerkId, domain, orderId, etc.)
+     *
+     * Content-Type: multipart/form-data
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ManualPaymentVoucherDTO> uploadVoucher(
-            @RequestParam(name = "file", required = false) MultipartFile file,
-            @RequestParam(name = "clerkId", required = false) String clerkId,
-            @RequestParam(name = "moduleIds", required = false) List<Long> moduleIds,
-            @RequestParam(name = "paymentMethod", required = false) String paymentMethod,
-            @RequestParam(name = "paidAt", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime paidAt,
-            @RequestParam(name = "status", required = false) String status
+            @RequestPart(name = "file", required = false) MultipartFile file,
+            @RequestPart(name = "payload", required = true) ManualPaymentVoucherPayload payload
     ) {
-        ManualPaymentVoucherDTO dto = service.uploadVoucher(file, clerkId, moduleIds, paymentMethod, paidAt, status);
+        ManualPaymentVoucherDTO dto = service.uploadVoucher(file, payload);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     /**
-     * Actualizar validación. Si validated=true:
-     *  - Verifica clerkId existe
-     *  - Verifica módulos existen y NO repetidos en UserModuleAccess
-     *  - Inserta en UnifiedPaidOrder
+     * Cambia 'validated'. Si pasa a true:
+     *  - EVENT => no exporta módulos (solo marca)
+     *  - MODULES/null => exporta a unificada módulos válidos
      */
     @PatchMapping("/{id}/validate")
-    public ResponseEntity<?> setValidated(
+    public ResponseEntity<ManualPaymentVoucherDTO> setValidated(
             @PathVariable Long id,
             @RequestBody ManualPaymentValidateRequest body
     ) {

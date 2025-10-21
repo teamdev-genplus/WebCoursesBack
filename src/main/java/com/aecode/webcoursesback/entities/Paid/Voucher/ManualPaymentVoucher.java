@@ -38,6 +38,36 @@ public class ManualPaymentVoucher {
     @Column(name = "status", length = 16)
     private PaymentStatus status;
 
+    /** ====== NUEVOS CAMPOS GENERALES (no obligatorios) ====== */
+    @Column(name = "email", length = 255)
+    private String email;                 // redundante (del clerkId o del front)
+
+    @Column(name = "order_id", length = 120)
+    private String orderId;               // nro/orden de pago manual
+
+    @Column(name = "amount_cents")
+    private Integer amountCents;          // total en centavos
+
+    @Column(name = "currency", length = 10)
+    private String currency;              // "PEN" | "USD"
+
+    /** Dominio de la compra: MODULES | EVENT */
+    public enum PaymentDomain { MODULES, EVENT }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "domain", length = 16)
+    private PaymentDomain domain;
+
+    /** ====== NUEVOS CAMPOS EVENT (no obligatorios) ====== */
+    @Column(name = "landing_slug", length = 150)
+    private String landingSlug;           // ej: "ai-construction-summit-2025"
+
+    @Column(name = "landing_plan_key", length = 80)
+    private String landingPlanKey;        // ej: "regular" | "comunidad" | "corporativo"
+
+    @Column(name = "landing_quantity")
+    private Integer landingQuantity;      // cantidad (boletos)
+
     /** Booleano de validación manual (false por defecto) */
     @Column(name = "validated")
     private boolean validated;

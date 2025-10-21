@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.servicesimplement.Paid.Voucher;
 
 import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherDTO;
+import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherPayload;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.Paid.Voucher.ManualPaymentVoucher;
 import com.aecode.webcoursesback.entities.Paid.UnifiedPaidOrder;
@@ -37,39 +38,35 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
     private final UnifiedPaidOrderService unifiedPaidOrderService;
 
     @Override
-    public ManualPaymentVoucherDTO uploadVoucher(
-            MultipartFile voucherFileOrNull,
-            String clerkIdOrNull,
-            List<Long> moduleIdsOrNull,
-            String paymentMethodOrNull,
-            OffsetDateTime paidAtOrNull,
-            String statusOrNull
-    ) {
+    public ManualPaymentVoucherDTO uploadVoucher(MultipartFile voucherFileOrNull,
+                                                 ManualPaymentVoucherPayload payload) {
+
+        // 0) defensivo
+        if (payload == null) {
+            payload = new ManualPaymentVoucherPayload();
+        }
+
         // 1) Subir archivo (si llega)
         String url = null;
         if (voucherFileOrNull != null && !voucherFileOrNull.isEmpty()) {
             validateMime(voucherFileOrNull.getContentType());
 
-            // ===== NUEVO: ruta ordenada por usuario, misma idea que en UserDetailController =====
+            String clerkId = trimToNull(payload.getClerkId());
             String path;
-            String safeClerk = (clerkIdOrNull != null && !clerkIdOrNull.isBlank()) ? clerkIdOrNull : "unknown";
+            String safeClerk = (clerkId != null) ? clerkId : "unknown";
 
-            if (clerkIdOrNull != null && !clerkIdOrNull.isBlank()) {
-                var optUser = userProfileRepo.findByClerkId(clerkIdOrNull);
+            if (clerkId != null) {
+                var optUser = userProfileRepo.findByClerkId(clerkId);
                 if (optUser.isPresent()) {
                     var user = optUser.get();
-                    String fullName = user.getFullname();
-                    String fullNameSafe = safeName(fullName != null ? fullName : "usuario");
+                    String fullNameSafe = safeName(nvl(user.getFullname(), "usuario"));
                     path = "users/" + user.getUserId() + "_" + fullNameSafe + "/vouchers/";
                 } else {
-                    // clerkId no encontrado -> fallback por clerk
                     path = "vouchers/" + safeClerk + "/";
                 }
             } else {
-                // sin clerkId -> carpeta genérica
                 path = "vouchers/" + safeClerk + "/";
             }
-            // ================================================================================
 
             try {
                 url = firebaseStorageService.uploadImage(voucherFileOrNull, path);
@@ -78,28 +75,57 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
             }
         }
 
-        // 2) Normalizar CSV de módulos (permite nulo/vacío)
-        String csv = toCsvDistinct(moduleIdsOrNull);
+        // 2) Derivar email desde clerkId (si existe el usuario)
+        String clerkId = trimToNull(payload.getClerkId());
+        String resolvedEmail = null;
+        if (clerkId != null) {
+            userProfileRepo.findByClerkId(clerkId).ifPresent(u -> {
+                // usamos siempre el email del usuario si existe
+            });
+            Optional<UserProfile> opt = userProfileRepo.findByClerkId(clerkId);
+            if (opt.isPresent()) {
+                resolvedEmail = opt.get().getEmail();
+            }
+        }
+        if (resolvedEmail == null) {
+            // si no hay user por clerkId, usamos el email que vino en el payload (si vino)
+            resolvedEmail = trimToNull(payload.getEmail());
+        }
 
-        // 3) Mapear estado (por defecto PAID)
+        // 3) Normalizar CSV de módulos (permite nulo/vacío)
+        String csv = toCsvDistinct(payload.getModuleIds());
+
+        // 4) Mapear status (default PAID en @PrePersist)
         ManualPaymentVoucher.PaymentStatus status =
-                mapStatusOrDefault(statusOrNull, ManualPaymentVoucher.PaymentStatus.PAID);
+                mapStatusOrDefault(payload.getStatus(), ManualPaymentVoucher.PaymentStatus.PAID);
 
-        // 4) Crear y guardar entidad
+        // 5) Parsear domain
+        ManualPaymentVoucher.PaymentDomain domain = parseDomainOrNull(payload.getDomain());
+
+        // 6) Construir y guardar la entidad (nada obligatorio)
         ManualPaymentVoucher entity = ManualPaymentVoucher.builder()
-                .clerkId(nullIfBlank(clerkIdOrNull))
+                .clerkId(clerkId)
                 .voucherUrl(url)
                 .moduleIdsCsv(csv)
-                .paymentMethod(nullIfBlank(paymentMethodOrNull))
-                .paidAt(paidAtOrNull)  // puede ser null
+                .paymentMethod(trimToNull(payload.getPaymentMethod()))
+                .paidAt(payload.getPaidAt())   // puede ser null
                 .status(status)
-                // validated = false en @PrePersist
+
+                // nuevos
+                .email(resolvedEmail)
+                .orderId(trimToNull(payload.getOrderId()))
+                .amountCents(payload.getAmountCents())
+                .currency(upperOrNull(payload.getCurrency()))
+                .domain(domain)
+                .landingSlug(trimToNull(payload.getLandingSlug()))
+                .landingPlanKey(trimToNull(payload.getLandingPlanKey()))
+                .landingQuantity(payload.getLandingQuantity())
+
                 .build();
 
         entity = repo.save(entity);
         return map(entity);
     }
-
     @Override
     public ManualPaymentVoucherDTO setValidated(Long id, boolean validated) {
         ManualPaymentVoucher entity = repo.findById(id)
@@ -114,56 +140,59 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
         List<Long> skippedMissing = List.of();
         String info = null;
 
-        // Solo si cambió a TRUE recién ahora, intentamos exportar a la unificada
+        // Solo si cambió a TRUE recién ahora
         if (!wasValidated && validated) {
-            if (entity.getClerkId() == null || entity.getClerkId().isBlank()) {
-                // No bloqueamos el cambio de estado, pero informamos que no se pudo exportar
-                info = "Validado, pero sin exportar: falta clerkId en el voucher.";
+            // EVENT => no exporta módulos
+            if (entity.getDomain() == ManualPaymentVoucher.PaymentDomain.EVENT) {
+                info = "Validado (EVENT). No se exportan módulos. Datos: slug="
+                        + nvl(entity.getLandingSlug(), "-")
+                        + ", plan=" + nvl(entity.getLandingPlanKey(), "-")
+                        + ", qty=" + String.valueOf(entity.getLandingQuantity());
             } else {
-                UserProfile user = userProfileRepo.findByClerkId(entity.getClerkId())
-                        .orElseThrow(() -> new EntityNotFoundException("No se puede validar: clerkId no existe en UserProfile."));
-
-                // IDs del voucher (distintos, en el mismo orden de CSV si quieres mantenerlo)
-                List<Long> requested = parseCsv(entity.getModuleIdsCsv());
-                if (requested.isEmpty()) {
-                    info = "Validado, pero sin exportar: el voucher no contiene módulos.";
+                // MODULES (o null)
+                if (isBlank(entity.getClerkId())) {
+                    info = "Validado, pero sin exportar: falta clerkId en el voucher.";
                 } else {
-                    // Módulos existentes
-                    List<Module> foundModules = moduleRepo.findAllById(requested);
-                    Set<Long> foundIds = foundModules.stream().map(Module::getModuleId).collect(Collectors.toSet());
-                    skippedMissing = requested.stream().filter(mid -> !foundIds.contains(mid)).toList();
+                    UserProfile user = userProfileRepo.findByClerkId(entity.getClerkId())
+                            .orElseThrow(() -> new EntityNotFoundException("No se puede validar: clerkId no existe en UserProfile."));
 
-                    // Ya comprados por el usuario
-                    List<UserModuleAccess> already = userModuleRepo.findByUserProfile_ClerkId(entity.getClerkId());
-                    Set<Long> alreadyOwned = already.stream()
-                            .filter(a -> a.getModule() != null)
-                            .map(a -> a.getModule().getModuleId())
-                            .collect(Collectors.toSet());
-                    skippedOwned = requested.stream().filter(alreadyOwned::contains).toList();
-
-                    // Aceptados = solicitados - (missing ∪ yaOwned)
-                    Set<Long> skipUnion = new HashSet<>(skippedMissing);
-                    skipUnion.addAll(skippedOwned);
-                    accepted = requested.stream().filter(mid -> !skipUnion.contains(mid)).toList();
-
-                    if (accepted.isEmpty()) {
-                        info = "Validado, pero sin exportar: todos los módulos del voucher eran inexistentes o ya poseídos.";
+                    List<Long> requested = parseCsv(entity.getModuleIdsCsv());
+                    if (requested.isEmpty()) {
+                        info = "Validado, pero sin exportar: el voucher no contiene módulos.";
                     } else {
-                        // Exportar SOLO aceptados a la tabla unificada
-                        OffsetDateTime paidAt = Optional.ofNullable(entity.getPaidAt()).orElse(OffsetDateTime.now());
-                        unifiedPaidOrderService.logPaidOrder(
-                                user.getEmail(),
-                                Optional.ofNullable(user.getFullname()).orElse(""),
-                                paidAt,
-                                accepted
-                        );
-                        info = buildInfoMessage(accepted, skippedOwned, skippedMissing);
+                        List<Module> foundModules = moduleRepo.findAllById(requested);
+                        Set<Long> foundIds = foundModules.stream().map(Module::getModuleId).collect(Collectors.toSet());
+                        skippedMissing = requested.stream().filter(mid -> !foundIds.contains(mid)).toList();
+
+                        List<UserModuleAccess> already = userModuleRepo.findByUserProfile_ClerkId(entity.getClerkId());
+                        Set<Long> alreadyOwned = already.stream()
+                                .filter(a -> a.getModule() != null)
+                                .map(a -> a.getModule().getModuleId())
+                                .collect(Collectors.toSet());
+                        skippedOwned = requested.stream().filter(alreadyOwned::contains).toList();
+
+                        Set<Long> skipUnion = new HashSet<>(skippedMissing);
+                        skipUnion.addAll(skippedOwned);
+                        accepted = requested.stream().filter(mid -> !skipUnion.contains(mid)).toList();
+
+                        if (accepted.isEmpty()) {
+                            info = "Validado, pero sin exportar: todos los módulos eran inexistentes o ya poseídos.";
+                        } else {
+                            OffsetDateTime paidAt = Optional.ofNullable(entity.getPaidAt()).orElse(OffsetDateTime.now());
+                            String emailToLog = nvl(entity.getEmail(), user.getEmail());
+                            unifiedPaidOrderService.logPaidOrder(
+                                    emailToLog,
+                                    nvl(user.getFullname(), ""),
+                                    paidAt,
+                                    accepted
+                            );
+                            info = buildInfoMessage(accepted, skippedOwned, skippedMissing);
+                        }
                     }
                 }
             }
         }
 
-        // Respuesta con reporte (los nuevos campos van nulos para casos no aplicables)
         return ManualPaymentVoucherDTO.builder()
                 .id(entity.getId())
                 .clerkId(entity.getClerkId())
@@ -172,9 +201,21 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .paymentMethod(entity.getPaymentMethod())
                 .status(entity.getStatus() != null ? entity.getStatus().name() : null)
                 .paidAt(entity.getPaidAt())
+
+                .email(entity.getEmail())
+                .orderId(entity.getOrderId())
+                .amountCents(entity.getAmountCents())
+                .currency(entity.getCurrency())
+                .domain(entity.getDomain() != null ? entity.getDomain().name() : null)
+
+                .landingSlug(entity.getLandingSlug())
+                .landingPlanKey(entity.getLandingPlanKey())
+                .landingQuantity(entity.getLandingQuantity())
+
                 .validated(entity.isValidated())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+
                 .acceptedModuleIds(accepted.isEmpty() ? null : accepted)
                 .skippedAlreadyOwned(skippedOwned.isEmpty() ? null : skippedOwned)
                 .skippedNotFound(skippedMissing.isEmpty() ? null : skippedMissing)
@@ -182,23 +223,13 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .build();
     }
 
-    private String buildInfoMessage(List<Long> accepted, List<Long> skippedOwned, List<Long> skippedMissing) {
-        StringBuilder sb = new StringBuilder("Exportado a unificada: ");
-        sb.append(accepted);
-        if (!skippedOwned.isEmpty()) {
-            sb.append(" | Omitidos (ya tenía acceso): ").append(skippedOwned);
-        }
-        if (!skippedMissing.isEmpty()) {
-            sb.append(" | Omitidos (inexistentes): ").append(skippedMissing);
-        }
-        return sb.toString();
-    }
 
 
-    @Override
     @Transactional(readOnly = true)
+    @Override
     public List<ManualPaymentVoucherDTO> listAll() {
-        return repo.findAll().stream().sorted(Comparator.comparing(ManualPaymentVoucher::getCreatedAt).reversed())
+        return repo.findAll().stream()
+                .sorted(Comparator.comparing(ManualPaymentVoucher::getCreatedAt).reversed())
                 .map(this::map)
                 .toList();
     }
@@ -231,17 +262,35 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
     }
 
     private ManualPaymentVoucher.PaymentStatus mapStatusOrDefault(String s, ManualPaymentVoucher.PaymentStatus def) {
-        if (s == null || s.isBlank()) return def;
+        if (isBlank(s)) return def;
         try { return ManualPaymentVoucher.PaymentStatus.valueOf(s.trim().toUpperCase()); }
         catch (IllegalArgumentException ex) { return def; }
     }
 
-    private String nullIfBlank(String s) {
-        return (s == null || s.isBlank()) ? null : s.trim();
+    private ManualPaymentVoucher.PaymentDomain parseDomainOrNull(String s) {
+        if (isBlank(s)) return null;
+        try { return ManualPaymentVoucher.PaymentDomain.valueOf(s.trim().toUpperCase()); }
+        catch (IllegalArgumentException ex) { return null; }
     }
 
-    private String safeName(String s) {
-        return s.replaceAll("[^a-zA-Z0-9]", "_");
+    private String trimToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
+    }
+    private boolean isBlank(String s) { return s == null || s.isBlank(); }
+    private String upperOrNull(String s) { return isBlank(s) ? null : s.trim().toUpperCase(); }
+    private String nvl(String s, String def) { return isBlank(s) ? def : s; }
+    private String safeName(String s) { return s.replaceAll("[^a-zA-Z0-9]", "_"); }
+
+    private String buildInfoMessage(List<Long> accepted, List<Long> skippedOwned, List<Long> skippedMissing) {
+        StringBuilder sb = new StringBuilder("Exportado a unificada: ");
+        sb.append(accepted);
+        if (!skippedOwned.isEmpty()) {
+            sb.append(" | Omitidos (ya tenía acceso): ").append(skippedOwned);
+        }
+        if (!skippedMissing.isEmpty()) {
+            sb.append(" | Omitidos (inexistentes): ").append(skippedMissing);
+        }
+        return sb.toString();
     }
 
     private ManualPaymentVoucherDTO map(ManualPaymentVoucher e) {
@@ -253,6 +302,17 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .paymentMethod(e.getPaymentMethod())
                 .status(e.getStatus() != null ? e.getStatus().name() : null)
                 .paidAt(e.getPaidAt())
+
+                .email(e.getEmail())
+                .orderId(e.getOrderId())
+                .amountCents(e.getAmountCents())
+                .currency(e.getCurrency())
+                .domain(e.getDomain() != null ? e.getDomain().name() : null)
+
+                .landingSlug(e.getLandingSlug())
+                .landingPlanKey(e.getLandingPlanKey())
+                .landingQuantity(e.getLandingQuantity())
+
                 .validated(e.isValidated())
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())

@@ -12,6 +12,20 @@ public class ManualPaymentVoucherDTO {
     private String paymentMethod;
     private String status;            // "PAID" | "PENDING"
     private OffsetDateTime paidAt;
+
+    // ===== NUEVOS: campos generales =====
+    private String email;
+    private String orderId;
+    private Integer amountCents;
+    private String currency;                  // "PEN" | "USD"
+    private String domain;                    // "MODULES" | "EVENT"
+
+    // ===== NUEVOS: campos EVENT =====
+    private String landingSlug;
+    private String landingPlanKey;
+    private Integer landingQuantity;
+
+
     private boolean validated;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
