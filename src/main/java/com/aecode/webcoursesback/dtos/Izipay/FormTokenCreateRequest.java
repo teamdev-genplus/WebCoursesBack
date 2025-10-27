@@ -36,4 +36,5 @@ public class FormTokenCreateRequest {
     private String landingPlanKey; // ej. "regular" | "comunidad" | "corporativo"
     private Integer landingQuantity;   // opcional (usa default por plan si null)
     private String  landingCouponCode; // opcional
+    private String landingModality;
 }

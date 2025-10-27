@@ -1,6 +1,6 @@
 package com.aecode.webcoursesback.services.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
-import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.*;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 
@@ -34,6 +34,7 @@ public interface LandingPageService {
      */
     LandingInvestmentDTO getInvestmentDetail(
             String slug,
+            String modality,
             String planKey,
             Integer quantity,
             String couponCode,
@@ -44,4 +45,11 @@ public interface LandingPageService {
     CallForPresentationSubmissionDTO submitCallForPresentation(
             String slug, SubmitCallForPresentationDTO dto);
 
+    // === NUEVO: Participantes previos al pago (vista de inversión) ===
+    ParticipantDTO upsertInvestmentParticipant(String slug, ParticipantCreateRequest req);
+    ParticipantListResponse listInvestmentParticipants(String slug, String buyerClerkId, String groupId);
+    ParticipantDeleteResponse deleteInvestmentParticipant(String slug, String buyerClerkId, Long participantId);
+
+    /** (Opcional, útil cuando confirmes pago por cualquier medio) */
+    void markParticipantsConfirmedByGroup(String slug, String groupId, String orderReference);
 }

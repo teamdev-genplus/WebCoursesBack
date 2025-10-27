@@ -240,6 +240,7 @@ public class PurchaseAccessServiceImpl implements PurchaseAccessService {
         if (subtotal == null) {
             var inv = landingService.getInvestmentDetail(
                     slug,
+                    req.getModality(),
                     req.getPlanKey(),
                     quantity,
                     req.getCouponCode(),

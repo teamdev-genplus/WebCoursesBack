@@ -26,6 +26,9 @@ public class AccessEventPurchaseRequestDTO {
 
     private String couponCode;                // opcional (solo referencia)
 
+    // NUEVO: modalidad del plan
+    private String modality;
+
     // ==== TOTALES ENVIADOS POR EL FRONT ====
     @NotNull @Digits(integer = 12, fraction = 2)
     private BigDecimal total;

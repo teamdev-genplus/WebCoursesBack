@@ -41,12 +41,13 @@ public class LandingPageController {
     @GetMapping("/{slug}/investment")
     public ResponseEntity<LandingInvestmentDTO> getInvestment(
             @PathVariable String slug,
+            @RequestParam(required = false) String modality,
             @RequestParam(required = false) String planKey,   // "aecoder" | "corporativo" | "general" (case-insensitive)
             @RequestParam(required = false) Integer quantity, // null -> se aplica mínimo por tipo
             @RequestParam(required = false) String couponCode,// sólo aplica para "aecoder"
             @RequestParam(required = false) String clerkId    // para validar single-use del cupón
     ) {
-        return ResponseEntity.ok(service.getInvestmentDetail(slug, planKey, quantity, couponCode, clerkId));
+        return ResponseEntity.ok(service.getInvestmentDetail(slug, modality,planKey, quantity, couponCode, clerkId));
     }
 
     /** NUEVO — Enviar solicitud (sin login obligatorio) */

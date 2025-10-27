@@ -11,6 +11,10 @@ import com.aecode.webcoursesback.entities.Landing.LandingPage;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRedemptionRepository;
 import com.aecode.webcoursesback.repositories.Coupon.CouponRepository;
 import com.aecode.webcoursesback.repositories.Landing.CallForPresentationSubmissionRepository;
+import com.aecode.webcoursesback.repositories.Landing.EventParticipantRepository;
+import com.aecode.webcoursesback.entities.Landing.EventParticipant;
+import com.aecode.webcoursesback.repositories.Landing.EventParticipantRepository;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.*;
 import com.aecode.webcoursesback.repositories.Landing.LandingPageRepository;
 import com.aecode.webcoursesback.services.EmailSenderService;
 import com.aecode.webcoursesback.services.Landing.LandingPageService;
@@ -22,9 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,8 @@ public class LandingPageServiceImpl implements LandingPageService {
 
     private final CallForPresentationSubmissionRepository submissionRepo; // NUEVO
     private final EmailSenderService emailSenderService;                 // NUEVO
+    private final EventParticipantRepository eventParticipantRepo; // <-- NUEVO
+
     // ===== Helpers de seguridad HTML simples (reuso de tu plantilla de emails)
     private static String safe(String s) {
         if (s == null) return "";
@@ -100,46 +104,92 @@ public class LandingPageServiceImpl implements LandingPageService {
 
     @Override
     @Transactional(readOnly = true)
-    public LandingInvestmentDTO getInvestmentDetail(String slug, String planKey, Integer quantity,
-                                                    String couponCode, String clerkId) {
+    public LandingInvestmentDTO getInvestmentDetail(String slug,
+                                                    String modality,     // PRESENCIAL | VIRTUAL (opcional)
+                                                    String planKey,
+                                                    Integer quantity,
+                                                    String couponCode,
+                                                    String clerkId) {
         LandingPage e = repo.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada: " + slug));
         if (e.getPricing() == null || e.getPricing().isEmpty()) {
             throw new EntityNotFoundException("La landing no tiene planes configurados.");
         }
 
-        // 1) Lista de títulos
-        List<PlanTitleDTO> titles = e.getPricing().stream()
+        // 0) Modalidades disponibles
+        List<String> availableModalities = e.getPricing().stream()
+                .map(LandingPage.PricingPlan::getModality)
+                .filter(Objects::nonNull)
+                .map(this::normalizeModality)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
+
+        List<ModalityTitleDTO> modalityTitles = availableModalities.stream()
+                .map(m -> ModalityTitleDTO.builder().key(m).title(m).build())
+                .toList();
+
+        // 1) Determinar modalidad activa
+        String requestedMod = normalizeModality(modality);
+        String activeModality;
+        if (requestedMod != null && availableModalities.contains(requestedMod)) {
+            activeModality = requestedMod;
+        } else {
+            // fallback: primera modalidad presente; si no hay, sin modalidad (planes legacy)
+            activeModality = availableModalities.isEmpty() ? null : availableModalities.get(0);
+        }
+
+        // 2) Filtrar planes por modalidad activa
+        List<LandingPage.PricingPlan> pool = e.getPricing().stream()
+                .filter(p -> Objects.equals(normalizeModality(p.getModality()), activeModality))
+                .toList();
+
+        // Compatibilidad legacy: si no hay planes etiquetados con modalidad, usa todos
+        if (pool.isEmpty()) {
+            pool = e.getPricing();
+        }
+        if (pool.isEmpty()) {
+            throw new EntityNotFoundException("No hay planes disponibles para la modalidad seleccionada.");
+        }
+
+        // 3) Títulos de planes (solo de la modalidad activa)
+        List<PlanTitleDTO> titles = pool.stream()
                 .sorted(Comparator.comparing(LandingPage.PricingPlan::getTitle,
                         Comparator.nullsLast(String::compareToIgnoreCase)))
                 .map(p -> PlanTitleDTO.builder().key(p.getKey()).title(p.getTitle()).build())
                 .toList();
 
-        // 2) Plan seleccionado
+        // 4) Seleccionar plan dentro del pool filtrado
         LandingPage.PricingPlan sel = null;
         if (planKey != null && !planKey.isBlank()) {
-            sel = e.getPricing().stream()
-                    .filter(p -> planKey.equalsIgnoreCase(p.getKey()))
+            sel = pool.stream()
+                    .filter(p -> planKey.equalsIgnoreCase(nvl(p.getKey(), "")))
                     .findFirst().orElse(null);
         }
-        if (sel == null) sel = e.getPricing().get(0);
-        String key = Optional.ofNullable(sel.getKey()).orElse("").toLowerCase();
+        if (sel == null) sel = pool.get(0);
 
-        // 3) Cantidad por defecto según tipo
-        int qty;
+        final String key = Optional.ofNullable(sel.getKey()).orElse("").toLowerCase();
+
+        // 5) Determinar cantidad (qty) y política de formularios
+        final int minQty;
+        final String participantMode;
         if ("corporativo".equals(key)) {
-            qty = Math.max(2, Optional.ofNullable(quantity).orElse(2));
-        } else if ("general".equals(key)) {
-            qty = Math.max(1, Optional.ofNullable(quantity).orElse(1));
-        } else { // "aecoder" u otros
-            qty = Math.max(1, Optional.ofNullable(quantity).orElse(1));
+            minQty = 2;
+            participantMode = "EXCLUDE_BUYER";
+        } else {
+            minQty = 1;
+            participantMode = "INCLUDE_BUYER";
         }
+        int qty = Optional.ofNullable(quantity).orElse(minQty);
+        if (qty < minQty) qty = minQty;
 
-        // 4) Subtotal (lo que se muestra): priceAmount * qty
+        final int requiredForms = "corporativo".equals(key) ? qty : Math.max(0, qty - 1);
+
+        // 6) Cálculos monetarios
         double unitPrice = Optional.ofNullable(sel.getPriceAmount()).orElse(0.0);
         BigDecimal subtotal = BigDecimal.valueOf(unitPrice).multiply(BigDecimal.valueOf(qty));
 
-        // 5) Descuento por pronto pago (si aplica): (priceAmount - promptPaymentPrice) * qty
         BigDecimal discountPrompt = BigDecimal.ZERO;
         if (Boolean.TRUE.equals(sel.getPromptPaymentEnabled())
                 && sel.getPromptPaymentPrice() != null
@@ -150,31 +200,26 @@ public class LandingPageServiceImpl implements LandingPageService {
             }
         }
 
-        // 6) Descuento por cupón (sólo si plan "aecoder" y cupón válido para PREVIEW)
         BigDecimal discountCoupon = BigDecimal.ZERO;
         String couponApplied = null;
+        // Solo permites cupón para aecoder (manteniendo tu regla actual)
         if ("aecoder".equals(key) && couponCode != null && !couponCode.isBlank()) {
             var cup = couponRepo.findByCode(couponCode.trim()).orElse(null);
-            // Para PREVIEW en /investment no exigimos clerkId ni single-use-per-user
             if (isValidLandingCouponPreview(cup, slug)) {
-                discountCoupon = calcCouponDiscount(cup, subtotal); // se aplica sobre el subtotal
+                discountCoupon = calcCouponDiscount(cup, subtotal);
                 if (discountCoupon.compareTo(BigDecimal.ZERO) < 0) discountCoupon = BigDecimal.ZERO;
                 if (discountCoupon.compareTo(subtotal) > 0) discountCoupon = subtotal;
                 couponApplied = cup.getCode();
             }
         }
 
-
         BigDecimal discountTotal = discountPrompt.add(discountCoupon);
-        // 7) Total: subtotal - (prompt + coupon)
         BigDecimal total = subtotal.subtract(discountTotal);
         if (total.compareTo(BigDecimal.ZERO) < 0) total = BigDecimal.ZERO;
 
         SelectedPlanBenefitsDTO selected = SelectedPlanBenefitsDTO.builder()
                 .key(sel.getKey())
                 .title(sel.getTitle())
-                .beforeEventText(sel.getBeforeEventText())
-                .duringEventText(sel.getDuringEventText())
                 .currency(sel.getCurrency())
                 .priceAmount(sel.getPriceAmount())
                 .promptPaymentPrice(sel.getPromptPaymentPrice())
@@ -186,13 +231,33 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .discountCoupon(discountCoupon.setScale(2, RoundingMode.HALF_UP))
                 .discountTotal(discountTotal.setScale(2, RoundingMode.HALF_UP))
                 .total(total.setScale(2, RoundingMode.HALF_UP))
+                .participantMode(participantMode)
+                .minQuantity(minQty)
+                .requiredParticipantForms(requiredForms)
                 .build();
 
         return LandingInvestmentDTO.builder()
+                .modalities(modalityTitles)      // <--- NUEVO
+                .activeModality(activeModality)  // <--- NUEVO
                 .plans(titles)
                 .selected(selected)
                 .build();
     }
+
+
+    // ===== Helpers nuevos/ajustados =====
+    private String normalizeModality(String s) {
+        if (s == null) return null;
+        String up = s.trim().toUpperCase();
+        if (up.isBlank()) return null;
+        // acepta variantes comunes
+        if (up.startsWith("PRES")) return "PRESENCIAL";
+        if (up.startsWith("VIRT")) return "VIRTUAL";
+        // si mandan otra cosa, igual retorna en mayúsculas para posible match estricto
+        return up;
+    }
+    private String nvl(String s, String def) { return (s == null || s.isBlank()) ? def : s; }
+
 
     /* ===== Helpers de cupón ===== */
 
@@ -291,6 +356,168 @@ public class LandingPageServiceImpl implements LandingPageService {
         e = repo.save(e);
         return map(e);
     }
+
+
+    // =================== PARTICIPANTES (Nueva Sección) ===================
+
+    @Override
+    public ParticipantDTO upsertInvestmentParticipant(String slug, ParticipantCreateRequest req) {
+        // 1) Validaciones mínimas
+        if (slug == null || slug.isBlank()) throw new IllegalArgumentException("slug requerido");
+        if (req == null) throw new IllegalArgumentException("payload requerido");
+
+        // landing existente
+        var landing = repo.findBySlug(slug)
+                .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada: " + slug));
+
+        String modality = normalizeModality(req.getModality());
+        if (modality == null) throw new IllegalArgumentException("modality requerida (PRESENCIAL|VIRTUAL)");
+
+        String planKey = nvl(req.getPlanKey(), "").toLowerCase();
+        if (planKey.isBlank()) throw new IllegalArgumentException("planKey requerido");
+
+        String buyerClerkId = nvl(req.getBuyerClerkId(), "");
+        if (buyerClerkId.isBlank()) throw new IllegalArgumentException("buyerClerkId requerido");
+
+        Integer quantity = req.getQuantity();
+        if (quantity == null || quantity < 1) throw new IllegalArgumentException("quantity inválido");
+
+        Integer pIndex = req.getParticipantIndex();
+        if (pIndex == null || pIndex < 1 || pIndex > quantity)
+            throw new IllegalArgumentException("participantIndex inválido (1..quantity)");
+
+        // 2) Reglas por plan
+        // general/aecoder: mínimo 1. El #1 es el comprador -> no registrar formulario para #1
+        // corporativo: mínimo 2. Se registran todos (#1..quantity) mediante formularios.
+        if ("general".equals(planKey) || "aecoder".equals(planKey)) {
+            if (quantity < 1) throw new IllegalArgumentException("quantity mínimo para plan " + planKey + " es 1");
+            if (pIndex == 1) {
+                throw new IllegalArgumentException("El participante #1 es el comprador; no requiere formulario.");
+            }
+        } else if ("corporativo".equals(planKey)) {
+            if (quantity < 2) throw new IllegalArgumentException("quantity mínimo para plan corporativo es 2");
+        }
+
+        // 3) Validar que planKey exista para la modalidad
+        boolean planExists = landing.getPricing() != null && landing.getPricing().stream()
+                .filter(p -> Objects.equals(normalizeModality(p.getModality()), modality))
+                .anyMatch(p -> planKey.equalsIgnoreCase(nvl(p.getKey(), "")));
+        if (!planExists) throw new IllegalArgumentException("El plan no existe para la modalidad indicada.");
+
+        // 4) Validar campos de participante
+        if (isBlank(req.getFirstName())) throw new IllegalArgumentException("firstName requerido");
+        if (isBlank(req.getLastName())) throw new IllegalArgumentException("lastName requerido");
+        if (isBlank(req.getEmail())) throw new IllegalArgumentException("email requerido");
+        if (isBlank(req.getPhone())) throw new IllegalArgumentException("phone requerido");
+        if (isBlank(req.getDocumentType())) throw new IllegalArgumentException("documentType requerido");
+        if (isBlank(req.getDocumentNumber())) throw new IllegalArgumentException("documentNumber requerido");
+
+        // 5) groupId (si no llega, crear uno y retornarlo)
+        String groupId = req.getGroupId();
+        if (groupId == null || groupId.isBlank()) {
+            groupId = UUID.randomUUID().toString();
+        }
+
+        // Evitar duplicados de índice por (slug, groupId, participantIndex)
+        if (eventParticipantRepo.existsByLandingSlugAndGroupIdAndParticipantIndex(slug, groupId, pIndex)) {
+            throw new IllegalStateException("Ya existe un participante con participantIndex=" + pIndex + " en este grupo.");
+        }
+
+        // 6) Persistir
+        var ep = EventParticipant.builder()
+                .landingSlug(slug)
+                .modality(modality)
+                .planKey(planKey)
+                .buyerClerkId(buyerClerkId)
+                .groupId(groupId)
+                .participantIndex(pIndex)
+                .firstName(req.getFirstName().trim())
+                .lastName(req.getLastName().trim())
+                .email(req.getEmail().trim())
+                .phone(req.getPhone().trim())
+                .documentType(req.getDocumentType().trim())
+                .documentNumber(req.getDocumentNumber().trim())
+                .company(nvl(req.getCompany(), null))
+                .status(EventParticipant.Status.PENDING)
+                .build();
+
+        ep = eventParticipantRepo.save(ep);
+        return toDTO(ep);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ParticipantListResponse listInvestmentParticipants(String slug, String buyerClerkId, String groupId) {
+        if (isBlank(slug)) throw new IllegalArgumentException("slug requerido");
+        if (isBlank(buyerClerkId)) throw new IllegalArgumentException("buyerClerkId requerido");
+        if (isBlank(groupId)) throw new IllegalArgumentException("groupId requerido");
+
+        var list = eventParticipantRepo.findByLandingSlugAndBuyerClerkIdAndGroupId(slug, buyerClerkId, groupId)
+                .stream().map(this::toDTO).toList();
+
+        return ParticipantListResponse.builder()
+                .groupId(groupId)
+                .participants(list)
+                .build();
+    }
+
+    @Override
+    public ParticipantDeleteResponse deleteInvestmentParticipant(String slug, String buyerClerkId, Long participantId) {
+        if (participantId == null) throw new IllegalArgumentException("participantId requerido");
+        var ep = eventParticipantRepo.findById(participantId)
+                .orElseThrow(() -> new EntityNotFoundException("Participante no encontrado"));
+
+        if (!slug.equals(ep.getLandingSlug()))
+            throw new IllegalArgumentException("slug no coincide con el participante");
+
+        if (!buyerClerkId.equals(ep.getBuyerClerkId()))
+            throw new IllegalArgumentException("No autorizado para eliminar este participante");
+
+        if (ep.getStatus() != EventParticipant.Status.PENDING)
+            throw new IllegalStateException("Solo se pueden eliminar participantes en estado PENDING");
+
+        eventParticipantRepo.delete(ep);
+        return ParticipantDeleteResponse.builder().deleted(true).build();
+    }
+
+    @Override
+    public void markParticipantsConfirmedByGroup(String slug, String groupId, String orderReference) {
+        if (isBlank(slug) || isBlank(groupId))
+            throw new IllegalArgumentException("slug y groupId requeridos");
+        var list = eventParticipantRepo.findByLandingSlugAndGroupId(slug, groupId);
+        for (var ep : list) {
+            ep.setStatus(EventParticipant.Status.CONFIRMED);
+            ep.setOrderReference(orderReference);
+        }
+        eventParticipantRepo.saveAll(list);
+    }
+
+    // ---- helpers de DTO ----
+    private ParticipantDTO toDTO(EventParticipant ep) {
+        return ParticipantDTO.builder()
+                .id(ep.getId())
+                .landingSlug(ep.getLandingSlug())
+                .modality(ep.getModality())
+                .planKey(ep.getPlanKey())
+                .buyerClerkId(ep.getBuyerClerkId())
+                .groupId(ep.getGroupId())
+                .participantIndex(ep.getParticipantIndex())
+                .firstName(ep.getFirstName())
+                .lastName(ep.getLastName())
+                .email(ep.getEmail())
+                .phone(ep.getPhone())
+                .documentType(ep.getDocumentType())
+                .documentNumber(ep.getDocumentNumber())
+                .company(ep.getCompany())
+                .status(ep.getStatus().name())
+                .orderReference(ep.getOrderReference())
+                .createdAt(ep.getCreatedAt())
+                .updatedAt(ep.getUpdatedAt())
+                .build();
+    }
+
+    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+
 
     // ---- PATCH por ID ----
 

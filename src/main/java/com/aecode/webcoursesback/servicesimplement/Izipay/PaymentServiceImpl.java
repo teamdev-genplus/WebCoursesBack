@@ -94,18 +94,20 @@ public class PaymentServiceImpl implements PaymentService {
                 throw new IllegalArgumentException("landingSlug requerido para domain=EVENT");
             if (req.getLandingPlanKey() == null || req.getLandingPlanKey().isBlank())
                 throw new IllegalArgumentException("landingPlanKey requerido para domain=EVENT");
+            if (req.getLandingModality() == null || req.getLandingModality().isBlank())
+                throw new IllegalArgumentException("landingModality requerido para domain=EVENT");
 
             order.setLandingSlug(req.getLandingSlug());
             order.setLandingPlanKey(req.getLandingPlanKey());
-
-            // NUEVO: persistir cantidad y cupón ingresados por el usuario
-            order.setLandingQuantity(req.getLandingQuantity());     // puede ser null
-            order.setLandingCouponCode(req.getLandingCouponCode()); // puede ser null
+            order.setLandingQuantity(req.getLandingQuantity());
+            order.setLandingCouponCode(req.getLandingCouponCode());
+            order.setLandingModality(normalizeModality(req.getLandingModality())); // <-- NUEVO
         } else {
             order.setLandingSlug(null);
             order.setLandingPlanKey(null);
             order.setLandingQuantity(null);
             order.setLandingCouponCode(null);
+            order.setLandingModality(null); // <-- NUEVO
         }
 
         order = paymentOrderRepository.save(order);
@@ -418,6 +420,16 @@ public class PaymentServiceImpl implements PaymentService {
                 }).orElse(planKey);
     }
 
+    private String normalizeModality(String s) {
+        if (s == null) return null;
+        String up = s.trim().toUpperCase();
+        if (up.isBlank()) return null;
+        if (up.startsWith("PRES")) return "PRESENCIAL";
+        if (up.startsWith("VIRT")) return "VIRTUAL";
+        return up; // deja pasar otra variante en mayúsculas
+    }
+
+
     private void handleEventPaid(PaymentOrder po) {
         if (po.isEntitlementsGranted()) return; // idempotencia
 
@@ -435,6 +447,7 @@ public class PaymentServiceImpl implements PaymentService {
             //    (usa cantidad/cupón guardados en la orden; si son null, Investment aplica defaults)
             var investment = landingService.getInvestmentDetail(
                     po.getLandingSlug(),
+                    po.getLandingModality(),
                     po.getLandingPlanKey(),
                     po.getLandingQuantity(),      // puede ser null
                     po.getLandingCouponCode(),    // puede ser null

@@ -69,6 +69,9 @@ public class PaymentOrder {
     @Column(name = "landing_slug", length = 150)
     private String landingSlug;        // ej: "ai-construction-summit-2025"
 
+    @Column(name = "landing_modality", length = 20)
+    private String landingModality; // "PRESENCIAL" | "VIRTUAL"
+
     @Column(name = "landing_plan_key", length = 80)
     private String landingPlanKey;     // ej: "regular" | "comunidad" | "corporativo"
     // NUEVOS (ambos opcionales)

@@ -144,7 +144,9 @@ public class LandingPage {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class PricingPlan {
-        /** Clave estable para el plan: p.ej. "regular", "comunidad", "corporativo" */
+        /** NUEVO: modalidad del plan — p.ej. "PRESENCIAL" o "VIRTUAL" */
+        private String modality;
+        /** Clave estable para el plan: p.ej. "regular", "regular", "corporativo" */
         private String key;
         private String title;              // “Corporativo”
         private String subtitle;           // breve (<= 6 palabras)
