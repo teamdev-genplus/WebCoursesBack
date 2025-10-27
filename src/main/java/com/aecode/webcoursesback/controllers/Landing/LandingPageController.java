@@ -1,6 +1,6 @@
 package com.aecode.webcoursesback.controllers.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
-import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
+import com.aecode.webcoursesback.dtos.Landing.Inversion.*;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 import com.aecode.webcoursesback.dtos.Paid.Event.AccessEventPurchaseRequestDTO;
@@ -66,6 +66,48 @@ public class LandingPageController {
     ) {
         var res = purchaseAccessService.processFrontAssertedEventPurchase(slug, request);
         return ResponseEntity.ok(res);
+    }
+
+    // ======== NUEVO: Participantes previos al pago (vista inversión) ========
+
+    /** Crea/guarda un participante del carrito (previo al pago). Devuelve el groupId. */
+    @PostMapping("/{slug}/investment/participants")
+    public ResponseEntity<ParticipantDTO> upsertInvestmentParticipant(
+            @PathVariable String slug,
+            @RequestBody ParticipantCreateRequest req
+    ) {
+        return ResponseEntity.ok(service.upsertInvestmentParticipant(slug, req));
+    }
+
+    /** Lista los participantes PENDING de un carrito (groupId) del comprador. */
+    @GetMapping("/{slug}/investment/participants")
+    public ResponseEntity<ParticipantListResponse> listInvestmentParticipants(
+            @PathVariable String slug,
+            @RequestParam String buyerClerkId,
+            @RequestParam String groupId
+    ) {
+        return ResponseEntity.ok(service.listInvestmentParticipants(slug, buyerClerkId, groupId));
+    }
+
+    /** Elimina un participante PENDING del carrito (ownership por buyerClerkId). */
+    @DeleteMapping("/{slug}/investment/participants/{participantId}")
+    public ResponseEntity<ParticipantDeleteResponse> deleteInvestmentParticipant(
+            @PathVariable String slug,
+            @PathVariable Long participantId,
+            @RequestParam String buyerClerkId
+    ) {
+        return ResponseEntity.ok(service.deleteInvestmentParticipant(slug, buyerClerkId, participantId));
+    }
+
+    /** (Opcional) Marcar participantes como CONFIRMED tras pago (cualquier medio). */
+    @PatchMapping("/{slug}/investment/participants/mark-paid")
+    public ResponseEntity<Void> markParticipantsPaid(
+            @PathVariable String slug,
+            @RequestParam String groupId,
+            @RequestParam(required = false) String orderReference
+    ) {
+        service.markParticipantsConfirmedByGroup(slug, groupId, orderReference);
+        return ResponseEntity.ok().build();
     }
 
     /* ==================== ADMIN ==================== */
