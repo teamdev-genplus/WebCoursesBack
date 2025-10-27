@@ -20,4 +20,13 @@ public interface ManualPaymentVoucherService {
 
     /** Lista para admin */
     List<ManualPaymentVoucherDTO> listAll();
+
+    /** Admin: solo EVENT */
+    List<ManualPaymentVoucherDTO> listEvents();
+
+    /**
+     * Admin: solo MODULES.
+     * @param includeLegacyNull si true, incluye vouchers con domain == null (históricos)
+     */
+    List<ManualPaymentVoucherDTO> listModules(boolean includeLegacyNull);
 }

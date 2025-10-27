@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -233,6 +234,29 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .map(this::map)
                 .toList();
     }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ManualPaymentVoucherDTO> listEvents() {
+        return repo.findByDomainOrderByCreatedAtDesc(ManualPaymentVoucher.PaymentDomain.EVENT)
+                .stream().map(this::map).toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ManualPaymentVoucherDTO> listModules(boolean includeLegacyNull) {
+        Stream<ManualPaymentVoucher> base = repo
+                .findByDomainOrderByCreatedAtDesc(ManualPaymentVoucher.PaymentDomain.MODULES)
+                .stream();
+        if (includeLegacyNull) {
+            var legacy = repo.findByDomainIsNullOrderByCreatedAtDesc();
+            base = Stream.concat(base, legacy.stream())
+                    .sorted(Comparator.comparing(ManualPaymentVoucher::getCreatedAt).reversed());
+        }
+        return base.map(this::map).toList();
+    }
+
 
     // ===== Helpers =====
 

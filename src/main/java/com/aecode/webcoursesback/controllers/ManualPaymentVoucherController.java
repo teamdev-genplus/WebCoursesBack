@@ -56,4 +56,23 @@ public class ManualPaymentVoucherController {
     public List<ManualPaymentVoucherDTO> listAll() {
         return service.listAll();
     }
+
+
+
+    /** Admin: solo EVENT */
+    @GetMapping("/admin/events")
+    public List<ManualPaymentVoucherDTO> listEvents() {
+        return service.listEvents();
+    }
+
+    /**
+     * Admin: solo MODULES
+     * includeLegacyNull=true => también incluye registros antiguos con domain NULL
+     */
+    @GetMapping("/admin/modules")
+    public List<ManualPaymentVoucherDTO> listModules(
+            @RequestParam(name = "includeLegacyNull", defaultValue = "true") boolean includeLegacyNull
+    ) {
+        return service.listModules(includeLegacyNull);
+    }
 }
