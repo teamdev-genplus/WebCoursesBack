@@ -17,4 +17,7 @@ public class Promotional {
     @Column( length = 255)
     private String urllink;
     private Boolean active;
+    //PARA UN TEXTO
+    @Column(columnDefinition = "TEXT")
+    private String text;
 }

@@ -28,10 +28,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+
+
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class LandingPageServiceImpl implements LandingPageService {
+
 
     private final LandingPageRepository repo;
     private final CouponRepository couponRepo;
@@ -43,6 +48,12 @@ public class LandingPageServiceImpl implements LandingPageService {
     private final EmailSenderService emailSenderService;                 // NUEVO
     private final EventParticipantRepository eventParticipantRepo; // <-- NUEVO
 
+    private static final ZoneId LIMA = ZoneId.of("America/Lima");
+
+    private OffsetDateTime toLima(OffsetDateTime utc) {
+        return utc == null ? null : utc.atZoneSameInstant(LIMA).toOffsetDateTime();
+    }
+
     // ===== Helpers de seguridad HTML simples (reuso de tu plantilla de emails)
     private static String safe(String s) {
         if (s == null) return "";
@@ -51,8 +62,13 @@ public class LandingPageServiceImpl implements LandingPageService {
 
 
     private LandingPageDTO map(LandingPage e) {
-        return mapper.map(e, LandingPageDTO.class);
+        LandingPageDTO dto = mapper.map(e, LandingPageDTO.class);
+        dto.setCreatedAt(toLima(e.getCreatedAt()));
+        dto.setUpdatedAt(toLima(e.getUpdatedAt()));
+        return dto;
     }
+
+
     private static String firstPrincipalTitle(LandingPage e) {
         return (e.getPrincipal() != null && !e.getPrincipal().isEmpty())
                 ? Optional.ofNullable(e.getPrincipal().get(0).getTitle()).orElse("")
@@ -511,8 +527,8 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .company(ep.getCompany())
                 .status(ep.getStatus().name())
                 .orderReference(ep.getOrderReference())
-                .createdAt(ep.getCreatedAt())
-                .updatedAt(ep.getUpdatedAt())
+                .createdAt(toLima(ep.getCreatedAt()))
+                .updatedAt(toLima(ep.getUpdatedAt()))
                 .build();
     }
 
@@ -632,7 +648,7 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .phoneNumber(s.getPhoneNumber())
                 .ideaText(s.getIdeaText())
                 .status(s.getStatus().name())
-                .createdAt(s.getCreatedAt() != null ? s.getCreatedAt().toString() : null)
+                .createdAt(s.getCreatedAt() != null ? toLima(s.getCreatedAt()).toString() : null)
                 .build();
     }
 

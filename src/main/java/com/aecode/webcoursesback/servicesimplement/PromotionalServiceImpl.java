@@ -74,6 +74,7 @@ public class PromotionalServiceImpl implements PromotionalService {
         dto.setUrlimage(p.getUrlimage());
         dto.setUrllink(p.getUrllink());
         dto.setActive(p.getActive());
+        dto.setText(p.getText());
         return dto;
     }
 
@@ -81,6 +82,7 @@ public class PromotionalServiceImpl implements PromotionalService {
         p.setUrlimage(dto.getUrlimage());
         p.setUrllink(dto.getUrllink());
         p.setActive(dto.getActive() != null ? dto.getActive() : Boolean.TRUE);
+        p.setText(dto.getText());
     }
 
 }

@@ -6,4 +6,5 @@ public class PromotionalCreateUpdateDTO {
     private String urlimage;
     private String urllink;
     private Boolean active;
+    private String text;
 }
