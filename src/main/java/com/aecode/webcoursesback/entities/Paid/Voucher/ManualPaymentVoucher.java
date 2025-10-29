@@ -69,7 +69,7 @@ public class ManualPaymentVoucher {
     private Integer landingQuantity;      // cantidad (boletos)
 
     @Column(name = "landing_modality")
-    private Integer landingModality;      // modalidad (presencial | virtual)
+    private String landingModality;        // modalidad (presencial | virtual)
 
     /** Booleano de validación manual (false por defecto) */
     @Column(name = "validated")
