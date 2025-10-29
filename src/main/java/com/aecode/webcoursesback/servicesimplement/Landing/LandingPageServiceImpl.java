@@ -3,6 +3,8 @@ import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.PlanTitleDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.SelectedPlanBenefitsDTO;
+import com.aecode.webcoursesback.dtos.Landing.ParticipantGroupDTO;
+import com.aecode.webcoursesback.dtos.Landing.Participantes.ParticipantGroupListResponse;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 import com.aecode.webcoursesback.entities.Coupon.Coupon;
@@ -30,6 +32,7 @@ import java.util.*;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -784,5 +787,131 @@ public class LandingPageServiceImpl implements LandingPageService {
                 fullPhone,
                 safe(s.getIdeaText())
         );
+    }
+
+
+
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public ParticipantGroupListResponse listParticipantsByBuyerGrouped(String buyerClerkId, String slug, String status) {
+        if (isBlank(buyerClerkId)) throw new IllegalArgumentException("buyerClerkId requerido");
+
+        // Normaliza status
+        String st = (status == null ? "ALL" : status.trim().toUpperCase());
+        boolean filterConfirmed = "CONFIRMED".equals(st);
+        boolean filterPending   = "PENDING".equals(st);
+
+        List<EventParticipant> rows;
+        if (!isBlank(slug)) {
+            if (filterConfirmed) {
+                rows = eventParticipantRepo.findByBuyerClerkIdAndLandingSlugAndStatusOrderByCreatedAtDesc(
+                        buyerClerkId, slug, EventParticipant.Status.CONFIRMED);
+            } else if (filterPending) {
+                rows = eventParticipantRepo.findByBuyerClerkIdAndLandingSlugAndStatusOrderByCreatedAtDesc(
+                        buyerClerkId, slug, EventParticipant.Status.PENDING);
+            } else {
+                rows = eventParticipantRepo.findByBuyerClerkIdAndLandingSlugOrderByCreatedAtDesc(buyerClerkId, slug);
+            }
+        } else {
+            if (filterConfirmed) {
+                rows = eventParticipantRepo.findByBuyerClerkIdAndStatusOrderByCreatedAtDesc(
+                        buyerClerkId, EventParticipant.Status.CONFIRMED);
+            } else if (filterPending) {
+                rows = eventParticipantRepo.findByBuyerClerkIdAndStatusOrderByCreatedAtDesc(
+                        buyerClerkId, EventParticipant.Status.PENDING);
+            } else {
+                rows = eventParticipantRepo.findByBuyerClerkIdOrderByCreatedAtDesc(buyerClerkId);
+            }
+        }
+
+        // Agrupa por groupId
+        var byGroup = rows.stream().collect(Collectors.groupingBy(EventParticipant::getGroupId));
+
+        // Construye DTOs de grupos
+        var groups = byGroup.entrySet().stream()
+                .map(e -> buildGroupDTO(e.getKey(), e.getValue()))
+                // ordena por updatedAtMax DESC (más recientes primero)
+                .sorted((g1, g2) -> {
+                    var a = g1.getUpdatedAtMax();
+                    var b = g2.getUpdatedAtMax();
+                    if (a == null && b == null) return 0;
+                    if (a == null) return 1;
+                    if (b == null) return -1;
+                    return b.compareTo(a);
+                })
+                .toList();
+
+        return ParticipantGroupListResponse.builder()
+                .buyerClerkId(buyerClerkId)
+                .slug(slug)
+                .status(st)
+                .groups(groups)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ParticipantGroupListResponse listConfirmedParticipantsByBuyerGrouped(String buyerClerkId, String slug) {
+        return listParticipantsByBuyerGrouped(buyerClerkId, slug, "CONFIRMED");
+    }
+
+    /* ===== Helpers para agrupar ===== */
+    private ParticipantGroupDTO buildGroupDTO(String groupId, List<EventParticipant> list) {
+        // Metadatos base
+        String landingSlug = null;
+
+        // Eval status agregado
+        boolean anyPending = list.stream().anyMatch(r -> r.getStatus() == EventParticipant.Status.PENDING);
+        boolean anyConfirmed = list.stream().anyMatch(r -> r.getStatus() == EventParticipant.Status.CONFIRMED);
+        String statusAggregated = (anyPending && anyConfirmed) ? "MIXED"
+                : (anyConfirmed ? "CONFIRMED" : "PENDING");
+
+        // Eval modality/planKey agregados (si todos iguales, mantener; si no, MIXED)
+        String modalityAgg = aggregateIfUnique(list.stream().map(EventParticipant::getModality).toList());
+        String planKeyAgg  = aggregateIfUnique(list.stream().map(EventParticipant::getPlanKey).toList());
+
+        // Slug (si hay mezcla - raro -, se toma el primero)
+        landingSlug = list.isEmpty() ? null : list.get(0).getLandingSlug();
+
+        var createdAtMin = list.stream().map(EventParticipant::getCreatedAt).filter(Objects::nonNull).min(OffsetDateTime::compareTo).orElse(null);
+        var createdAtMax = list.stream().map(EventParticipant::getCreatedAt).filter(Objects::nonNull).max(OffsetDateTime::compareTo).orElse(null);
+        var updatedAtMax = list.stream().map(EventParticipant::getUpdatedAt).filter(Objects::nonNull).max(OffsetDateTime::compareTo).orElse(null);
+
+        // Conviertes a Lima con tu helper ya existente
+        var createdAtMinL = toLima(createdAtMin);
+        var createdAtMaxL = toLima(createdAtMax);
+        var updatedAtMaxL = toLima(updatedAtMax);
+
+        // Mapea participantes al DTO que ya devuelve horas en Lima
+        var participants = list.stream()
+                .map(this::toDTO)
+                .toList();
+
+        return ParticipantGroupDTO.builder()
+                .groupId(groupId)
+                .landingSlug(landingSlug)
+                .modality(modalityAgg)
+                .planKey(planKeyAgg)
+                .quantity(list.size())
+                .statusAggregated(statusAggregated)
+                .createdAtMin(createdAtMinL)
+                .createdAtMax(createdAtMaxL)
+                .updatedAtMax(updatedAtMaxL)
+                .participants(participants)
+                .build();
+    }
+
+    private String aggregateIfUnique(List<String> values) {
+        var uniq = values.stream()
+                .filter(v -> v != null && !v.isBlank())
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .distinct()
+                .toList();
+        if (uniq.isEmpty()) return null;
+        if (uniq.size() == 1) return uniq.get(0);
+        return "MIXED";
     }
 }

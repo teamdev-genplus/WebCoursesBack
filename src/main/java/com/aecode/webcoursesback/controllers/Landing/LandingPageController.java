@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.controllers.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.*;
+import com.aecode.webcoursesback.dtos.Landing.Participantes.ParticipantGroupListResponse;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 import com.aecode.webcoursesback.dtos.Paid.Event.AccessEventPurchaseRequestDTO;
@@ -87,6 +88,28 @@ public class LandingPageController {
             @RequestParam String groupId
     ) {
         return ResponseEntity.ok(service.listInvestmentParticipants(slug, buyerClerkId, groupId));
+    }
+
+    /** Lista (agrupado por groupId) los participantes del comprador (todas las landings o filtrado por slug).
+     *  status: ALL|PENDING|CONFIRMED (por defecto ALL).
+     *  Útil para que el admin/usuario vea todos sus "carritos" anteriores y actuales.
+     */
+    @GetMapping("/admin/participants/by-buyer")
+    public ResponseEntity<ParticipantGroupListResponse> listParticipantsByBuyerGrouped(
+            @RequestParam String buyerClerkId,
+            @RequestParam(required = false) String slug,
+            @RequestParam(required = false, defaultValue = "ALL") String status
+    ) {
+        return ResponseEntity.ok(service.listParticipantsByBuyerGrouped(buyerClerkId, slug, status));
+    }
+
+    /** Atajo: solo CONFIRMED (agrupado) por buyerClerkId (opcional slug). */
+    @GetMapping("/admin/participants/by-buyer/confirmed")
+    public ResponseEntity<ParticipantGroupListResponse> listConfirmedParticipantsByBuyerGrouped(
+            @RequestParam String buyerClerkId,
+            @RequestParam(required = false) String slug
+    ) {
+        return ResponseEntity.ok(service.listConfirmedParticipantsByBuyerGrouped(buyerClerkId, slug));
     }
 
     /** Elimina un participante PENDING del carrito (ownership por buyerClerkId). */

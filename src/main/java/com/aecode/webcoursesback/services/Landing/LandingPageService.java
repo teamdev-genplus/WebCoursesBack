@@ -1,6 +1,7 @@
 package com.aecode.webcoursesback.services.Landing;
 import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.*;
+import com.aecode.webcoursesback.dtos.Landing.Participantes.ParticipantGroupListResponse;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
 
@@ -52,4 +53,7 @@ public interface LandingPageService {
 
     /** (Opcional, útil cuando confirmes pago por cualquier medio) */
     void markParticipantsConfirmedByGroup(String slug, String groupId, String orderReference);
+
+    ParticipantGroupListResponse listParticipantsByBuyerGrouped(String buyerClerkId, String slug, String status); // status: ALL|PENDING|CONFIRMED
+    ParticipantGroupListResponse listConfirmedParticipantsByBuyerGrouped(String buyerClerkId, String slug);
 }
