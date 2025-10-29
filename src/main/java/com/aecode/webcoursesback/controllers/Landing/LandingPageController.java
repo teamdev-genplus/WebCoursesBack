@@ -146,6 +146,7 @@ public class LandingPageController {
     public ResponseEntity<LandingPageDTO> upsert(@RequestBody LandingPageDTO dto) {
         return ResponseEntity.ok(service.upsert(dto));
     }
+    /* ==================== ADMIN - ACTUALIZAR ==================== */
 
     /** PATCH (admin): Sección Principal por ID */
     @PatchMapping("/admin/{id}/principal")

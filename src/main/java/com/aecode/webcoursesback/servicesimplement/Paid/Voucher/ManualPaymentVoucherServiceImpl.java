@@ -4,7 +4,6 @@ import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherDTO;
 import com.aecode.webcoursesback.dtos.Paid.Voucher.ManualPaymentVoucherPayload;
 import com.aecode.webcoursesback.entities.Module;
 import com.aecode.webcoursesback.entities.Paid.Voucher.ManualPaymentVoucher;
-import com.aecode.webcoursesback.entities.Paid.UnifiedPaidOrder;
 import com.aecode.webcoursesback.entities.UserModuleAccess;
 import com.aecode.webcoursesback.entities.UserProfile;
 import com.aecode.webcoursesback.repositories.IModuleRepo;
@@ -121,6 +120,7 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingSlug(trimToNull(payload.getLandingSlug()))
                 .landingPlanKey(trimToNull(payload.getLandingPlanKey()))
                 .landingQuantity(payload.getLandingQuantity())
+                .landingModality(payload.getLandingModality())
 
                 .build();
 
@@ -212,6 +212,7 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingSlug(entity.getLandingSlug())
                 .landingPlanKey(entity.getLandingPlanKey())
                 .landingQuantity(entity.getLandingQuantity())
+                .landingModality(entity.getLandingModality())
 
                 .validated(entity.isValidated())
                 .createdAt(entity.getCreatedAt())
@@ -336,6 +337,7 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingSlug(e.getLandingSlug())
                 .landingPlanKey(e.getLandingPlanKey())
                 .landingQuantity(e.getLandingQuantity())
+                .landingModality(e.getLandingModality())
 
                 .validated(e.isValidated())
                 .createdAt(e.getCreatedAt())

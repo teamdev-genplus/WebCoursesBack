@@ -24,6 +24,7 @@ public class ManualPaymentVoucherDTO {
     private String landingSlug;
     private String landingPlanKey;
     private Integer landingQuantity;
+    private Integer landingModality;          //
 
 
     private boolean validated;
