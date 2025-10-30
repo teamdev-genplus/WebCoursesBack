@@ -43,11 +43,8 @@ public class EventParticipant {
     private Integer participantIndex;
 
     /** Datos del participante */
-    @Column(name = "first_name", length = 120, nullable = false)
-    private String firstName;
-
-    @Column(name = "last_name", length = 160, nullable = false)
-    private String lastName;
+    @Column(name = "full_name", length = 120, nullable = false)
+    private String fullname;
 
     @Column(name = "email", length = 255, nullable = false)
     private String email;
@@ -63,6 +60,12 @@ public class EventParticipant {
 
     @Column(name = "company", length = 200)
     private String company;
+
+    @Column(name = "rol", length = 200)
+    private String rol;
+
+    @Column(name = "linkedin", length = 200)
+    private String linkedin;
 
     /** Estado: PENDING (por defecto) | CONFIRMED | CANCELED */
     @Enumerated(EnumType.STRING)

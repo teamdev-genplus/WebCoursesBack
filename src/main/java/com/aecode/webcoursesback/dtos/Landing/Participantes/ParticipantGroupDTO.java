@@ -1,4 +1,4 @@
-package com.aecode.webcoursesback.dtos.Landing;
+package com.aecode.webcoursesback.dtos.Landing.Participantes;
 
 import com.aecode.webcoursesback.dtos.Landing.Inversion.ParticipantDTO;
 import lombok.*;

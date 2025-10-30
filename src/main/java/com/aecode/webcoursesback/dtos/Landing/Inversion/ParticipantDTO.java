@@ -13,13 +13,15 @@ public class ParticipantDTO {
     private String groupId;        // agrupa la compra previa al pago
     private Integer participantIndex;
 
-    private String firstName;
-    private String lastName;
+    private String fullname;        // requerido
     private String email;
     private String phone;
     private String documentType;
     private String documentNumber;
     private String company;
+    private String rol;             // opcional
+    private String linkedin;        // opcional
+
 
     private String status;         // PENDING | CONFIRMED | CANCELED
     private String orderReference; // opcional (rellenable post-pago)
