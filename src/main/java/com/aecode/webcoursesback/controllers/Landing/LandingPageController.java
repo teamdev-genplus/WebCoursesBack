@@ -133,6 +133,30 @@ public class LandingPageController {
         return ResponseEntity.ok().build();
     }
 
+
+    /** [ADMIN] Buscar participantes (LISTA PLANA). Filtros TODOS opcionales. */
+    @GetMapping("/admin/participants")
+    public ResponseEntity<ParticipantListResponse> adminSearchParticipants(
+            @RequestParam(required = false) String slug,
+            @RequestParam(required = false) String buyerClerkId,
+            @RequestParam(required = false) String groupId,
+            @RequestParam(required = false) String status // ALL|PENDING|CONFIRMED
+    ) {
+        return ResponseEntity.ok(service.adminSearchParticipants(slug, buyerClerkId, groupId, status));
+    }
+
+    /** [ADMIN] Buscar participantes AGRUPADOS por groupId. Filtros TODOS opcionales. */
+    @GetMapping("/admin/participants/grouped")
+    public ResponseEntity<ParticipantGroupListResponse> adminSearchParticipantsGrouped(
+            @RequestParam(required = false) String slug,
+            @RequestParam(required = false) String buyerClerkId,
+            @RequestParam(required = false) String groupId,
+            @RequestParam(required = false) String status // ALL|PENDING|CONFIRMED
+    ) {
+        return ResponseEntity.ok(service.adminSearchParticipantsGrouped(slug, buyerClerkId, groupId, status));
+    }
+
+
     /* ==================== ADMIN ==================== */
 
     /** Índice admin: lista con id + slug */

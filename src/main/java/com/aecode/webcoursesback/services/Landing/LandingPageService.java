@@ -29,10 +29,7 @@ public interface LandingPageService {
     /** NUEVO */
     LandingPageDTO patchCallForPresentationById(Long id, UpdateCallForPresentationDTO dto);
 
-    /**
-     * Vista "Inversión": devuelve títulos de planes y, para el plan seleccionado,
-     * los dos párrafos de beneficios + importes calculados.
-     */
+    // Inversión
     LandingInvestmentDTO getInvestmentDetail(
             String slug,
             String modality,
@@ -42,11 +39,11 @@ public interface LandingPageService {
             String clerkId
     );
 
-    /** NUEVO: creación de solicitud */
+    // Call for presentation
     CallForPresentationSubmissionDTO submitCallForPresentation(
             String slug, SubmitCallForPresentationDTO dto);
 
-    // === NUEVO: Participantes previos al pago (vista de inversión) ===
+    // ===== Participantes (Front) =====
     ParticipantDTO upsertInvestmentParticipant(String slug, ParticipantCreateRequest req);
     ParticipantListResponse listInvestmentParticipants(String slug, String buyerClerkId, String groupId);
     ParticipantDeleteResponse deleteInvestmentParticipant(String slug, String buyerClerkId, Long participantId);
@@ -54,6 +51,14 @@ public interface LandingPageService {
     /** (Opcional, útil cuando confirmes pago por cualquier medio) */
     void markParticipantsConfirmedByGroup(String slug, String groupId, String orderReference);
 
-    ParticipantGroupListResponse listParticipantsByBuyerGrouped(String buyerClerkId, String slug, String status); // status: ALL|PENDING|CONFIRMED
+    // ===== Participantes (Admin) — Búsqueda flexible =====
+    /** Lista PLANA con filtros opcionales */
+    ParticipantListResponse adminSearchParticipants(String slug, String buyerClerkId, String groupId, String status);
+
+    /** Lista AGRUPADA por groupId con filtros opcionales */
+    ParticipantGroupListResponse adminSearchParticipantsGrouped(String slug, String buyerClerkId, String groupId, String status);
+
+    /** Atajo (mantener compat): por comprador agrupado, filtros opcionales */
+    ParticipantGroupListResponse listParticipantsByBuyerGrouped(String buyerClerkId, String slug, String status);
     ParticipantGroupListResponse listConfirmedParticipantsByBuyerGrouped(String buyerClerkId, String slug);
 }
