@@ -3,7 +3,7 @@ import com.aecode.webcoursesback.dtos.Landing.*;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.LandingInvestmentDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.PlanTitleDTO;
 import com.aecode.webcoursesback.dtos.Landing.Inversion.SelectedPlanBenefitsDTO;
-import com.aecode.webcoursesback.dtos.Landing.ParticipantGroupDTO;
+import com.aecode.webcoursesback.dtos.Landing.Participantes.ParticipantGroupDTO;
 import com.aecode.webcoursesback.dtos.Landing.Participantes.ParticipantGroupListResponse;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.CallForPresentationSubmissionDTO;
 import com.aecode.webcoursesback.dtos.Landing.Solicitud.SubmitCallForPresentationDTO;
@@ -427,8 +427,7 @@ public class LandingPageServiceImpl implements LandingPageService {
         if (!planExists) throw new IllegalArgumentException("El plan no existe para la modalidad indicada.");
 
         // 4) Validar campos de participante
-        if (isBlank(req.getFirstName())) throw new IllegalArgumentException("firstName requerido");
-        if (isBlank(req.getLastName())) throw new IllegalArgumentException("lastName requerido");
+        if (isBlank(req.getFullname())) throw new IllegalArgumentException("Nombre completo requerido");
         if (isBlank(req.getEmail())) throw new IllegalArgumentException("email requerido");
         if (isBlank(req.getPhone())) throw new IllegalArgumentException("phone requerido");
         if (isBlank(req.getDocumentType())) throw new IllegalArgumentException("documentType requerido");
@@ -453,13 +452,14 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .buyerClerkId(buyerClerkId)
                 .groupId(groupId)
                 .participantIndex(pIndex)
-                .firstName(req.getFirstName().trim())
-                .lastName(req.getLastName().trim())
+                .fullname(req.getFullname().trim())
                 .email(req.getEmail().trim())
                 .phone(req.getPhone().trim())
                 .documentType(req.getDocumentType().trim())
                 .documentNumber(req.getDocumentNumber().trim())
                 .company(nvl(req.getCompany(), null))
+                .rol(nvl(req.getRol(), null))
+                .linkedin(nvl(req.getLinkedin(), null))
                 .status(EventParticipant.Status.PENDING)
                 .build();
 
@@ -524,13 +524,14 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .buyerClerkId(ep.getBuyerClerkId())
                 .groupId(ep.getGroupId())
                 .participantIndex(ep.getParticipantIndex())
-                .firstName(ep.getFirstName())
-                .lastName(ep.getLastName())
+                .fullname(ep.getFullname())
                 .email(ep.getEmail())
                 .phone(ep.getPhone())
                 .documentType(ep.getDocumentType())
                 .documentNumber(ep.getDocumentNumber())
                 .company(ep.getCompany())
+                .rol(ep.getRol())
+                .linkedin(ep.getLinkedin())
                 .status(ep.getStatus().name())
                 .orderReference(ep.getOrderReference())
                 .createdAt(toLima(ep.getCreatedAt()))

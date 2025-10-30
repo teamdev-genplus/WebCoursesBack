@@ -1,5 +1,4 @@
 package com.aecode.webcoursesback.dtos.Landing.Participantes;
-import com.aecode.webcoursesback.dtos.Landing.ParticipantGroupDTO;
 import lombok.*;
 
 import java.util.List;
