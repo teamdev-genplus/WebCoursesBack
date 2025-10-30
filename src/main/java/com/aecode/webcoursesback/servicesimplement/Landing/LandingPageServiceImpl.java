@@ -23,6 +23,7 @@ import com.aecode.webcoursesback.services.Landing.LandingPageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +57,10 @@ public class LandingPageServiceImpl implements LandingPageService {
     private OffsetDateTime toLima(OffsetDateTime utc) {
         return utc == null ? null : utc.atZoneSameInstant(LIMA).toOffsetDateTime();
     }
+    private String nvl(String s, String def) { return (s == null || s.isBlank()) ? def : s; }
+    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+
+
 
     // ===== Helpers de seguridad HTML simples (reuso de tu plantilla de emails)
     private static String safe(String s) {
@@ -275,8 +280,6 @@ public class LandingPageServiceImpl implements LandingPageService {
         // si mandan otra cosa, igual retorna en mayúsculas para posible match estricto
         return up;
     }
-    private String nvl(String s, String def) { return (s == null || s.isBlank()) ? def : s; }
-
 
     /* ===== Helpers de cupón ===== */
 
@@ -535,7 +538,77 @@ public class LandingPageServiceImpl implements LandingPageService {
                 .build();
     }
 
-    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+
+    /* ==================== PARTICIPANTES (Admin) ==================== */
+
+    // ---- Búsqueda PLANA con filtros opcionales
+    @Override @Transactional(readOnly = true)
+    public ParticipantListResponse adminSearchParticipants(String slug, String buyerClerkId, String groupId, String status) {
+        var rows = eventParticipantRepo.findAll(specFor(slug, buyerClerkId, groupId, status));
+        var list = rows.stream()
+                .sorted(Comparator.comparing(EventParticipant::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .map(this::toDTO)
+                .toList();
+        return ParticipantListResponse.builder()
+                .groupId(groupId)
+                .participants(list)
+                .build();
+    }
+
+    // ---- Búsqueda AGRUPADA por groupId con filtros opcionales
+    @Override @Transactional(readOnly = true)
+    public ParticipantGroupListResponse adminSearchParticipantsGrouped(String slug, String buyerClerkId, String groupId, String status) {
+        var rows = eventParticipantRepo.findAll(specFor(slug, buyerClerkId, groupId, status));
+
+        var byGroup = rows.stream().collect(Collectors.groupingBy(EventParticipant::getGroupId));
+        var groups = byGroup.entrySet().stream()
+                .map(e -> buildGroupDTO(e.getKey(), e.getValue()))
+                .sorted((g1, g2) -> {
+                    var a = g1.getUpdatedAtMax();
+                    var b = g2.getUpdatedAtMax();
+                    if (a == null && b == null) return 0;
+                    if (a == null) return 1;
+                    if (b == null) return -1;
+                    return b.compareTo(a);
+                })
+                .toList();
+
+        return ParticipantGroupListResponse.builder()
+                .buyerClerkId(buyerClerkId)
+                .slug(slug)
+                .status(normalizeStatus(status))
+                .groups(groups)
+                .build();
+    }
+
+    /* ==================== Helpers de búsqueda (Specifications) ==================== */
+
+    private Specification<EventParticipant> specFor(String slug, String buyerClerkId, String groupId, String status) {
+        return (root, q, cb) -> {
+            var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+            if (!isBlank(slug)) {
+                predicates.add(cb.equal(root.get("landingSlug"), slug));
+            }
+            if (!isBlank(buyerClerkId)) {
+                predicates.add(cb.equal(root.get("buyerClerkId"), buyerClerkId));
+            }
+            if (!isBlank(groupId)) {
+                predicates.add(cb.equal(root.get("groupId"), groupId));
+            }
+            var st = normalizeStatus(status);
+            if (st != null) {
+                predicates.add(cb.equal(root.get("status"), EventParticipant.Status.valueOf(st)));
+            }
+            return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
+    }
+
+    private String normalizeStatus(String status) {
+        if (isBlank(status)) return null; // ALL
+        String up = status.trim().toUpperCase();
+        if (up.equals("PENDING") || up.equals("CONFIRMED")) return up;
+        return null; // ALL por defecto
+    }
 
 
     // ---- PATCH por ID ----
