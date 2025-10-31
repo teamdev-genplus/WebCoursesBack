@@ -29,6 +29,8 @@ public class PaymentOrderExportDTO {
     private String  landingPlanKey;
     private Integer landingQuantity;
     private String  landingCouponCode;
+    private String  landingModality;
+    private String groupId;
 
     // Solo MODULES (lista de módulos de la orden)
     private List<Long> moduleIds;

@@ -102,12 +102,14 @@ public class PaymentServiceImpl implements PaymentService {
             order.setLandingQuantity(req.getLandingQuantity());
             order.setLandingCouponCode(req.getLandingCouponCode());
             order.setLandingModality(normalizeModality(req.getLandingModality())); // <-- NUEVO
+            order.setGroupId(req.getGroupId());
         } else {
             order.setLandingSlug(null);
             order.setLandingPlanKey(null);
             order.setLandingQuantity(null);
             order.setLandingCouponCode(null);
             order.setLandingModality(null); // <-- NUEVO
+            order.setGroupId(null);
         }
 
         order = paymentOrderRepository.save(order);
@@ -342,6 +344,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .landingPlanKey(po.getLandingPlanKey())
                 .landingQuantity(po.getLandingQuantity())
                 .landingCouponCode(po.getLandingCouponCode())
+                .landingModality(po.getLandingModality())
+                .groupId(po.getGroupId())
 
                 // MODULES
                 .moduleIds(moduleIds)

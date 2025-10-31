@@ -37,4 +37,5 @@ public class FormTokenCreateRequest {
     private Integer landingQuantity;   // opcional (usa default por plan si null)
     private String  landingCouponCode; // opcional
     private String landingModality;
+    private String groupId;
 }

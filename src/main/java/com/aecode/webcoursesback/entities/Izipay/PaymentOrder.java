@@ -81,6 +81,9 @@ public class PaymentOrder {
     @Column(length = 60)
     private String landingCouponCode;    // null => sin cupón
 
+    @Column(length = 60)
+    private String groupId;    //grupo de participantes en caso sea un evento y se compre mas de 1 entrada.
+
     @PrePersist
     public void prePersist() {
         OffsetDateTime now = OffsetDateTime.now();
