@@ -29,4 +29,5 @@ public class ManualPaymentVoucherPayload {
     private String landingPlanKey;          // ej: "regular", "comunidad", "corporativo"
     private Integer landingQuantity;        // ej: 1, 2, 10
     private String landingModality;        // ej: PRESENCIAL, VIRTUAL
+    private String groupId;
 }

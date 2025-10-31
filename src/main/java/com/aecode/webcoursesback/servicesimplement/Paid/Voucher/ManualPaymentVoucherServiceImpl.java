@@ -121,6 +121,8 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingPlanKey(trimToNull(payload.getLandingPlanKey()))
                 .landingQuantity(payload.getLandingQuantity())
                 .landingModality(payload.getLandingModality())
+                //púede ser null
+                .groupId(trimToNull(payload.getGroupId()))
 
                 .build();
 
@@ -213,6 +215,7 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingPlanKey(entity.getLandingPlanKey())
                 .landingQuantity(entity.getLandingQuantity())
                 .landingModality(entity.getLandingModality())
+                .groupId(entity.getGroupId())
 
                 .validated(entity.isValidated())
                 .createdAt(entity.getCreatedAt())
@@ -338,6 +341,7 @@ public class ManualPaymentVoucherServiceImpl implements ManualPaymentVoucherServ
                 .landingPlanKey(e.getLandingPlanKey())
                 .landingQuantity(e.getLandingQuantity())
                 .landingModality(e.getLandingModality())
+                .groupId(e.getGroupId())
 
                 .validated(e.isValidated())
                 .createdAt(e.getCreatedAt())

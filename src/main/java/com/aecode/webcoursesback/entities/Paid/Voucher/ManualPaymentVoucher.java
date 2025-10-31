@@ -71,6 +71,9 @@ public class ManualPaymentVoucher {
     @Column(name = "landing_modality")
     private String landingModality;        // modalidad (presencial | virtual)
 
+    @Column(name = "group_id", length = 80)
+    private String groupId; //grupo de participantes para participantes de eventos
+
     /** Booleano de validación manual (false por defecto) */
     @Column(name = "validated")
     private boolean validated;
