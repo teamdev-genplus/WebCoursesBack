@@ -6,12 +6,21 @@ import java.time.OffsetDateTime;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @Entity
-@Table(name = "event_participants", indexes = {
-        @Index(name = "ix_evpart_slug", columnList = "landing_slug"),
-        @Index(name = "ix_evpart_clerk", columnList = "buyer_clerk_id"),
-        @Index(name = "ix_evpart_group", columnList = "group_id"),
-        @Index(name = "ix_evpart_status", columnList = "status")
-})
+@Table(
+        name = "event_participants",
+        indexes = {
+                @Index(name = "ix_evpart_slug", columnList = "landing_slug"),
+                @Index(name = "ix_evpart_clerk", columnList = "buyer_clerk_id"),
+                @Index(name = "ix_evpart_group", columnList = "group_id"),
+                @Index(name = "ix_evpart_status", columnList = "status")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uq_evpart_slug_clerk_group_idx",
+                        columnNames = {"landing_slug", "buyer_clerk_id", "group_id", "participant_index"}
+                )
+        }
+)
 public class EventParticipant {
 
     @Id

@@ -12,11 +12,14 @@ public interface EventParticipantRepository
     // Compatibles con front ya existente:
     List<EventParticipant> findByLandingSlugAndBuyerClerkIdAndGroupId(String landingSlug, String buyerClerkId, String groupId);
     List<EventParticipant> findByLandingSlugAndGroupId(String landingSlug, String groupId);
-    boolean existsByLandingSlugAndGroupIdAndParticipantIndex(String landingSlug, String groupId, Integer participantIndex);
 
     // Atajos por comprador (se siguen usando en algunos flows)
     List<EventParticipant> findByBuyerClerkIdOrderByCreatedAtDesc(String buyerClerkId);
     List<EventParticipant> findByBuyerClerkIdAndStatusOrderByCreatedAtDesc(String buyerClerkId, EventParticipant.Status status);
     List<EventParticipant> findByBuyerClerkIdAndLandingSlugOrderByCreatedAtDesc(String buyerClerkId, String landingSlug);
     List<EventParticipant> findByBuyerClerkIdAndLandingSlugAndStatusOrderByCreatedAtDesc(String buyerClerkId, String landingSlug, EventParticipant.Status status);
+
+    java.util.Optional<EventParticipant> findFirstByLandingSlugAndBuyerClerkIdAndGroupIdAndParticipantIndex(
+            String landingSlug, String buyerClerkId, String groupId, Integer participantIndex
+    );
 }

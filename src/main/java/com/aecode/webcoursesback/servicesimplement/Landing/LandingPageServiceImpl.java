@@ -384,11 +384,10 @@ public class LandingPageServiceImpl implements LandingPageService {
 
     @Override
     public ParticipantDTO upsertInvestmentParticipant(String slug, ParticipantCreateRequest req) {
-        // 1) Validaciones mínimas
+        // 1) Validaciones mínimas (igual que hoy)
         if (slug == null || slug.isBlank()) throw new IllegalArgumentException("slug requerido");
         if (req == null) throw new IllegalArgumentException("payload requerido");
 
-        // landing existente
         var landing = repo.findBySlug(slug)
                 .orElseThrow(() -> new EntityNotFoundException("Landing no encontrada: " + slug));
 
@@ -408,9 +407,7 @@ public class LandingPageServiceImpl implements LandingPageService {
         if (pIndex == null || pIndex < 1 || pIndex > quantity)
             throw new IllegalArgumentException("participantIndex inválido (1..quantity)");
 
-        // 2) Reglas por plan
-        // general/aecoder: mínimo 1. El #1 es el comprador -> no registrar formulario para #1
-        // corporativo: mínimo 2. Se registran todos (#1..quantity) mediante formularios.
+        // 2) Reglas por plan (igual que hoy)
         if ("general".equals(planKey) || "aecoder".equals(planKey)) {
             if (quantity < 1) throw new IllegalArgumentException("quantity mínimo para plan " + planKey + " es 1");
             if (pIndex == 1) {
@@ -420,52 +417,72 @@ public class LandingPageServiceImpl implements LandingPageService {
             if (quantity < 2) throw new IllegalArgumentException("quantity mínimo para plan corporativo es 2");
         }
 
-        // 3) Validar que planKey exista para la modalidad
+        // 3) Validar que plan exista para modalidad (igual que hoy)
         boolean planExists = landing.getPricing() != null && landing.getPricing().stream()
                 .filter(p -> Objects.equals(normalizeModality(p.getModality()), modality))
                 .anyMatch(p -> planKey.equalsIgnoreCase(nvl(p.getKey(), "")));
         if (!planExists) throw new IllegalArgumentException("El plan no existe para la modalidad indicada.");
 
-        // 4) Validar campos de participante
+        // 4) Validar campos de participante (igual que hoy)
         if (isBlank(req.getFullname())) throw new IllegalArgumentException("Nombre completo requerido");
         if (isBlank(req.getEmail())) throw new IllegalArgumentException("email requerido");
         if (isBlank(req.getPhone())) throw new IllegalArgumentException("phone requerido");
         if (isBlank(req.getDocumentType())) throw new IllegalArgumentException("documentType requerido");
         if (isBlank(req.getDocumentNumber())) throw new IllegalArgumentException("documentNumber requerido");
 
-        // 5) groupId (si no llega, crear uno y retornarlo)
+        // 5) groupId (si no llega, generar uno y retornarlo en el DTO)
         String groupId = req.getGroupId();
         if (groupId == null || groupId.isBlank()) {
             groupId = UUID.randomUUID().toString();
         }
 
-        // Evitar duplicados de índice por (slug, groupId, participantIndex)
-        if (eventParticipantRepo.existsByLandingSlugAndGroupIdAndParticipantIndex(slug, groupId, pIndex)) {
-            throw new IllegalStateException("Ya existe un participante con participantIndex=" + pIndex + " en este grupo.");
-        }
+        // ==== 🔁 UPSERT por clave natural (slug, buyerClerkId, groupId, participantIndex) ====
+        var existingOpt = eventParticipantRepo.findFirstByLandingSlugAndBuyerClerkIdAndGroupIdAndParticipantIndex(
+                slug, buyerClerkId, groupId, pIndex
+        );
 
-        // 6) Persistir
-        var ep = EventParticipant.builder()
-                .landingSlug(slug)
-                .modality(modality)
-                .planKey(planKey)
-                .buyerClerkId(buyerClerkId)
-                .groupId(groupId)
-                .participantIndex(pIndex)
-                .fullname(req.getFullname().trim())
-                .email(req.getEmail().trim())
-                .phone(req.getPhone().trim())
-                .documentType(req.getDocumentType().trim())
-                .documentNumber(req.getDocumentNumber().trim())
-                .company(nvl(req.getCompany(), null))
-                .rol(nvl(req.getRol(), null))
-                .linkedin(nvl(req.getLinkedin(), null))
-                .status(EventParticipant.Status.PENDING)
-                .build();
+        EventParticipant ep;
+        if (existingOpt.isPresent()) {
+            // UPDATE ❗
+            ep = existingOpt.get();
+            ep.setModality(modality);
+            ep.setPlanKey(planKey);
+            ep.setFullname(req.getFullname().trim());
+            ep.setEmail(req.getEmail().trim());
+            ep.setPhone(req.getPhone().trim());
+            ep.setDocumentType(req.getDocumentType().trim());
+            ep.setDocumentNumber(req.getDocumentNumber().trim());
+            ep.setCompany(nvl(req.getCompany(), null));
+            ep.setRol(nvl(req.getRol(), null));
+            ep.setLinkedin(nvl(req.getLinkedin(), null));
+            // status se mantiene (PENDING/CONFIRMED) — no lo forzamos
+            // orderReference se mantiene
+            // updatedAt se setea en @PreUpdate
+        } else {
+            // CREATE ➕
+            ep = EventParticipant.builder()
+                    .landingSlug(slug)
+                    .modality(modality)
+                    .planKey(planKey)
+                    .buyerClerkId(buyerClerkId)
+                    .groupId(groupId)
+                    .participantIndex(pIndex)
+                    .fullname(req.getFullname().trim())
+                    .email(req.getEmail().trim())
+                    .phone(req.getPhone().trim())
+                    .documentType(req.getDocumentType().trim())
+                    .documentNumber(req.getDocumentNumber().trim())
+                    .company(nvl(req.getCompany(), null))
+                    .rol(nvl(req.getRol(), null))
+                    .linkedin(nvl(req.getLinkedin(), null))
+                    .status(EventParticipant.Status.PENDING)
+                    .build();
+        }
 
         ep = eventParticipantRepo.save(ep);
         return toDTO(ep);
     }
+
 
     @Override
     @Transactional(readOnly = true)
